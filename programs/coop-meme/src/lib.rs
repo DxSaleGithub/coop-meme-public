@@ -22,7 +22,38 @@ pub mod coop_meme {
         ctx.accounts.init(&ctx.bumps, team_wallet)
     }
 
+    pub fn update_config(
+        // only admin
+        ctx: Context<UpdateConfig>,
+        new_team_fee: Option<u16>,
+        new_owner_fee: Option<u16>,
+        new_affiliated_fee: Option<u16>,
+        new_listing_fee: Option<u16>,
+        new_team_wallet: Option<Pubkey>,
+        new_coop_interval: Option<u64>,
+        new_fairlaunch_period: Option<u64>,
+        new_min_price_per_token: Option<u64>,
+        new_max_price_per_token: Option<u64>,
+        new_init_virtual_sol: Option<u128>,
+        new_init_virtual_token: Option<u128>,
+    ) -> Result<()> {
+        ctx.accounts.update_config(
+            new_team_fee,
+            new_owner_fee,
+            new_affiliated_fee,
+            new_listing_fee,
+            new_team_wallet,
+            new_coop_interval,
+            new_fairlaunch_period,
+            new_min_price_per_token,
+            new_max_price_per_token,
+            new_init_virtual_sol,
+            new_init_virtual_token,
+        )
+    }
+
     pub fn create_token(
+        // only admin can call
         ctx: Context<MemeCoin>,
         total_supply: u128,
         token_share_price: u64,

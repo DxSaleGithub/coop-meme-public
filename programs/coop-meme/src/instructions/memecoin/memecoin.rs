@@ -76,14 +76,6 @@ pub struct MemeCoin<'info> {
     )]
     pub global_token_ata: AccountInfo<'info>,
 
-    // #[account(
-    //   init,
-    //   payer=creator,
-    //   associated_token::mint=coop_token,
-    //   associated_token::authority=global_vault,
-    //   associated_token::token_program=token_program,
-    // )]
-    // pub global_token_ata: Account<'info, TokenAccount>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 

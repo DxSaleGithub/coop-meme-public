@@ -5,7 +5,10 @@ use anchor_spl::{
     token_interface::TokenInterface,
 };
 
-use crate::state::{ConfigData, GlobalVault};
+use crate::{
+    error::*,
+    state::{ConfigData, GlobalVault},
+};
 #[derive(Accounts)]
 pub struct Config<'info> {
     #[account[mut]]
@@ -61,6 +64,90 @@ impl<'info> Config<'info> {
             config_bump: bumbs.config,
             global_vault_bump: bumbs.global_vault,
         });
+
+        Ok(())
+    }
+
+    // update methods here
+}
+
+#[derive(Accounts)]
+pub struct UpdateConfig<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.config_bump,
+        has_one = admin @ CustomError::Unauthorized
+    )]
+    pub config: Account<'info, ConfigData>,
+}
+
+impl<'info> UpdateConfig<'info> {
+    pub fn update_config(
+        &mut self,
+        new_team_fee: Option<u16>,
+        new_owner_fee: Option<u16>,
+        new_affiliated_fee: Option<u16>,
+        new_listing_fee: Option<u16>,
+        new_team_wallet: Option<Pubkey>,
+        new_coop_interval: Option<u64>,
+        new_fairlaunch_period: Option<u64>,
+        new_min_price_per_token: Option<u64>,
+        new_max_price_per_token: Option<u64>,
+        new_init_virtual_sol: Option<u128>,
+        new_init_virtual_token: Option<u128>,
+    ) -> Result<()> {
+        require!(
+            self.admin.key() == self.config.admin,
+            CustomError::Unauthorized
+        );
+
+        if let Some(fee) = new_team_fee {
+            self.config.team_fee = fee;
+        }
+
+        if let Some(fee) = new_owner_fee {
+            self.config.owner_fee = fee;
+        }
+
+        if let Some(fee) = new_affiliated_fee {
+            self.config.affiliated_fee = fee;
+        }
+
+        if let Some(fee) = new_listing_fee {
+            self.config.listing_fee = fee;
+        }
+
+        if let Some(wallet) = new_team_wallet {
+            self.config.team_wallet = wallet;
+        }
+
+        if let Some(interval) = new_coop_interval {
+            self.config.coop_interval = interval;
+        }
+
+        if let Some(period) = new_fairlaunch_period {
+            self.config.fairlaunch_period = period;
+        }
+
+        if let Some(min_price) = new_min_price_per_token {
+            self.config.min_price_per_token = min_price;
+        }
+
+        if let Some(max_price) = new_max_price_per_token {
+            self.config.max_price_per_token = max_price;
+        }
+
+        if let Some(sol) = new_init_virtual_sol {
+            self.config.init_virtual_sol = sol;
+        }
+
+        if let Some(token) = new_init_virtual_token {
+            self.config.init_virtual_token = token;
+        }
 
         Ok(())
     }

@@ -5,6 +5,7 @@ import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-me
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { token } from '@coral-xyz/anchor/dist/cjs/utils';
+import { assert } from 'chai';
 
 describe('coop-meme-2', () => {
   // Configure the client to use the local cluster.
@@ -17,7 +18,7 @@ describe('coop-meme-2', () => {
   );
   let affiliate = provider.wallet.publicKey;
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -37,9 +38,65 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is creating memecoin!', async () => {
-    // await provider.connection.requestAirdrop(teamWallet, 2040000);
+  it.skip('updates the config', async () => {
+    const owner = provider.wallet.publicKey;
 
+    const [configPda] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from('config')],
+        program.programId
+      );
+
+    const configState = await program.account.configData.fetch(
+      configPda
+    );
+    console.log('Config state data:', configState);
+
+    const newOwnerFee = new anchor.BN(2000);
+    const newCoopInterval = new anchor.BN(1200);
+    const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
+    const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
+
+    await program.methods
+      .updateConfig(
+        null,
+        newOwnerFee,
+        null,
+        null,
+        null,
+        newCoopInterval,
+        null,
+        null,
+        null,
+        newInitVirtualSol,
+        newInitVirtualToken
+      )
+      .accounts({
+        owner,
+        config: configPda,
+      })
+      .rpc();
+
+    const config = await program.account.configData.fetch(configPda);
+
+    console.log('Config state data:', config);
+
+    assert.strictEqual(config.ownerFee, newOwnerFee.toNumber());
+    assert.strictEqual(
+      config.coopInterval.toNumber(),
+      newCoopInterval.toNumber()
+    );
+    assert.strictEqual(
+      config.initVirtualSol.toString(),
+      newInitVirtualSol.toString()
+    );
+    assert.strictEqual(
+      config.initVirtualToken.toString(),
+      newInitVirtualToken.toString()
+    );
+  });
+
+  it('Is creating memecoin!', async () => {
     const creator = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -69,7 +126,7 @@ describe('coop-meme-2', () => {
       program.programId
     );
 
-    console.log(coopToken);
+    console.log('coopToken latest', coopToken);
 
     const [memecoinPda] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -100,12 +157,6 @@ describe('coop-meme-2', () => {
         ],
         anchor.utils.token.ASSOCIATED_PROGRAM_ID
       );
-
-    // const globalTokenAta = await getAssociatedTokenAddress(
-    //   coopToken,
-    //   globalVault,
-    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    // );
 
     const tx = await program.methods
       .createToken(
@@ -186,16 +237,6 @@ describe('coop-meme-2', () => {
         anchor.utils.token.ASSOCIATED_PROGRAM_ID
       );
 
-    // const [traderTokenAta] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [
-    //       trader.toBuffer(),
-    //       anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-    //       coopToken.toBuffer(),
-    //     ],
-    //     anchor.utils.token.ASSOCIATED_PROGRAM_ID
-    //   );
-
     const traderTokenAta = await getAssociatedTokenAddress(
       coopToken,
       trader,
@@ -203,7 +244,7 @@ describe('coop-meme-2', () => {
     );
 
     const tx = await program.methods
-      .buyTokens(new BN(1_000_000_0), new BN(0))
+      .buyTokens(new BN(1_000_000), new BN(0))
       .accounts({
         trader,
         affiliate,
@@ -277,16 +318,6 @@ describe('coop-meme-2', () => {
         anchor.utils.token.ASSOCIATED_PROGRAM_ID
       );
 
-    // const [traderTokenAta] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [
-    //       trader.toBuffer(),
-    //       anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-    //       coopToken.toBuffer(),
-    //     ],
-    //     anchor.utils.token.ASSOCIATED_PROGRAM_ID
-    //   );
-
     const traderTokenAta = await getAssociatedTokenAddress(
       coopToken,
       trader,
@@ -325,6 +356,9 @@ describe('coop-meme-2', () => {
     const memecoinState = await program.account.memeCoinData.fetch(
       memecoinPda
     );
-    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data:',
+      memecoinState.tokenMarketEndTime.toString()
+    );
   });
 });

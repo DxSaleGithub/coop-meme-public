@@ -111,19 +111,12 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
-            // Fair price = total SOL / total tokens
-            let fair_price = (self.memecoin.real_sol_reserves as u128)
-                .checked_mul(1_000_000_000) // to 9 decimals
-                .unwrap()
-                .checked_div(self.memecoin.real_token_reserves as u128)
-                .unwrap(); // fair_price in lamports per token (9 decimals)
-
             // Set virtual reserves to preserve price and ensure curve continuity
             self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
             self.memecoin.virtual_token_reserves = (1_000_000_000u128)
                 .checked_mul(1_000_000_000) // 9 decimals
                 .unwrap()
-                .checked_div(fair_price)
+                .checked_div(self.memecoin.token_share_price as u128)
                 .unwrap()
                 .try_into()
                 .unwrap();
@@ -201,19 +194,12 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
-            // Fair price = total SOL / total tokens
-            let fair_price = (self.memecoin.real_sol_reserves as u128)
-                .checked_mul(1_000_000_000) // to 9 decimals
-                .unwrap()
-                .checked_div(self.memecoin.real_token_reserves as u128)
-                .unwrap(); // fair_price in lamports per token (9 decimals)
-
             // Set virtual reserves to preserve price and ensure curve continuity
             self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
             self.memecoin.virtual_token_reserves = (1_000_000_000u128)
                 .checked_mul(1_000_000_000) // 9 decimals
                 .unwrap()
-                .checked_div(fair_price)
+                .checked_div(self.memecoin.token_share_price as u128)
                 .unwrap()
                 .try_into()
                 .unwrap();
