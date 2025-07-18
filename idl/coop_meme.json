@@ -1104,6 +1104,116 @@
           "type": "u128"
         }
       ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_team_fee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "new_owner_fee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "new_affiliated_fee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "new_listing_fee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "new_team_wallet",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_coop_interval",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_fairlaunch_period",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_min_price_per_token",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_max_price_per_token",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_init_virtual_sol",
+          "type": {
+            "option": "u128"
+          }
+        },
+        {
+          "name": "new_init_virtual_token",
+          "type": {
+            "option": "u128"
+          }
+        }
+      ]
     }
   ],
   "accounts": [

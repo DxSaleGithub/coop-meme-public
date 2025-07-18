@@ -1110,6 +1110,116 @@ export type CoopMeme = {
           "type": "u128"
         }
       ]
+    },
+    {
+      "name": "updateConfig",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "newTeamFee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "newOwnerFee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "newAffiliatedFee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "newListingFee",
+          "type": {
+            "option": "u16"
+          }
+        },
+        {
+          "name": "newTeamWallet",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "newCoopInterval",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newFairlaunchPeriod",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newMinPricePerToken",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newMaxPricePerToken",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newInitVirtualSol",
+          "type": {
+            "option": "u128"
+          }
+        },
+        {
+          "name": "newInitVirtualToken",
+          "type": {
+            "option": "u128"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
