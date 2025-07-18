@@ -1,12 +1,12 @@
 [package]
-name = "coop-meme-2"
+name = "coop-meme"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "coop_meme_2"
+name = "coop_meme"
 
 [features]
 default = []

@@ -1,6 +1,6 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program, BN } from '@coral-xyz/anchor';
-import { CoopMeme2 } from '../target/types/coop_meme_2';
+import { CoopMeme } from '../target/types/coop_meme';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -11,13 +11,13 @@ describe('coop-meme-2', () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.CoopMeme2 as Program<CoopMeme2>;
+  const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
   let teamWallet = new PublicKey(
     'An7Lica1BAXqKuY5ScViHwBnQLqnUQt1eYmDvHgYdaMQ'
   );
   let affiliate = provider.wallet.publicKey;
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();

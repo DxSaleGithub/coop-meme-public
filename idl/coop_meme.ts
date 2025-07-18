@@ -2,12 +2,12 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/coop_meme_2.json`.
+ * IDL can be found at `target/idl/coop_meme.json`.
  */
-export type CoopMeme2 = {
-  "address": "74Shjhw7y3AuTArpaLDv6cWaj9hk1yuQ93L6dUrZavyV",
+export type CoopMeme = {
+  "address": "ABuUbPC7MduQYdSTHUaoT3LWgEkknSaPQPNy6dwQDc8a",
   "metadata": {
-    "name": "coopMeme2",
+    "name": "coopMeme",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
@@ -1143,8 +1143,48 @@ export type CoopMeme2 = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
     }
   ],
   "types": [

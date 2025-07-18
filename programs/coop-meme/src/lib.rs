@@ -12,10 +12,10 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("74Shjhw7y3AuTArpaLDv6cWaj9hk1yuQ93L6dUrZavyV");
+declare_id!("ABuUbPC7MduQYdSTHUaoT3LWgEkknSaPQPNy6dwQDc8a");
 
 #[program]
-pub mod coop_meme_2 {
+pub mod coop_meme {
     use super::*;
 
     pub fn initialize(ctx: Context<Config>, team_wallet: Pubkey) -> Result<()> {

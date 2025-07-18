@@ -1,7 +1,7 @@
 {
-  "address": "74Shjhw7y3AuTArpaLDv6cWaj9hk1yuQ93L6dUrZavyV",
+  "address": "ABuUbPC7MduQYdSTHUaoT3LWgEkknSaPQPNy6dwQDc8a",
   "metadata": {
-    "name": "coop_meme_2",
+    "name": "coop_meme",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
@@ -1137,8 +1137,48 @@
   "errors": [
     {
       "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "InvalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "TradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidOperation",
+      "msg": "Invalid arithmetic operation"
     }
   ],
   "types": [
