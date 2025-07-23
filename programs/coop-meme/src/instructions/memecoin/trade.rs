@@ -104,7 +104,8 @@ impl<'info> Trade<'info> {
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
-            return Err(CustomError::TradingNotActive.into());
+            // return Err(CustomError::TradingNotActive.into());
+            return Ok(());
         }
 
         if (current_time as u64 > self.memecoin.token_fairlaunch_end_time
@@ -187,7 +188,8 @@ impl<'info> Trade<'info> {
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
-            return Err(CustomError::TradingNotActive.into());
+            // return Err(CustomError::TradingNotActive.into());
+            return Ok(());
         }
 
         if (current_time as u64 > self.memecoin.token_fairlaunch_end_time

@@ -12,7 +12,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("ABuUbPC7MduQYdSTHUaoT3LWgEkknSaPQPNy6dwQDc8a");
+declare_id!("241PuxFSpzprqnwQNXGS4XdBkW79jkQ481KDtyxj4RZv");
 
 #[program]
 pub mod coop_meme {
@@ -77,5 +77,26 @@ pub mod coop_meme {
 
     pub fn sell_tokens(ctx: Context<Trade>, amount: u128, min_sol_receive: u128) -> Result<()> {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
+    }
+
+    pub fn list_token(ctx: Context<List>) -> Result<()> {
+        // only admin can call
+        ctx.accounts.list_token()
+    }
+
+    pub fn swap_token_base_input(
+        ctx: Context<SwapBaseInput>,
+        amount_in: u64,
+        minimum_amount_out: u64,
+    ) -> Result<()> {
+        ctx.accounts.swap_base_input(amount_in, minimum_amount_out)
+    }
+
+    pub fn swap_token_base_output(
+        ctx: Context<SwapBaseOutput>,
+        max_amount_in: u64,
+        amount_out: u64,
+    ) -> Result<()> {
+        ctx.accounts.swap_base_output(max_amount_in, amount_out)
     }
 }

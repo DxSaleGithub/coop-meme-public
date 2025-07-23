@@ -55,7 +55,7 @@ impl<'info> Config<'info> {
             listing_fee: 500,
             coop_interval: 600,
             fairlaunch_period: 300,
-            min_price_per_token: 10_000,                   //  0.00001 sol
+            min_price_per_token: 100,                      //  0.0000001 sol
             max_price_per_token: 1_000_000_0,              // 0.01 sol
             init_virtual_sol: 1_000_000_000,               // 1 sol
             init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token => init price = 0.01 sol per token

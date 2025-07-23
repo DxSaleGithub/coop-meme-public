@@ -26,4 +26,10 @@ pub enum CustomError {
     InvalidTokenUri,
     #[msg("Invalid arithmetic operation")]
     InvalidOperation,
+    #[msg("Trading active")]
+    TradingActive,
+    #[msg("Not enough token")]
+    NotEnoughToken,
+    #[msg("Not enough sol")]
+    NotEnoughSol,
 }
