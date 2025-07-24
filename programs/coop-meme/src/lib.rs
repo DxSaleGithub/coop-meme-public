@@ -16,6 +16,7 @@ declare_id!("241PuxFSpzprqnwQNXGS4XdBkW79jkQ481KDtyxj4RZv");
 
 #[program]
 pub mod coop_meme {
+
     use super::*;
 
     pub fn initialize(ctx: Context<Config>, team_wallet: Pubkey) -> Result<()> {
@@ -60,6 +61,9 @@ pub mod coop_meme {
         name: String,
         symbol: String,
         uri: String,
+        token_names: [String; 5],
+        token_symbols: [String; 5],
+        token_uris: [String; 5],
     ) -> Result<()> {
         ctx.accounts.create_memecoin(
             &ctx.bumps,
@@ -68,6 +72,9 @@ pub mod coop_meme {
             name,
             symbol,
             uri,
+            token_names,
+            token_symbols,
+            token_uris,
         )
     }
 
@@ -98,5 +105,23 @@ pub mod coop_meme {
         amount_out: u64,
     ) -> Result<()> {
         ctx.accounts.swap_base_output(max_amount_in, amount_out)
+    }
+
+    pub fn vote(
+        ctx: Context<UserVote>,
+        name_vote: UserVoteInfo,
+        symbol_vote: UserVoteInfo,
+        uri_vote: UserVoteInfo,
+    ) -> Result<()> {
+        ctx.accounts.user_votes(name_vote, symbol_vote, uri_vote)
+    }
+
+    pub fn unvote(
+        ctx: Context<UserVote>,
+        name_vote: UserVoteInfo,
+        symbol_vote: UserVoteInfo,
+        uri_vote: UserVoteInfo,
+    ) -> Result<()> {
+        ctx.accounts.user_unvotes(name_vote, symbol_vote, uri_vote)
     }
 }

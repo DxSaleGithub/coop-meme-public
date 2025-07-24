@@ -7,7 +7,7 @@ use anchor_spl::{
 
 use crate::{
     error::*,
-    state::{ConfigData, MemeCoinData},
+    state::{ConfigData, MemeCoinData, TokenVotes},
     GlobalVault,
 };
 #[derive(Accounts)]
@@ -39,7 +39,7 @@ pub struct MemeCoin<'info> {
         mint::decimals = 9,
         mint::authority = global_vault.key(),
     )]
-    pub coop_token: Account<'info, Mint>,
+    pub coop_token: Box<Account<'info, Mint>>,
     #[account[
       init,
       space = 8 + MemeCoinData::INIT_SPACE,
@@ -47,7 +47,7 @@ pub struct MemeCoin<'info> {
       seeds = [b"memecoin", coop_token.key().as_ref()],
       bump
     ]]
-    pub memecoin: Account<'info, MemeCoinData>,
+    pub memecoin: Box<Account<'info, MemeCoinData>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -62,8 +62,17 @@ pub struct MemeCoin<'info> {
       seeds::program = metadata::ID
     )]
     token_metadata_account: UncheckedAccount<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
 
+    #[account[
+      init,
+      space = 8 + TokenVotes::INIT_SPACE,
+      payer=creator,
+      seeds = [b"votes", coop_token.key().as_ref()],
+      bump
+    ]]
+    pub token_votes: Box<Account<'info, TokenVotes>>,
+
+    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     #[account(
     mut,
     seeds = [
@@ -75,6 +84,16 @@ pub struct MemeCoin<'info> {
     seeds::program = associated_token::ID        // Associated Token Program
     )]
     pub global_token_ata: AccountInfo<'info>,
+
+    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    #[account(
+      init_if_needed,
+      associated_token::mint=coop_token,
+      associated_token::authority=token_votes,
+      associated_token::token_program=token_program,
+      payer=creator
+    )]
+    pub vote_token_ata: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
@@ -98,6 +117,9 @@ impl<'info> MemeCoin<'info> {
         name: String,
         symbol: String,
         uri: String,
+        token_names: [String; 5],
+        token_symbols: [String; 5],
+        token_uris: [String; 5],
     ) -> Result<()> {
         require!(
             total_supply == 1_000_000_000_000_000_000,
@@ -139,8 +161,20 @@ impl<'info> MemeCoin<'info> {
             real_token_reserves: total_supply,
             is_bonding_curve_active: false,
             is_trading_active: true,
+            token_names,
+            token_symbols,
+            token_uris,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
+        });
+
+        self.token_votes.set_inner(TokenVotes {
+            minimum_tokens: 1_000_000_000_000,
+            total_votes: 0,
+            name_votes: [0; 5],
+            symbol_votes: [0; 5],
+            uri_votes: [0; 5],
+            bump: bumps.token_votes,
         });
 
         self.config.total_coop_created = self.config.total_coop_created + 1;

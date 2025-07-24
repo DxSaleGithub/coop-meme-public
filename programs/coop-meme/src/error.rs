@@ -32,4 +32,6 @@ pub enum CustomError {
     NotEnoughToken,
     #[msg("Not enough sol")]
     NotEnoughSol,
+    #[msg("Invalid token vote info")]
+    InvalidTokenVoteInfo,
 }

@@ -44,7 +44,7 @@ pub struct Trade<'info> {
       seeds = [b"config"],
       bump = config.config_bump
     ]]
-    pub config: Account<'info, ConfigData>,
+    pub config: Box<Account<'info, ConfigData>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -58,19 +58,19 @@ pub struct Trade<'info> {
       seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_bump
     )]
-    pub coop_token: Account<'info, Mint>,
+    pub coop_token: Box<Account<'info, Mint>>,
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
       bump = memecoin.memecoin_bump
     ]]
-    pub memecoin: Account<'info, MemeCoinData>,
+    pub memecoin: Box<Account<'info, MemeCoinData>>,
     #[account(
       mut,
       associated_token::mint = coop_token,
       associated_token::authority = global_vault
     )]
-    pub global_token_ata: Account<'info, TokenAccount>,
+    pub global_token_ata: Box<Account<'info, TokenAccount>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     #[account(
       init_if_needed,
@@ -79,7 +79,7 @@ pub struct Trade<'info> {
       associated_token::token_program=token_program,
       payer=trader
     )]
-    pub trader_token_ata: Account<'info, TokenAccount>,
+    pub trader_token_ata: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
 
