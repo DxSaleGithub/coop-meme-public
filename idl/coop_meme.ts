@@ -747,6 +747,251 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "finalizeVote",
+      "discriminator": [
+        181,
+        176,
+        6,
+        248,
+        249,
+        134,
+        146,
+        56
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenMetadataAccount",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "mplTokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initialize",
       "discriminator": [
         175,
@@ -3012,6 +3257,99 @@ export type CoopMeme = {
       ]
     }
   ],
+  "events": [
+    {
+      "name": "bondingCurveStartedEvent",
+      "discriminator": [
+        42,
+        6,
+        201,
+        28,
+        8,
+        237,
+        215,
+        231
+      ]
+    },
+    {
+      "name": "createdEvent",
+      "discriminator": [
+        231,
+        117,
+        250,
+        141,
+        110,
+        243,
+        96,
+        47
+      ]
+    },
+    {
+      "name": "listEvent",
+      "discriminator": [
+        131,
+        251,
+        20,
+        8,
+        113,
+        195,
+        210,
+        18
+      ]
+    },
+    {
+      "name": "tradeEvent",
+      "discriminator": [
+        189,
+        219,
+        127,
+        211,
+        78,
+        230,
+        97,
+        238
+      ]
+    },
+    {
+      "name": "tradingOverEvent",
+      "discriminator": [
+        159,
+        210,
+        41,
+        22,
+        139,
+        105,
+        112,
+        35
+      ]
+    },
+    {
+      "name": "voteEvent",
+      "discriminator": [
+        195,
+        71,
+        250,
+        105,
+        120,
+        119,
+        234,
+        134
+      ]
+    },
+    {
+      "name": "voteFinalizedEvent",
+      "discriminator": [
+        76,
+        50,
+        16,
+        156,
+        100,
+        1,
+        45,
+        153
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
@@ -3077,6 +3415,21 @@ export type CoopMeme = {
       "code": 6012,
       "name": "invalidTokenVoteInfo",
       "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed "
     }
   ],
   "types": [
@@ -3167,6 +3520,22 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "bondingCurveStartedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "configData",
       "type": {
         "kind": "struct",
@@ -3239,6 +3608,82 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "createdEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenId",
+            "type": "u32"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "metadata",
+            "type": "pubkey"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "tokenSupply",
+            "type": "u64"
+          },
+          {
+            "name": "tokenCreationTime",
+            "type": "u64"
+          },
+          {
+            "name": "tokenFairlaunchEndTime",
+            "type": "u64"
+          },
+          {
+            "name": "tokenMarketEndTime",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "listEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenIn",
+            "type": "u64"
+          },
+          {
+            "name": "solIn",
+            "type": "u64"
+          },
+          {
+            "name": "lpMint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "memeCoinData",
       "type": {
         "kind": "struct",
@@ -3297,6 +3742,14 @@ export type CoopMeme = {
           },
           {
             "name": "isTradingActive",
+            "type": "bool"
+          },
+          {
+            "name": "isVotingFinalized",
+            "type": "bool"
+          },
+          {
+            "name": "isTokenListed",
             "type": "bool"
           },
           {
@@ -3639,6 +4092,58 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "tradeEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "direction",
+            "type": "u8"
+          },
+          {
+            "name": "amountIn",
+            "type": "u64"
+          },
+          {
+            "name": "minimumReceiveAmount",
+            "type": "u64"
+          },
+          {
+            "name": "amountOut",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tradingOverEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "userTokenVotes",
       "type": {
         "kind": "struct",
@@ -3692,6 +4197,90 @@ export type CoopMeme = {
           },
           {
             "name": "tokenAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "direction",
+            "type": "u8"
+          },
+          {
+            "name": "nameVote",
+            "type": {
+              "defined": {
+                "name": "userVoteInfo"
+              }
+            }
+          },
+          {
+            "name": "symbolVote",
+            "type": {
+              "defined": {
+                "name": "userVoteInfo"
+              }
+            }
+          },
+          {
+            "name": "uriVote",
+            "type": {
+              "defined": {
+                "name": "userVoteInfo"
+              }
+            }
+          },
+          {
+            "name": "totalVotes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteFinalizedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "finalName",
+            "type": "string"
+          },
+          {
+            "name": "finalSymbol",
+            "type": "string"
+          },
+          {
+            "name": "finalUri",
+            "type": "string"
+          },
+          {
+            "name": "totalVotes",
             "type": "u64"
           }
         ]
