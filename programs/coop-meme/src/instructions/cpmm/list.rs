@@ -12,8 +12,8 @@ use raydium_cpmm_cpi::{
 use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::system_program::{transfer, Transfer};
 
-use crate::error::*;
 use crate::state::*;
+use crate::{error::*, events::ListEvent};
 
 #[derive(Accounts)]
 pub struct List<'info> {
@@ -197,6 +197,10 @@ pub struct List<'info> {
 
 impl<'info> List<'info> {
     pub fn list_token(&mut self) -> Result<()> {
+        require!(
+            !self.memecoin.is_token_listed,
+            CustomError::TokenAlreadyListed
+        );
         let mut owner_token_ata;
         let mut owner_wsol_ata;
         let mut init_token_0;
@@ -230,6 +234,10 @@ impl<'info> List<'info> {
             self.memecoin.is_trading_active = false;
         }
         require!(!self.memecoin.is_trading_active, CustomError::TradingActive);
+        require!(
+            self.memecoin.is_voting_finalized,
+            CustomError::VotingNotFinalized
+        );
         require!(
             self.config.admin.key() == self.owner.key(),
             CustomError::Unauthorized
@@ -312,6 +320,15 @@ impl<'info> List<'info> {
         )?;
 
         self.config.total_coop_listed = self.config.total_coop_listed + 1;
+        self.memecoin.is_token_listed = true;
+
+        emit!(ListEvent {
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            token_in: self.memecoin.real_token_reserves as u64,
+            sol_in: (self.memecoin.real_sol_reserves - listing_fee) as u64,
+            lp_mint: self.lp_mint.key()
+        });
         Ok(())
     }
 

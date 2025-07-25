@@ -1,4 +1,4 @@
-use crate::{error::*, state::*};
+use crate::{error::*, events::*, state::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
@@ -91,6 +91,22 @@ impl<'info> UserVote<'info> {
         uri_vote: UserVoteInfo,
     ) -> Result<()> {
         require!(
+            self.memecoin.is_trading_active,
+            CustomError::TradingNotActive
+        );
+        let clock = Clock::get()?; // Pull the clock sysvar
+        let current_time = clock.unix_timestamp; // i64 in seconds
+
+        if (current_time as u64 > self.memecoin.token_market_end_time) {
+            self.memecoin.is_trading_active = false;
+            // return Err(CustomError::TradingNotActive.into());
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
+            return Ok(());
+        }
+        require!(
             self.user_token_ata.amount >= self.token_votes.minimum_tokens,
             CustomError::NotEnoughToken
         );
@@ -119,6 +135,17 @@ impl<'info> UserVote<'info> {
             &self.token_program,
             current_total_votes as u64,
         )?;
+
+        emit!(VoteEvent {
+            user: self.user.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            direction: 1, // vote and lock tokens
+            name_vote,
+            symbol_vote,
+            uri_vote,
+            total_votes: current_total_votes
+        });
         Ok(())
     }
 
@@ -128,6 +155,22 @@ impl<'info> UserVote<'info> {
         symbol_vote: UserVoteInfo,
         uri_vote: UserVoteInfo,
     ) -> Result<()> {
+        require!(
+            self.memecoin.is_trading_active,
+            CustomError::TradingNotActive
+        );
+        let clock = Clock::get()?; // Pull the clock sysvar
+        let current_time = clock.unix_timestamp; // i64 in seconds
+
+        if (current_time as u64 > self.memecoin.token_market_end_time) {
+            self.memecoin.is_trading_active = false;
+            // return Err(CustomError::TradingNotActive.into());
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
+            return Ok(());
+        }
         self._validate_unvote_info(&name_vote, &symbol_vote, &uri_vote)?;
         let current_total_votes =
             name_vote.token_amount + symbol_vote.token_amount + uri_vote.token_amount;
@@ -160,6 +203,17 @@ impl<'info> UserVote<'info> {
             &[seeds],
             current_total_votes as u64,
         )?;
+
+        emit!(VoteEvent {
+            user: self.user.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            direction: 2, // vote and lock tokens
+            name_vote,
+            symbol_vote,
+            uri_vote,
+            total_votes: current_total_votes
+        });
         Ok(())
     }
 

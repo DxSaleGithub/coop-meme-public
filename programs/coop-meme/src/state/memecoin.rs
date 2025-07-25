@@ -17,6 +17,8 @@ pub struct MemeCoinData {
     pub real_token_reserves: u128,      // create token + buy + sell
     pub is_bonding_curve_active: bool,  // create token + buy + sell
     pub is_trading_active: bool,        // create token + buy + sell + listing
+    pub is_voting_finalized: bool,
+    pub is_token_listed: bool,
 
     #[max_len(64)]
     pub token_names: [String; 5],

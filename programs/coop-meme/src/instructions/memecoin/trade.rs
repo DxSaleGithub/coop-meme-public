@@ -2,6 +2,7 @@ use std::alloc::GlobalAlloc;
 
 use crate::{
     error::*,
+    events::{BondingCurveStartedEvent, TradeEvent, TradingOverEvent},
     state::{ConfigData, GlobalVault, MemeCoinData},
     utils::*,
 };
@@ -104,6 +105,10 @@ impl<'info> Trade<'info> {
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
             // return Err(CustomError::TradingNotActive.into());
             return Ok(());
         }
@@ -121,6 +126,10 @@ impl<'info> Trade<'info> {
                 .unwrap()
                 .try_into()
                 .unwrap();
+            emit!(BondingCurveStartedEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
         }
 
         let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
@@ -174,8 +183,19 @@ impl<'info> Trade<'info> {
             &self.token_program,
             &[seeds],
             token_amount as u64,
-        )
-        // Ok(())
+        )?;
+
+        emit!(TradeEvent {
+            trader: self.trader.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            amount_in: amount as u64,
+            direction: 1, // from SOL to tokens
+            minimum_receive_amount: min_tokens_receive as u64,
+            amount_out: token_amount as u64
+        });
+
+        Ok(())
     }
 
     pub fn sell_tokens(&mut self, amount: u128, min_sol_receive: u128) -> Result<()> {
@@ -188,6 +208,10 @@ impl<'info> Trade<'info> {
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
             // return Err(CustomError::TradingNotActive.into());
             return Ok(());
         }
@@ -205,6 +229,10 @@ impl<'info> Trade<'info> {
                 .unwrap()
                 .try_into()
                 .unwrap();
+            emit!(BondingCurveStartedEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
         }
 
         let sol_amount = self
@@ -258,6 +286,16 @@ impl<'info> Trade<'info> {
             .checked_add(amount)
             .ok_or(CustomError::InvalidOperation)
             .unwrap();
+
+        emit!(TradeEvent {
+            trader: self.trader.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            amount_in: amount as u64,
+            direction: 2, // from tokens to SOL
+            minimum_receive_amount: min_sol_receive as u64,
+            amount_out: sol_amount as u64
+        });
 
         Ok(())
     }

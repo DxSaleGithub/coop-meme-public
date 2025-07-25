@@ -34,4 +34,10 @@ pub enum CustomError {
     NotEnoughSol,
     #[msg("Invalid token vote info")]
     InvalidTokenVoteInfo,
+    #[msg("Token voting is not finalized")]
+    VotingNotFinalized,
+    #[msg("Token voting is finalized")]
+    VotingFinalized,
+    #[msg("Token is already listed ")]
+    TokenAlreadyListed,
 }

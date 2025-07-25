@@ -2,6 +2,7 @@
 #[allow(unexpected_cfgs)]
 pub mod constants;
 pub mod error;
+pub mod events;
 pub mod instructions;
 pub mod state;
 pub mod utils;
@@ -123,5 +124,9 @@ pub mod coop_meme {
         uri_vote: UserVoteInfo,
     ) -> Result<()> {
         ctx.accounts.user_unvotes(name_vote, symbol_vote, uri_vote)
+    }
+
+    pub fn finalize_vote(ctx: Context<FinalizeVote>) -> Result<()> {
+        ctx.accounts.finalize_vote()
     }
 }

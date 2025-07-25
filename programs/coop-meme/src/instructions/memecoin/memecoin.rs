@@ -7,8 +7,8 @@ use anchor_spl::{
 
 use crate::{
     error::*,
+    events::CreatedEvent,
     state::{ConfigData, MemeCoinData, TokenVotes},
-    GlobalVault,
 };
 #[derive(Accounts)]
 pub struct MemeCoin<'info> {
@@ -161,6 +161,8 @@ impl<'info> MemeCoin<'info> {
             real_token_reserves: total_supply,
             is_bonding_curve_active: false,
             is_trading_active: true,
+            is_token_listed: false,
+            is_voting_finalized: false,
             token_names,
             token_symbols,
             token_uris,
@@ -232,7 +234,7 @@ impl<'info> MemeCoin<'info> {
                 collection: None,
                 uses: None,
             },
-            false,
+            true,
             true,
             None,
         )?;
@@ -250,6 +252,19 @@ impl<'info> MemeCoin<'info> {
             AuthorityType::MintTokens,
             None,
         )?;
+
+        emit!(CreatedEvent {
+            token_id: self.memecoin.token_id,
+            creator: self.creator.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            metadata: self.token_metadata_account.key(),
+            decimals: 9,
+            token_supply: total_supply as u64,
+            token_creation_time: self.memecoin.token_creation_time,
+            token_fairlaunch_end_time: self.memecoin.token_fairlaunch_end_time,
+            token_market_end_time: self.memecoin.token_market_end_time
+        });
 
         Ok(())
     }
