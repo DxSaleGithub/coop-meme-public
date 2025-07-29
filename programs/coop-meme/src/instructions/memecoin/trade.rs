@@ -255,7 +255,7 @@ impl<'info> Trade<'info> {
             amount as u64,
         )?;
 
-        msg!("token transfer done");
+        msg!("token transfer done"); // Todo:: Remove
 
         let team_fees = self
             ._calculate_and_send_fees_with_signer(sol_amount)
