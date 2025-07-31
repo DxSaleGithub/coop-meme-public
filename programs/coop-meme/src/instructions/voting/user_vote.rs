@@ -10,7 +10,7 @@ use anchor_spl::{
 pub struct UserVote<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is a system account so safe.
     #[account[
       constraint = memecoin.creator == creator.key()
     ]]
@@ -57,8 +57,7 @@ pub struct UserVote<'info> {
       bump
     ]]
     pub user_token_votes: Box<Account<'info, UserTokenVotes>>,
-
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is an ata for coop token for user.
     #[account(
       mut,
       associated_token::mint=coop_token,
@@ -92,14 +91,13 @@ impl<'info> UserVote<'info> {
     ) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
-            CustomError::TradingNotActive
+            CoopMemeError::TradingNotActive
         );
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
-            // return Err(CustomError::TradingNotActive.into());
             emit!(TradingOverEvent {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
@@ -108,12 +106,18 @@ impl<'info> UserVote<'info> {
         }
         require!(
             self.user_token_ata.amount >= self.token_votes.minimum_tokens,
-            CustomError::NotEnoughToken
+            CoopMemeError::NotEnoughToken
         );
         self._validate_vote_info(&name_vote, &symbol_vote, &uri_vote)?;
 
-        let current_total_votes =
-            name_vote.token_amount + symbol_vote.token_amount + uri_vote.token_amount;
+        let current_total_votes = name_vote
+            .token_amount
+            .checked_add(symbol_vote.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_add(uri_vote.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         self.token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
         self.token_votes.symbol_votes[symbol_vote.field_index as usize] += symbol_vote.token_amount;
@@ -157,14 +161,13 @@ impl<'info> UserVote<'info> {
     ) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
-            CustomError::TradingNotActive
+            CoopMemeError::TradingNotActive
         );
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
             self.memecoin.is_trading_active = false;
-            // return Err(CustomError::TradingNotActive.into());
             emit!(TradingOverEvent {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
@@ -172,8 +175,14 @@ impl<'info> UserVote<'info> {
             return Ok(());
         }
         self._validate_unvote_info(&name_vote, &symbol_vote, &uri_vote)?;
-        let current_total_votes =
-            name_vote.token_amount + symbol_vote.token_amount + uri_vote.token_amount;
+        let current_total_votes = name_vote
+            .token_amount
+            .checked_add(symbol_vote.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_add(uri_vote.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         self.token_votes.name_votes[name_vote.field_index as usize] -= name_vote.token_amount;
         self.token_votes.symbol_votes[symbol_vote.field_index as usize] -= symbol_vote.token_amount;
@@ -223,23 +232,30 @@ impl<'info> UserVote<'info> {
         sym_votes: &UserVoteInfo,
         uri_votes: &UserVoteInfo,
     ) -> Result<()> {
-        let current_total_votes =
-            name_votes.token_amount + sym_votes.token_amount + uri_votes.token_amount;
+        let current_total_votes = name_votes
+            .token_amount
+            .checked_add(sym_votes.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_add(uri_votes.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+
         require!(
             self.user_token_ata.amount >= current_total_votes,
-            CustomError::NotEnoughToken
+            CoopMemeError::NotEnoughToken
         );
         require!(
             name_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         require!(
             sym_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         require!(
             uri_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         Ok(())
     }
@@ -250,24 +266,30 @@ impl<'info> UserVote<'info> {
         sym_votes: &UserVoteInfo,
         uri_votes: &UserVoteInfo,
     ) -> Result<()> {
-        let current_total_votes =
-            name_votes.token_amount + sym_votes.token_amount + uri_votes.token_amount;
+        let current_total_votes = name_votes
+            .token_amount
+            .checked_add(sym_votes.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_add(uri_votes.token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         require!(
             self.user_token_votes.total_votes >= current_total_votes,
-            CustomError::NotEnoughToken
+            CoopMemeError::NotEnoughToken
         );
         require!(
             name_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         require!(
             sym_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         require!(
             uri_votes.field_index <= 4,
-            CustomError::InvalidTokenVoteInfo
+            CoopMemeError::InvalidTokenVoteInfo
         );
         Ok(())
     }

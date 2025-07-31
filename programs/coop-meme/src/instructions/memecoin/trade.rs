@@ -1,9 +1,7 @@
-use std::alloc::GlobalAlloc;
-
 use crate::{
     error::*,
     events::{BondingCurveStartedEvent, TradeEvent, TradingOverEvent},
-    state::{ConfigData, GlobalVault, MemeCoinData},
+    state::{ConfigData, MemeCoinData},
     utils::*,
 };
 use anchor_lang::prelude::*;
@@ -19,22 +17,18 @@ pub struct Trade<'info> {
       mut
     ]]
     pub trader: Signer<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-    /// It does not store any data and is used only for lamport/token transfers.
-    /// PDA seeds = [b"global"], bump = config.global_vault_bump
+    /// CHECK: This is a system account so safe.
     #[account[
       mut
     ]]
     pub affiliate: AccountInfo<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-
+    /// CHECK: This is a system account so safe.
     #[account[
       mut,
       constraint = memecoin.creator == creator.key()
     ]]
     pub creator: AccountInfo<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-
+    /// CHECK: This is a system account so safe.
     #[account[
       mut,
       constraint = config.team_wallet == team_wallet.key()
@@ -72,7 +66,7 @@ pub struct Trade<'info> {
       associated_token::authority = global_vault
     )]
     pub global_token_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is an ATA for coop token for trader.
     #[account(
       init_if_needed,
       associated_token::mint=coop_token,
@@ -95,10 +89,10 @@ pub struct Trade<'info> {
 }
 
 impl<'info> Trade<'info> {
-    pub fn buy_tokens(&mut self, amount: u128, min_tokens_receive: u128) -> Result<()> {
+    pub fn buy_tokens(&mut self, amount: u64, min_tokens_receive: u64) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
-            CustomError::TradingNotActive
+            CoopMemeError::TradingNotActive
         );
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
@@ -109,13 +103,13 @@ impl<'info> Trade<'info> {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
             });
-            // return Err(CustomError::TradingNotActive.into());
             return Ok(());
         }
 
         if (current_time as u64 > self.memecoin.token_fairlaunch_end_time
             && !self.memecoin.is_bonding_curve_active)
         {
+            msg!("bonding curve should start");
             self.memecoin.is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
             self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
@@ -130,41 +124,42 @@ impl<'info> Trade<'info> {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
             });
+            msg!("bonding curve started");
         }
 
         let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
-
+        let amount_to_buy = amount
+            .checked_sub(team_fees)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
         // let team_fees = 0;
         let token_amount = self
-            ._calculate_token_amount_when_buy(
-                amount - team_fees,
-                self.memecoin.is_bonding_curve_active,
-            )
+            ._calculate_token_amount_when_buy(amount_to_buy, self.memecoin.is_bonding_curve_active)
             .unwrap();
 
         self.memecoin.virtual_sol_reserves = self
             .memecoin
             .virtual_sol_reserves
-            .checked_add(amount - team_fees)
-            .ok_or(CustomError::InvalidOperation)
+            .checked_add(amount_to_buy)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.virtual_token_reserves = self
             .memecoin
             .virtual_token_reserves
             .checked_sub(token_amount)
-            .ok_or(CustomError::InvalidOperation)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.real_sol_reserves = self
             .memecoin
             .real_sol_reserves
-            .checked_add(amount - team_fees)
-            .ok_or(CustomError::InvalidOperation)
+            .checked_add(amount_to_buy)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.real_token_reserves = self
             .memecoin
             .real_token_reserves
             .checked_sub(token_amount)
-            .ok_or(CustomError::InvalidOperation)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
 
         let seeds: &[&[u8]] = &[
@@ -173,7 +168,7 @@ impl<'info> Trade<'info> {
         ];
         require!(
             token_amount > min_tokens_receive,
-            CustomError::InsufficientAmount
+            CoopMemeError::InsufficientAmount
         );
 
         self._token_transfer_with_signer(
@@ -198,10 +193,10 @@ impl<'info> Trade<'info> {
         Ok(())
     }
 
-    pub fn sell_tokens(&mut self, amount: u128, min_sol_receive: u128) -> Result<()> {
+    pub fn sell_tokens(&mut self, amount: u64, min_sol_receive: u64) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
-            CustomError::TradingNotActive
+            CoopMemeError::TradingNotActive
         );
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
@@ -212,7 +207,6 @@ impl<'info> Trade<'info> {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
             });
-            // return Err(CustomError::TradingNotActive.into());
             return Ok(());
         }
 
@@ -236,15 +230,11 @@ impl<'info> Trade<'info> {
         }
 
         let sol_amount = self
-            ._calculate_sol_amount_when_sell(
-                amount,
-                current_time as u64,
-                self.memecoin.is_bonding_curve_active,
-            )
+            ._calculate_sol_amount_when_sell(amount, self.memecoin.is_bonding_curve_active)
             .unwrap();
         require!(
             sol_amount > min_sol_receive,
-            CustomError::InsufficientAmount
+            CoopMemeError::InsufficientAmount
         );
 
         token_transfer_user(
@@ -255,36 +245,38 @@ impl<'info> Trade<'info> {
             amount as u64,
         )?;
 
-        msg!("token transfer done"); // Todo:: Remove
-
         let team_fees = self
             ._calculate_and_send_fees_with_signer(sol_amount)
             .unwrap()
+            .unwrap();
+        let sol_amount_to_sell = sol_amount
+            .checked_sub(team_fees)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
 
         self.memecoin.virtual_sol_reserves = self
             .memecoin
             .virtual_sol_reserves
-            .checked_sub(sol_amount - team_fees)
-            .ok_or(CustomError::InvalidOperation)
+            .checked_sub(sol_amount_to_sell)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.virtual_token_reserves = self
             .memecoin
             .virtual_token_reserves
             .checked_add(amount)
-            .ok_or(CustomError::InvalidOperation)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.real_sol_reserves = self
             .memecoin
             .real_sol_reserves
-            .checked_sub(sol_amount - team_fees)
-            .ok_or(CustomError::InvalidOperation)
+            .checked_sub(sol_amount_to_sell)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.real_token_reserves = self
             .memecoin
             .real_token_reserves
             .checked_add(amount)
-            .ok_or(CustomError::InvalidOperation)
+            .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
 
         emit!(TradeEvent {
@@ -300,19 +292,31 @@ impl<'info> Trade<'info> {
         Ok(())
     }
 
-    fn _calculate_and_send_fees(&self, amount: u128) -> Result<(Option<((u128))>)> {
-        let team_fees = amount * self.config.team_fee as u128 / 10000;
-        let owner_fees = team_fees * self.config.owner_fee as u128 / 10000;
-        let affiliate_fees = team_fees * self.config.affiliated_fee as u128 / 10000;
-
-        msg!(
-            "all fees - team, owner, affialiate and remaining {:?} {:?} {:?} {:?}",
-            team_fees,
-            owner_fees,
-            affiliate_fees,
-            amount - team_fees
-        );
-        msg!("sol transfer as owner fees done");
+    fn _calculate_and_send_fees(&self, amount: u64) -> Result<(Option<((u64))>)> {
+        // let team_fees = amount *  / 10000;
+        let team_fees = amount
+            .checked_mul(self.config.team_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
+        let owner_fees = team_fees
+            .checked_mul(self.config.owner_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
+        let affiliate_fees = team_fees
+            .checked_mul(self.config.affiliated_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         self._sol_transfer_from_user(
             &self.trader,
@@ -321,7 +325,6 @@ impl<'info> Trade<'info> {
             owner_fees as u64,
         )?;
 
-        msg!("sol transfer as affiliate fees done");
         self._sol_transfer_from_user(
             &self.trader,
             self.affiliate.to_account_info(),
@@ -333,34 +336,57 @@ impl<'info> Trade<'info> {
             &self.trader,
             self.team_wallet.to_account_info(),
             &self.system_program,
-            (team_fees - owner_fees - affiliate_fees) as u64,
+            (team_fees
+                .checked_sub(owner_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()
+                .checked_sub(affiliate_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()) as u64,
         )?;
-
-        msg!("sol transfer as team fees done");
-        msg!(
-            "all fees - team, owner, affialiate and remaining {:?} {:?} {:?} {:?}",
-            team_fees,
-            owner_fees,
-            affiliate_fees,
-            amount - team_fees
-        );
 
         self._sol_transfer_from_user(
             &self.trader,
             self.global_vault.to_account_info(),
             &self.system_program,
-            (amount - team_fees) as u64,
+            (amount
+                .checked_sub(team_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()) as u64,
         )?;
 
-        msg!("sol transfer as buy amount done");
-
-        return Ok(Some(team_fees as u128));
+        return Ok(Some(team_fees as u64));
     }
 
-    fn _calculate_and_send_fees_with_signer(&self, amount: u128) -> Result<(Option<((u128))>)> {
-        let team_fees = amount * self.config.team_fee as u128 / 10000;
-        let owner_fees = team_fees * self.config.owner_fee as u128 / 10000;
-        let affiliate_fees = team_fees * self.config.affiliated_fee as u128 / 10000;
+    fn _calculate_and_send_fees_with_signer(&self, amount: u64) -> Result<(Option<((u64))>)> {
+        // let team_fees = amount * self.config.team_fee as u64 / 10000;
+        // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
+        // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
+
+        // let team_fees = amount *  / 10000;
+        let team_fees = amount
+            .checked_mul(self.config.team_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
+        let owner_fees = team_fees
+            .checked_mul(self.config.owner_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
+        let affiliate_fees = team_fees
+            .checked_mul(self.config.affiliated_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         let seeds: &[&[u8]] = &[
             b"global",                        // your static seed
@@ -388,7 +414,13 @@ impl<'info> Trade<'info> {
             self.team_wallet.to_account_info(),
             &self.system_program,
             &[seeds],
-            (team_fees - affiliate_fees - owner_fees) as u64,
+            (team_fees
+                .checked_sub(owner_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()
+                .checked_sub(affiliate_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()) as u64,
         )?;
 
         self._sol_transfer_with_signer(
@@ -396,81 +428,104 @@ impl<'info> Trade<'info> {
             self.trader.to_account_info(),
             &self.system_program,
             &[seeds],
-            (amount - team_fees) as u64,
+            (amount
+                .checked_sub(team_fees)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()) as u64,
         )?;
-        return Ok(Some(team_fees as u128));
+        return Ok(Some(team_fees as u64));
     }
 
     fn _calculate_token_amount_when_buy(
         &self,
-        amount: u128,
+        amount: u64,
         is_bonding_curve_active: bool,
-    ) -> Option<u128> {
+    ) -> Option<u64> {
         let mut token_amount;
         if (!is_bonding_curve_active) {
+            msg!("fair launch going on");
             // token_amount using fairlaunch
-            token_amount = amount / (self.memecoin.token_share_price as u128) * 1_000_000_000;
-            return Some(token_amount);
+            // token_amount = amount / (self.memecoin.token_share_price as u64) * 1_000_000_000;
+            token_amount = (amount as u128)
+                .checked_mul(1_000_000_000 as u128)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()
+                .checked_div(self.memecoin.token_share_price as u128)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap();
+            return Some(token_amount as u64);
         } else {
+            msg!("bonding curve going on");
+
             // token amount using bonding curve
-            return self._get_tokens_for_buy_sol(amount as u128);
+            return self._get_tokens_for_buy_sol(amount as u64);
         }
     }
 
-    fn _get_tokens_for_buy_sol(&self, sol_amount: u128) -> Option<u128> {
+    fn _get_tokens_for_buy_sol(&self, sol_amount: u64) -> Option<u64> {
         if sol_amount == 0 {
             return None;
         }
 
         // Convert to common decimal basis (using 9 decimals as base)
-        let current_sol = self.memecoin.virtual_sol_reserves as u128;
-        let current_tokens = (self.memecoin.virtual_token_reserves as u128);
+        let current_sol = self.memecoin.virtual_sol_reserves;
+        let current_tokens = (self.memecoin.virtual_token_reserves);
 
         // Calculate new reserves using constant product formula
-        let new_sol = current_sol.checked_add(sol_amount as u128)?;
-        let new_tokens = (current_sol.checked_mul(current_tokens)?).checked_div(new_sol)?;
+        let new_sol = current_sol.checked_add(sol_amount)?;
+        let new_tokens = ((current_sol as u128).checked_mul(current_tokens as u128)?)
+            .checked_div(new_sol as u128)?;
 
-        let tokens_out = current_tokens.checked_sub(new_tokens)?;
+        let tokens_out = current_tokens.checked_sub(new_tokens as u64)?;
 
-        // <u128 as TryInto<u64>>::try_into(tokens_out).ok()
+        // <u64 as TryInto<u64>>::try_into(tokens_out).ok()
+
+        msg!("token out calculated for bonding curver is {}", tokens_out);
 
         return Some(tokens_out);
     }
 
     fn _calculate_sol_amount_when_sell(
         &self,
-        amount: u128,
-        current_time: u64,
+        amount: u64,
         is_bonding_curve_active: bool,
-    ) -> Option<u128> {
+    ) -> Option<u64> {
         let mut sol_amount;
         if (!is_bonding_curve_active) {
             // sol amount using fairlaunch
-            sol_amount = amount * (self.memecoin.token_share_price as u128) / 1_000_000_000;
-            return Some((sol_amount));
+            // sol_amount = amount * (self.memecoin.token_share_price as u64) / 1_000_000_000;
+            sol_amount = (amount as u128)
+                .checked_mul(self.memecoin.token_share_price as u128)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap()
+                .checked_div(1_000_000_000u128)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap();
+            return Some((sol_amount as u64));
         } else {
             // token amount using bonding curve
-            return self._get_sol_for_sell_tokens(amount as u128);
+            return self._get_sol_for_sell_tokens(amount as u64);
         }
     }
 
-    fn _get_sol_for_sell_tokens(&self, token_amount: u128) -> Option<u128> {
+    fn _get_sol_for_sell_tokens(&self, token_amount: u64) -> Option<u64> {
         if token_amount == 0 {
             return None;
         }
 
         // Convert to common decimal basis (using 9 decimals as base)
-        let current_sol = self.memecoin.virtual_sol_reserves as u128;
-        let current_tokens = (self.memecoin.virtual_token_reserves as u128);
+        let current_sol = self.memecoin.virtual_sol_reserves;
+        let current_tokens = (self.memecoin.virtual_token_reserves);
 
         // Calculate new reserves using constant product formula
         let new_tokens = current_tokens.checked_add(token_amount)?;
 
-        let new_sol = (current_sol.checked_mul(current_tokens)?).checked_div(new_tokens)?;
+        let new_sol = ((current_sol as u128).checked_mul(current_tokens as u128)?)
+            .checked_div(new_tokens as u128)?;
 
-        let sol_out = current_sol.checked_sub(new_sol)?;
+        let sol_out = current_sol.checked_sub(new_sol as u64)?;
 
-        // <u128 as TryInto<u64>>::try_into(sol_out).ok()
+        // <u64 as TryInto<u64>>::try_into(sol_out).ok()
         Some(sol_out)
     }
 

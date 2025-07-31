@@ -1,5 +1,5 @@
 {
-  "address": "241PuxFSpzprqnwQNXGS4XdBkW79jkQ481KDtyxj4RZv",
+  "address": "9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -27,10 +27,6 @@
         },
         {
           "name": "affiliate",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true
         },
         {
@@ -300,11 +296,11 @@
       "args": [
         {
           "name": "amount",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "min_tokens_receive",
-          "type": "u128"
+          "type": "u64"
         }
       ]
     },
@@ -399,10 +395,6 @@
         },
         {
           "name": "token_metadata_account",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -693,7 +685,7 @@
       "args": [
         {
           "name": "total_supply",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "token_share_price",
@@ -877,10 +869,6 @@
         },
         {
           "name": "token_metadata_account",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -1834,10 +1822,6 @@
         },
         {
           "name": "affiliate",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true
         },
         {
@@ -2107,11 +2091,11 @@
       "args": [
         {
           "name": "amount",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "min_sol_receive",
-          "type": "u128"
+          "type": "u64"
         }
       ]
     },
@@ -2831,13 +2815,13 @@
         {
           "name": "new_init_virtual_sol",
           "type": {
-            "option": "u128"
+            "option": "u64"
           }
         },
         {
           "name": "new_init_virtual_token",
           "type": {
-            "option": "u128"
+            "option": "u64"
           }
         }
       ]
@@ -3423,7 +3407,12 @@
     {
       "code": 6015,
       "name": "TokenAlreadyListed",
-      "msg": "Token is already listed "
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidListingInfo",
+      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3576,11 +3565,11 @@
           },
           {
             "name": "init_virtual_sol",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "init_virtual_token",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "total_coop_created",
@@ -3700,7 +3689,7 @@
           },
           {
             "name": "token_total_supply",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "token_creation_time",
@@ -3716,19 +3705,19 @@
           },
           {
             "name": "virtual_sol_reserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "virtual_token_reserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "real_sol_reserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "real_token_reserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "is_bonding_curve_active",

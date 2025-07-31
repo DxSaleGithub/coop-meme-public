@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("241PuxFSpzprqnwQNXGS4XdBkW79jkQ481KDtyxj4RZv");
+declare_id!("9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi");
 
 #[program]
 pub mod coop_meme {
@@ -36,8 +36,8 @@ pub mod coop_meme {
         new_fairlaunch_period: Option<u64>,
         new_min_price_per_token: Option<u64>,
         new_max_price_per_token: Option<u64>,
-        new_init_virtual_sol: Option<u128>,
-        new_init_virtual_token: Option<u128>,
+        new_init_virtual_sol: Option<u64>,
+        new_init_virtual_token: Option<u64>,
     ) -> Result<()> {
         ctx.accounts.update_config(
             new_team_fee,
@@ -57,7 +57,7 @@ pub mod coop_meme {
     pub fn create_token(
         // only admin can call
         ctx: Context<MemeCoin>,
-        total_supply: u128,
+        total_supply: u64,
         token_share_price: u64,
         name: String,
         symbol: String,
@@ -79,11 +79,11 @@ pub mod coop_meme {
         )
     }
 
-    pub fn buy_tokens(ctx: Context<Trade>, amount: u128, min_tokens_receive: u128) -> Result<()> {
+    pub fn buy_tokens(ctx: Context<Trade>, amount: u64, min_tokens_receive: u64) -> Result<()> {
         ctx.accounts.buy_tokens(amount, min_tokens_receive)
     }
 
-    pub fn sell_tokens(ctx: Context<Trade>, amount: u128, min_sol_receive: u128) -> Result<()> {
+    pub fn sell_tokens(ctx: Context<Trade>, amount: u64, min_sol_receive: u64) -> Result<()> {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 

@@ -75,6 +75,7 @@ describe('coop-meme-2', () => {
 
     const newOwnerFee = new anchor.BN(2000);
     const newCoopInterval = new anchor.BN(1200);
+    const newFairlaunchPeriod = new anchor.BN(60);
     const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
 
@@ -86,7 +87,7 @@ describe('coop-meme-2', () => {
         null,
         null,
         newCoopInterval,
-        null,
+        newFairlaunchPeriod,
         null,
         null,
         newInitVirtualSol,
@@ -117,7 +118,7 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it('Is creating memecoin!', async () => {
+  it.skip('Is creating memecoin!', async () => {
     const creator = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -138,6 +139,8 @@ describe('coop-meme-2', () => {
     console.log('globalVault', globalVault);
 
     const totalCoopCreated = new BN(config.totalCoopCreated); // e.g., 0
+
+    console.log('total coop created', totalCoopCreated);
     const seedBuffer = totalCoopCreated
       .addn(1)
       .toArrayLike(Buffer, 'le', 4); // u64 LE
@@ -257,7 +260,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it('Is buying memecoin!', async () => {
+  it.skip('Is buying memecoin!', async () => {
     const trader = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -290,6 +293,11 @@ describe('coop-meme-2', () => {
         [Buffer.from('memecoin'), coopToken.toBuffer()],
         program.programId
       );
+
+    const mstate = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', mstate);
 
     const [globalTokenAta] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -348,7 +356,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it('Is selling memecoin!', async () => {
+  it.skip('Is selling memecoin!', async () => {
     const trader = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -403,7 +411,7 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .sellTokens(new BN(userTokenBal.value.amount), new BN(0))
+      .sellTokens(new BN('100000000000000'), new BN(0))
       .accounts({
         trader,
         affiliate,
@@ -653,13 +661,13 @@ describe('coop-meme-2', () => {
     const txSig = await program.methods
       .unvote(
         // name
-        { fieldIndex: 0, tokenAmount: new BN(5000_000_000_000) },
+        { fieldIndex: 2, tokenAmount: new BN(5000_000_000_000) },
 
         // symbol
-        { fieldIndex: 1, tokenAmount: new BN(5000_000_000_000) },
+        { fieldIndex: 3, tokenAmount: new BN(5000_000_000_000) },
 
         // uri
-        { fieldIndex: 2, tokenAmount: new BN(5000_000_000_000) }
+        { fieldIndex: 4, tokenAmount: new BN(5000_000_000_000) }
       )
       .accounts({
         user,
@@ -818,7 +826,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it.skip('Is listing memecoin!', async () => {
+  it('Is listing memecoin!', async () => {
     const owner = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -1038,7 +1046,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.skip('Is swapping SOL to memecoin!', async () => {
+  it('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -1242,7 +1250,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.skip('Is swapping memecoin to SOL!', async () => {
+  it('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(

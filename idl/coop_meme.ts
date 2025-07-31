@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "241PuxFSpzprqnwQNXGS4XdBkW79jkQ481KDtyxj4RZv",
+  "address": "9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -33,10 +33,6 @@ export type CoopMeme = {
         },
         {
           "name": "affiliate",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true
         },
         {
@@ -306,11 +302,11 @@ export type CoopMeme = {
       "args": [
         {
           "name": "amount",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "minTokensReceive",
-          "type": "u128"
+          "type": "u64"
         }
       ]
     },
@@ -405,10 +401,6 @@ export type CoopMeme = {
         },
         {
           "name": "tokenMetadataAccount",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -699,7 +691,7 @@ export type CoopMeme = {
       "args": [
         {
           "name": "totalSupply",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "tokenSharePrice",
@@ -883,10 +875,6 @@ export type CoopMeme = {
         },
         {
           "name": "tokenMetadataAccount",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -1840,10 +1828,6 @@ export type CoopMeme = {
         },
         {
           "name": "affiliate",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true
         },
         {
@@ -2113,11 +2097,11 @@ export type CoopMeme = {
       "args": [
         {
           "name": "amount",
-          "type": "u128"
+          "type": "u64"
         },
         {
           "name": "minSolReceive",
-          "type": "u128"
+          "type": "u64"
         }
       ]
     },
@@ -2837,13 +2821,13 @@ export type CoopMeme = {
         {
           "name": "newInitVirtualSol",
           "type": {
-            "option": "u128"
+            "option": "u64"
           }
         },
         {
           "name": "newInitVirtualToken",
           "type": {
-            "option": "u128"
+            "option": "u64"
           }
         }
       ]
@@ -3429,7 +3413,12 @@ export type CoopMeme = {
     {
       "code": 6015,
       "name": "tokenAlreadyListed",
-      "msg": "Token is already listed "
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3582,11 +3571,11 @@ export type CoopMeme = {
           },
           {
             "name": "initVirtualSol",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "initVirtualToken",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "totalCoopCreated",
@@ -3706,7 +3695,7 @@ export type CoopMeme = {
           },
           {
             "name": "tokenTotalSupply",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "tokenCreationTime",
@@ -3722,19 +3711,19 @@ export type CoopMeme = {
           },
           {
             "name": "virtualSolReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "virtualTokenReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "realSolReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "realTokenReserves",
-            "type": "u128"
+            "type": "u64"
           },
           {
             "name": "isBondingCurveActive",

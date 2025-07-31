@@ -13,7 +13,10 @@ use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::system_program::{transfer, Transfer};
 
 use crate::state::*;
-use crate::{error::*, events::ListEvent};
+use crate::{
+    error::*,
+    events::{ListEvent, TradingOverEvent},
+};
 
 #[derive(Accounts)]
 pub struct List<'info> {
@@ -21,12 +24,12 @@ pub struct List<'info> {
       mut
     ]]
     pub owner: Signer<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is a system account so safe.
     #[account[
       mut,
     ]]
     pub creator: AccountInfo<'info>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is a system account so safe.
     #[account[
       mut,
       constraint = config.team_wallet == team_wallet.key()
@@ -55,7 +58,7 @@ pub struct List<'info> {
     )]
     pub token_0_mint: Box<Account<'info, Mint>>,
 
-    // Token_1 mint, the key must grater then token_0 mint.
+    // Token_1 mint, the key must be greater than token_0 mint.
     #[account(
         mint::token_program = token_program,
     )]
@@ -71,19 +74,13 @@ pub struct List<'info> {
       bump = memecoin.memecoin_bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
-    // // #[account(
-    // //   mut,
-    // //   associated_token::mint = native_mint,
-    // //   associated_token::authority = global_vault
-    // // )]
-    // // pub global_wsol_account: Box<Account<'info, TokenAccount>>,
     #[account(
       mut,
       associated_token::mint = coop_token,
       associated_token::authority = global_vault
     )]
     pub global_token_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is an ATA for owner for token0.
     #[account(
       init_if_needed,
       associated_token::mint=token_0_mint,
@@ -99,7 +96,6 @@ pub struct List<'info> {
         associated_token::authority = owner
     )]
     pub owner_token_1: Box<Account<'info, TokenAccount>>,
-
     /// CHECK: pool lp mint, init by cp-swap
     #[account(
         mut,
@@ -156,7 +152,7 @@ pub struct List<'info> {
     )]
     pub observation_state: UncheckedAccount<'info>,
     pub cp_swap_program: Program<'info, RaydiumCpmm>, // must be Program<'info, RaydiumProg> for prod
-    /// CHECK: pool vault and lp mint authority
+    /// CHECK: amm config pda
     /// Which config the pool belongs to.
     pub amm_config: Box<Account<'info, AmmConfig>>, // same as cp_swap_program
     /// CHECK: pool vault and lp mint authority
@@ -199,14 +195,28 @@ impl<'info> List<'info> {
     pub fn list_token(&mut self) -> Result<()> {
         require!(
             !self.memecoin.is_token_listed,
-            CustomError::TokenAlreadyListed
+            CoopMemeError::TokenAlreadyListed
         );
         let mut owner_token_ata;
         let mut owner_wsol_ata;
         let mut init_token_0;
         let mut init_token_1;
 
-        let listing_fee = self.memecoin.real_sol_reserves * self.config.listing_fee as u128 / 10000;
+        let listing_fee = self
+            .memecoin
+            .real_sol_reserves
+            .checked_mul(self.config.listing_fee as u64)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(10000)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        let sol_to_list = self
+            .memecoin
+            .real_sol_reserves
+            .checked_sub(listing_fee)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         if (self.token_0_mint.key() == self.native_mint.key()
             && self.token_1_mint.key() == self.coop_token.key())
@@ -214,7 +224,7 @@ impl<'info> List<'info> {
             owner_wsol_ata = self.owner_token_0.to_account_info();
             owner_token_ata = self.owner_token_1.to_account_info();
 
-            init_token_0 = self.memecoin.real_sol_reserves - listing_fee;
+            init_token_0 = sol_to_list;
             init_token_1 = self.memecoin.real_token_reserves;
         } else if (self.token_1_mint.key() == self.native_mint.key()
             && self.token_0_mint.key() == self.coop_token.key())
@@ -223,30 +233,36 @@ impl<'info> List<'info> {
             owner_token_ata = self.owner_token_0.to_account_info();
 
             init_token_0 = self.memecoin.real_token_reserves;
-            init_token_1 = self.memecoin.real_sol_reserves - listing_fee;
+            init_token_1 = sol_to_list;
         } else {
-            return Err(CustomError::Unauthorized.into());
+            return Err(CoopMemeError::InvalidListingInfo.into());
         }
 
         // trade is over -> check via timestamp and mark as inactive if not already
         let current_time = Clock::get()?.unix_timestamp as u64;
         if (self.memecoin.is_trading_active && self.memecoin.token_market_end_time < current_time) {
             self.memecoin.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
         }
-        require!(!self.memecoin.is_trading_active, CustomError::TradingActive);
+        require!(
+            !self.memecoin.is_trading_active,
+            CoopMemeError::TradingActive
+        );
         require!(
             self.memecoin.is_voting_finalized,
-            CustomError::VotingNotFinalized
+            CoopMemeError::VotingNotFinalized
         );
         require!(
             self.config.admin.key() == self.owner.key(),
-            CustomError::Unauthorized
+            CoopMemeError::Unauthorized
         );
         require!(
             self.memecoin.creator == self.creator.key(),
-            CustomError::Unauthorized
+            CoopMemeError::Unauthorized
         );
-        msg!("Constraint passed");
 
         // transfer listing fee from gloval vault to team wallet
         let seeds: &[&[u8]] = &[
@@ -258,23 +274,15 @@ impl<'info> List<'info> {
             self.team_wallet.to_account_info(),
             &self.system_program,
             &[seeds],
-            listing_fee as u64,
+            listing_fee,
         )?;
-
-        msg!("listing fee transferred");
 
         // wrap SOL into WSOL by transferring SOL from global vault to owner wsol ata
-        self._wrap_sol(
-            self.memecoin.real_sol_reserves - listing_fee,
-            &[seeds],
-            owner_wsol_ata,
-        )?;
-
-        msg!("sol to wsol for user done");
+        self._wrap_sol(sol_to_list, &[seeds], owner_wsol_ata)?;
 
         require!(
             (self.memecoin.real_token_reserves as u64) <= self.global_token_ata.amount,
-            CustomError::NotEnoughToken
+            CoopMemeError::NotEnoughToken
         );
 
         // transfer tokens from global token ata to owner token ata
@@ -286,8 +294,6 @@ impl<'info> List<'info> {
             &[seeds],
             self.memecoin.real_token_reserves as u64,
         )?;
-
-        msg!("token transfer to owner pda is successful");
 
         let cpi_accounts = cpi::accounts::Initialize {
             creator: self.owner.to_account_info(),
@@ -314,19 +320,24 @@ impl<'info> List<'info> {
         let cpi_context = CpiContext::new(self.cp_swap_program.to_account_info(), cpi_accounts);
         cpi::initialize(
             cpi_context,
-            init_token_0 as u64,
-            init_token_1 as u64,
+            init_token_0,
+            init_token_1,
             Clock::get()?.unix_timestamp as u64,
         )?;
 
-        self.config.total_coop_listed = self.config.total_coop_listed + 1;
+        self.config.total_coop_listed = self
+            .config
+            .total_coop_listed
+            .checked_add(1)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
         self.memecoin.is_token_listed = true;
 
         emit!(ListEvent {
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
             token_in: self.memecoin.real_token_reserves as u64,
-            sol_in: (self.memecoin.real_sol_reserves - listing_fee) as u64,
+            sol_in: (sol_to_list),
             lp_mint: self.lp_mint.key()
         });
         Ok(())
@@ -334,7 +345,7 @@ impl<'info> List<'info> {
 
     fn _wrap_sol(
         &self,
-        amount: u128,
+        amount: u64,
         signer_seeds: &[&[&[u8]]],
         owner_wsol_ata: AccountInfo<'info>,
     ) -> Result<()> {

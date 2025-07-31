@@ -15,7 +15,7 @@ pub struct FinalizeVote<'info> {
     #[account[
       constraint = memecoin.creator == creator.key()
     ]]
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is a system account so safe.
     pub creator: AccountInfo<'info>,
     #[account[
       mut,
@@ -49,9 +49,7 @@ pub struct FinalizeVote<'info> {
       bump = token_votes.bump
     ]]
     pub token_votes: Box<Account<'info, TokenVotes>>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-    /// It does not store any data and is used only for lamport/token transfers.
-    /// PDA seeds = [b"global"], bump = config.global_vault_bump
+    /// CHECK: This is a PDA for coop token metadata account
     #[account(
       mut,
       seeds = [
@@ -72,17 +70,24 @@ impl<'info> FinalizeVote<'info> {
     pub fn finalize_vote(&mut self) -> Result<()> {
         require!(
             !self.memecoin.is_voting_finalized,
-            CustomError::VotingFinalized
+            CoopMemeError::VotingFinalized
         );
         // trade is over -> check via timestamp and mark as inactive if not already
         let current_time = Clock::get()?.unix_timestamp as u64;
         if (self.memecoin.is_trading_active && self.memecoin.token_market_end_time < current_time) {
             self.memecoin.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
         }
-        require!(!self.memecoin.is_trading_active, CustomError::TradingActive);
+        require!(
+            !self.memecoin.is_trading_active,
+            CoopMemeError::TradingActive
+        );
         require!(
             self.memecoin.creator == self.creator.key(),
-            CustomError::Unauthorized
+            CoopMemeError::Unauthorized
         );
 
         let name_votes = self.token_votes.name_votes;

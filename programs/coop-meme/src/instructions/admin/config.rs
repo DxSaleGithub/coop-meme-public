@@ -2,13 +2,9 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
     token::{self, Mint, Token, TokenAccount},
-    token_interface::TokenInterface,
 };
 
-use crate::{
-    error::*,
-    state::{ConfigData, GlobalVault},
-};
+use crate::{error::*, state::ConfigData};
 #[derive(Accounts)]
 pub struct Config<'info> {
     #[account[mut]]
@@ -57,7 +53,7 @@ impl<'info> Config<'info> {
             fairlaunch_period: 300,
             min_price_per_token: 100,                      //  0.0000001 sol
             max_price_per_token: 1_000_000_0,              // 0.01 sol
-            init_virtual_sol: 1_000_000_000,               // 1 sol
+            init_virtual_sol: 10_000_000_000_000_000,      // 10 million sol
             init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token => init price = 0.01 sol per token
             total_coop_created: 0,
             total_coop_listed: 0,
@@ -80,7 +76,7 @@ pub struct UpdateConfig<'info> {
         mut,
         seeds = [b"config"],
         bump = config.config_bump,
-        has_one = admin @ CustomError::Unauthorized
+        has_one = admin @ CoopMemeError::Unauthorized
     )]
     pub config: Account<'info, ConfigData>,
 }
@@ -97,12 +93,12 @@ impl<'info> UpdateConfig<'info> {
         new_fairlaunch_period: Option<u64>,
         new_min_price_per_token: Option<u64>,
         new_max_price_per_token: Option<u64>,
-        new_init_virtual_sol: Option<u128>,
-        new_init_virtual_token: Option<u128>,
+        new_init_virtual_sol: Option<u64>,
+        new_init_virtual_token: Option<u64>,
     ) -> Result<()> {
         require!(
             self.admin.key() == self.config.admin,
-            CustomError::Unauthorized
+            CoopMemeError::Unauthorized
         );
 
         if let Some(fee) = new_team_fee {

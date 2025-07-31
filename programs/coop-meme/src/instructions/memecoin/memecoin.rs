@@ -48,9 +48,7 @@ pub struct MemeCoin<'info> {
       bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-    /// It does not store any data and is used only for lamport/token transfers.
-    /// PDA seeds = [b"global"], bump = config.global_vault_bump
+    /// CHECK: This is a PDA for coop token metadata account
     #[account(
       mut,
       seeds = [
@@ -72,7 +70,7 @@ pub struct MemeCoin<'info> {
     ]]
     pub token_votes: Box<Account<'info, TokenVotes>>,
 
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is an ATA for coop token with global vault as authority.
     #[account(
     mut,
     seeds = [
@@ -85,7 +83,7 @@ pub struct MemeCoin<'info> {
     )]
     pub global_token_ata: AccountInfo<'info>,
 
-    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
     #[account(
       init_if_needed,
       associated_token::mint=coop_token,
@@ -112,7 +110,7 @@ impl<'info> MemeCoin<'info> {
     pub fn create_memecoin(
         &mut self,
         bumps: &MemeCoinBumps,
-        total_supply: u128,
+        total_supply: u64,
         token_share_price: u64,
         name: String,
         symbol: String,
@@ -123,28 +121,28 @@ impl<'info> MemeCoin<'info> {
     ) -> Result<()> {
         require!(
             total_supply == 1_000_000_000_000_000_000,
-            CustomError::InvalidTotalSupply
+            CoopMemeError::InvalidTotalSupply
         );
         require!(
             self.config.min_price_per_token < token_share_price
                 && token_share_price < self.config.max_price_per_token,
-            CustomError::InvalidFairSharePrice
+            CoopMemeError::InvalidFairSharePrice
         );
         require!(
             !name.is_empty() && name.len() < 37,
-            CustomError::InvalidTokenName
+            CoopMemeError::InvalidTokenName
         );
         require!(
             !symbol.is_empty() && symbol.len() < 15,
-            CustomError::InvalidTokenSymbol
+            CoopMemeError::InvalidTokenSymbol
         );
         require!(
             !uri.is_empty() && uri.len() < 200,
-            CustomError::InvalidTokenUri
+            CoopMemeError::InvalidTokenUri
         );
 
         let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
+        let current_time = clock.unix_timestamp as u64; // i64 in seconds
 
         self.memecoin.set_inner(MemeCoinData {
             token_id: self.config.total_coop_created.checked_add(1).unwrap(),
@@ -153,8 +151,14 @@ impl<'info> MemeCoin<'info> {
             token_share_price: token_share_price,
             token_total_supply: total_supply,
             token_creation_time: current_time as u64,
-            token_fairlaunch_end_time: current_time as u64 + self.config.fairlaunch_period as u64,
-            token_market_end_time: current_time as u64 + self.config.coop_interval as u64,
+            token_fairlaunch_end_time: current_time
+                .checked_add(self.config.fairlaunch_period)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap(),
+            token_market_end_time: current_time
+                .checked_add(self.config.coop_interval)
+                .ok_or(CoopMemeError::InvalidOperation)
+                .unwrap(),
             virtual_sol_reserves: self.config.init_virtual_sol,
             virtual_token_reserves: total_supply,
             real_sol_reserves: 0,

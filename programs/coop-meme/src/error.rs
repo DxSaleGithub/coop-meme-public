@@ -7,7 +7,7 @@ pub enum ErrorCode {
 }
 
 #[error_code]
-pub enum CustomError {
+pub enum CoopMemeError {
     #[msg("Only the admin is authorized to perform this action.")]
     Unauthorized,
     #[msg("Invalid total supply")]
@@ -38,6 +38,8 @@ pub enum CustomError {
     VotingNotFinalized,
     #[msg("Token voting is finalized")]
     VotingFinalized,
-    #[msg("Token is already listed ")]
+    #[msg("Token is already listed")]
     TokenAlreadyListed,
+    #[msg("Listing info not valid")]
+    InvalidListingInfo,
 }
