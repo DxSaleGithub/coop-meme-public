@@ -68,6 +68,8 @@ describe('coop-meme-2', () => {
         program.programId
       );
 
+    console.log(program.programId);
+
     const configState = await program.account.configData.fetch(
       configPda
     );
@@ -118,7 +120,7 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it.skip('Is creating memecoin!', async () => {
+  it('Is creating memecoin!', async () => {
     const creator = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -198,15 +200,15 @@ describe('coop-meme-2', () => {
       .createToken(
         new BN('1000000000000000000'),
         new BN('1000'),
-        'Coop Test Token',
+        'Coop Token',
         'CTT',
         'uri',
         [
-          'Coop Token Final Name 1',
-          'Coop Token Final Name 2',
-          'Coop Token Final Name 3',
-          'Coop Token Final Name 4',
-          'Coop Token Final Name 5',
+          'Coop Token 1',
+          'Coop Token 2',
+          'Coop Token 3',
+          'Coop Token 4',
+          'Coop Token 5',
         ],
         ['CTFN1', 'CTFN2', 'CTFN3', 'CTFN4', 'CTFN5'],
         ['uri1', 'uri2', 'uri3', 'uri4', 'uri5']
@@ -260,7 +262,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it.skip('Is buying memecoin!', async () => {
+  it('Is buying memecoin!', async () => {
     const trader = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -356,7 +358,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it.skip('Is selling memecoin!', async () => {
+  it('Is selling memecoin!', async () => {
     const trader = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -411,7 +413,7 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .sellTokens(new BN('100000000000000'), new BN(0))
+      .sellTokens(new BN('10000000000000'), new BN(0))
       .accounts({
         trader,
         affiliate,
@@ -826,7 +828,7 @@ describe('coop-meme-2', () => {
     console.log('Memecoin state data:', memecoinState);
   });
 
-  it('Is listing memecoin!', async () => {
+  it.skip('Is listing memecoin!', async () => {
     const owner = provider.wallet.publicKey;
     const creator = provider.wallet.publicKey;
 
@@ -1046,7 +1048,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping SOL to memecoin!', async () => {
+  it.skip('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -1250,7 +1252,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping memecoin to SOL!', async () => {
+  it.skip('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(

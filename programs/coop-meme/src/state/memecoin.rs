@@ -6,7 +6,7 @@ pub struct MemeCoinData {
     pub token_id: u32,
     pub token_mint: Pubkey,
     pub creator: Pubkey,
-    pub token_share_price: u64,
+    pub token_share_price: u32,
     pub token_total_supply: u64,
     pub token_creation_time: u64,
     pub token_fairlaunch_end_time: u64,
@@ -20,10 +20,10 @@ pub struct MemeCoinData {
     pub is_voting_finalized: bool,
     pub is_token_listed: bool,
 
-    #[max_len(64)]
+    #[max_len(16)]
     pub token_names: [String; 5],
 
-    #[max_len(16)]
+    #[max_len(6)]
     pub token_symbols: [String; 5],
 
     #[max_len(128)]

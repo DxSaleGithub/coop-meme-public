@@ -6,16 +6,16 @@ use anchor_spl::{
 use raydium_cpmm_cpi::{
     cpi,
     program::RaydiumCpmm,
-    states::{AmmConfig, OBSERVATION_SEED, POOL_LP_MINT_SEED, POOL_SEED, POOL_VAULT_SEED},
+    states::{AmmConfig, OBSERVATION_SEED, POOL_LP_MINT_SEED, POOL_VAULT_SEED},
 };
 
-use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::system_program::{transfer, Transfer};
 
-use crate::state::*;
+use crate::state::{ConfigData, MemeCoinData};
 use crate::{
     error::*,
     events::{ListEvent, TradingOverEvent},
+    utils::{sol_transfer_with_signer, token_transfer_with_signer},
 };
 
 #[derive(Accounts)]
@@ -269,7 +269,7 @@ impl<'info> List<'info> {
             b"global",                        // your static seed
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
-        self._sol_transfer_with_signer(
+        sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.team_wallet.to_account_info(),
             &self.system_program,
@@ -286,7 +286,7 @@ impl<'info> List<'info> {
         );
 
         // transfer tokens from global token ata to owner token ata
-        self._token_transfer_with_signer(
+        token_transfer_with_signer(
             self.global_token_ata.to_account_info(),
             self.global_vault.to_account_info(),
             owner_token_ata.to_account_info(),
@@ -370,48 +370,6 @@ impl<'info> List<'info> {
             },
         ))?;
 
-        Ok(())
-    }
-
-    //  transfer token from PDA
-    fn _token_transfer_with_signer(
-        &self,
-        from: AccountInfo<'info>,
-        authority: AccountInfo<'info>,
-        to: AccountInfo<'info>,
-        token_program: &Program<'info, Token>,
-        signer_seeds: &[&[&[u8]]],
-        amount: u64,
-    ) -> Result<()> {
-        let cpi_ctx: CpiContext<_> = CpiContext::new_with_signer(
-            token_program.to_account_info(),
-            token::Transfer {
-                from,
-                to,
-                authority,
-            },
-            signer_seeds,
-        );
-        token::transfer(cpi_ctx, amount)?;
-
-        Ok(())
-    }
-
-    // transfer sol from PDA
-    fn _sol_transfer_with_signer(
-        &self,
-        source: AccountInfo<'info>,
-        destination: AccountInfo<'info>,
-        system_program: &Program<'info, System>,
-        signers_seeds: &[&[&[u8]]],
-        amount: u64,
-    ) -> Result<()> {
-        let ix = solana_program::system_instruction::transfer(source.key, destination.key, amount);
-        invoke_signed(
-            &ix,
-            &[source, destination, system_program.to_account_info()],
-            signers_seeds,
-        )?;
         Ok(())
     }
 }

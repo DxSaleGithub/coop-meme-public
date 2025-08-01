@@ -90,9 +90,9 @@ impl<'info> UpdateConfig<'info> {
         new_listing_fee: Option<u16>,
         new_team_wallet: Option<Pubkey>,
         new_coop_interval: Option<u64>,
-        new_fairlaunch_period: Option<u64>,
-        new_min_price_per_token: Option<u64>,
-        new_max_price_per_token: Option<u64>,
+        new_fairlaunch_period: Option<u32>,
+        new_min_price_per_token: Option<u32>,
+        new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
     ) -> Result<()> {

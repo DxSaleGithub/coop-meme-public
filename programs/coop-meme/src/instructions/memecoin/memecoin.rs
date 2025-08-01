@@ -111,7 +111,7 @@ impl<'info> MemeCoin<'info> {
         &mut self,
         bumps: &MemeCoinBumps,
         total_supply: u64,
-        token_share_price: u64,
+        token_share_price: u32,
         name: String,
         symbol: String,
         uri: String,
@@ -152,7 +152,7 @@ impl<'info> MemeCoin<'info> {
             token_total_supply: total_supply,
             token_creation_time: current_time as u64,
             token_fairlaunch_end_time: current_time
-                .checked_add(self.config.fairlaunch_period)
+                .checked_add(self.config.fairlaunch_period as u64)
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap(),
             token_market_end_time: current_time

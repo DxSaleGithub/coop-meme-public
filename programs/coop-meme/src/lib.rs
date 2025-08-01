@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi");
+declare_id!("F43PQufttirqktLapWBsp4xLwFgxcdsRQAdykc4Tu2Ep");
 
 #[program]
 pub mod coop_meme {
@@ -33,9 +33,9 @@ pub mod coop_meme {
         new_listing_fee: Option<u16>,
         new_team_wallet: Option<Pubkey>,
         new_coop_interval: Option<u64>,
-        new_fairlaunch_period: Option<u64>,
-        new_min_price_per_token: Option<u64>,
-        new_max_price_per_token: Option<u64>,
+        new_fairlaunch_period: Option<u32>,
+        new_min_price_per_token: Option<u32>,
+        new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
     ) -> Result<()> {
@@ -58,7 +58,7 @@ pub mod coop_meme {
         // only admin can call
         ctx: Context<MemeCoin>,
         total_supply: u64,
-        token_share_price: u64,
+        token_share_price: u32,
         name: String,
         symbol: String,
         uri: String,

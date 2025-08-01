@@ -1,5 +1,5 @@
 {
-  "address": "9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi",
+  "address": "F43PQufttirqktLapWBsp4xLwFgxcdsRQAdykc4Tu2Ep",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -689,7 +689,7 @@
         },
         {
           "name": "token_share_price",
-          "type": "u64"
+          "type": "u32"
         },
         {
           "name": "name",
@@ -2797,19 +2797,19 @@
         {
           "name": "new_fairlaunch_period",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
           "name": "new_min_price_per_token",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
           "name": "new_max_price_per_token",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
@@ -3331,88 +3331,8 @@
   "errors": [
     {
       "code": 6000,
-      "name": "Unauthorized",
-      "msg": "Only the admin is authorized to perform this action."
-    },
-    {
-      "code": 6001,
       "name": "InvalidTotalSupply",
       "msg": "Invalid total supply"
-    },
-    {
-      "code": 6002,
-      "name": "TradingNotActive",
-      "msg": "Trading not active"
-    },
-    {
-      "code": 6003,
-      "name": "InsufficientAmount",
-      "msg": "Insufficient Amount"
-    },
-    {
-      "code": 6004,
-      "name": "InvalidFairSharePrice",
-      "msg": "Invalid fairshare token price"
-    },
-    {
-      "code": 6005,
-      "name": "InvalidTokenName",
-      "msg": "Invalid coop token name"
-    },
-    {
-      "code": 6006,
-      "name": "InvalidTokenSymbol",
-      "msg": "Invalid coop token symbol"
-    },
-    {
-      "code": 6007,
-      "name": "InvalidTokenUri",
-      "msg": "Invalid coop token uri"
-    },
-    {
-      "code": 6008,
-      "name": "InvalidOperation",
-      "msg": "Invalid arithmetic operation"
-    },
-    {
-      "code": 6009,
-      "name": "TradingActive",
-      "msg": "Trading active"
-    },
-    {
-      "code": 6010,
-      "name": "NotEnoughToken",
-      "msg": "Not enough token"
-    },
-    {
-      "code": 6011,
-      "name": "NotEnoughSol",
-      "msg": "Not enough sol"
-    },
-    {
-      "code": 6012,
-      "name": "InvalidTokenVoteInfo",
-      "msg": "Invalid token vote info"
-    },
-    {
-      "code": 6013,
-      "name": "VotingNotFinalized",
-      "msg": "Token voting is not finalized"
-    },
-    {
-      "code": 6014,
-      "name": "VotingFinalized",
-      "msg": "Token voting is finalized"
-    },
-    {
-      "code": 6015,
-      "name": "TokenAlreadyListed",
-      "msg": "Token is already listed"
-    },
-    {
-      "code": 6016,
-      "name": "InvalidListingInfo",
-      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3553,15 +3473,15 @@
           },
           {
             "name": "fairlaunch_period",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "min_price_per_token",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "max_price_per_token",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "init_virtual_sol",
@@ -3685,7 +3605,7 @@
           },
           {
             "name": "token_share_price",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "token_total_supply",

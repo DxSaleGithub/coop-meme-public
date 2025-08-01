@@ -5,7 +5,6 @@ use crate::{
     utils::*,
 };
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
     metadata::{self, Metadata},
@@ -109,7 +108,6 @@ impl<'info> Trade<'info> {
         if (current_time as u64 > self.memecoin.token_fairlaunch_end_time
             && !self.memecoin.is_bonding_curve_active)
         {
-            msg!("bonding curve should start");
             self.memecoin.is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
             self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
@@ -124,7 +122,6 @@ impl<'info> Trade<'info> {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
             });
-            msg!("bonding curve started");
         }
 
         let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
@@ -171,7 +168,7 @@ impl<'info> Trade<'info> {
             CoopMemeError::InsufficientAmount
         );
 
-        self._token_transfer_with_signer(
+        token_transfer_with_signer(
             self.global_token_ata.to_account_info(),
             self.global_vault.to_account_info(),
             self.trader_token_ata.to_account_info(),
@@ -318,21 +315,21 @@ impl<'info> Trade<'info> {
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
 
-        self._sol_transfer_from_user(
+        sol_transfer_from_user(
             &self.trader,
             self.creator.to_account_info(),
             &self.system_program,
             owner_fees as u64,
         )?;
 
-        self._sol_transfer_from_user(
+        sol_transfer_from_user(
             &self.trader,
             self.affiliate.to_account_info(),
             &self.system_program,
             (affiliate_fees as u64),
         )?;
 
-        self._sol_transfer_from_user(
+        sol_transfer_from_user(
             &self.trader,
             self.team_wallet.to_account_info(),
             &self.system_program,
@@ -345,7 +342,7 @@ impl<'info> Trade<'info> {
                 .unwrap()) as u64,
         )?;
 
-        self._sol_transfer_from_user(
+        sol_transfer_from_user(
             &self.trader,
             self.global_vault.to_account_info(),
             &self.system_program,
@@ -393,7 +390,7 @@ impl<'info> Trade<'info> {
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
 
-        self._sol_transfer_with_signer(
+        sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.creator.to_account_info(),
             &self.system_program,
@@ -401,7 +398,7 @@ impl<'info> Trade<'info> {
             owner_fees as u64,
         )?;
 
-        self._sol_transfer_with_signer(
+        sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.affiliate.to_account_info(),
             &self.system_program,
@@ -409,7 +406,7 @@ impl<'info> Trade<'info> {
             affiliate_fees as u64,
         )?;
 
-        self._sol_transfer_with_signer(
+        sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.team_wallet.to_account_info(),
             &self.system_program,
@@ -423,7 +420,7 @@ impl<'info> Trade<'info> {
                 .unwrap()) as u64,
         )?;
 
-        self._sol_transfer_with_signer(
+        sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.trader.to_account_info(),
             &self.system_program,
@@ -443,7 +440,6 @@ impl<'info> Trade<'info> {
     ) -> Option<u64> {
         let mut token_amount;
         if (!is_bonding_curve_active) {
-            msg!("fair launch going on");
             // token_amount using fairlaunch
             // token_amount = amount / (self.memecoin.token_share_price as u64) * 1_000_000_000;
             token_amount = (amount as u128)
@@ -455,8 +451,6 @@ impl<'info> Trade<'info> {
                 .unwrap();
             return Some(token_amount as u64);
         } else {
-            msg!("bonding curve going on");
-
             // token amount using bonding curve
             return self._get_tokens_for_buy_sol(amount as u64);
         }
@@ -479,9 +473,6 @@ impl<'info> Trade<'info> {
         let tokens_out = current_tokens.checked_sub(new_tokens as u64)?;
 
         // <u64 as TryInto<u64>>::try_into(tokens_out).ok()
-
-        msg!("token out calculated for bonding curver is {}", tokens_out);
-
         return Some(tokens_out);
     }
 
@@ -527,88 +518,5 @@ impl<'info> Trade<'info> {
 
         // <u64 as TryInto<u64>>::try_into(sol_out).ok()
         Some(sol_out)
-    }
-
-    fn _sol_transfer_from_user(
-        &self,
-        signer: &Signer<'info>,
-        destination: AccountInfo<'info>,
-        system_program: &Program<'info, System>,
-        amount: u64,
-    ) -> Result<()> {
-        let ix = solana_program::system_instruction::transfer(signer.key, destination.key, amount);
-        invoke(
-            &ix,
-            &[
-                signer.to_account_info(),
-                destination.to_account_info(),
-                system_program.to_account_info(),
-            ],
-        )?;
-        Ok(())
-    }
-
-    //  transfer token from user
-    fn _token_transfer_user(
-        &self,
-        from: AccountInfo<'info>,
-        authority: &Signer<'info>,
-        to: AccountInfo<'info>,
-        token_program: &Program<'info, Token>,
-        amount: u64,
-    ) -> Result<()> {
-        let cpi_ctx: CpiContext<_> = CpiContext::new(
-            token_program.to_account_info(),
-            token::Transfer {
-                from,
-                authority: authority.to_account_info(),
-                to,
-            },
-        );
-        token::transfer(cpi_ctx, amount)?;
-
-        Ok(())
-    }
-
-    //  transfer token from PDA
-    fn _token_transfer_with_signer(
-        &self,
-        from: AccountInfo<'info>,
-        authority: AccountInfo<'info>,
-        to: AccountInfo<'info>,
-        token_program: &Program<'info, Token>,
-        signer_seeds: &[&[&[u8]]],
-        amount: u64,
-    ) -> Result<()> {
-        let cpi_ctx: CpiContext<_> = CpiContext::new_with_signer(
-            token_program.to_account_info(),
-            token::Transfer {
-                from,
-                to,
-                authority,
-            },
-            signer_seeds,
-        );
-        token::transfer(cpi_ctx, amount)?;
-
-        Ok(())
-    }
-
-    // transfer sol from PDA
-    fn _sol_transfer_with_signer(
-        &self,
-        source: AccountInfo<'info>,
-        destination: AccountInfo<'info>,
-        system_program: &Program<'info, System>,
-        signers_seeds: &[&[&[u8]]],
-        amount: u64,
-    ) -> Result<()> {
-        let ix = solana_program::system_instruction::transfer(source.key, destination.key, amount);
-        invoke_signed(
-            &ix,
-            &[source, destination, system_program.to_account_info()],
-            signers_seeds,
-        )?;
-        Ok(())
     }
 }

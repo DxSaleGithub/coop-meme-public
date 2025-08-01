@@ -1,9 +1,13 @@
-use crate::{error::*, events::*, state::*};
+use crate::{
+    error::*,
+    events::{TradingOverEvent, VoteFinalizedEvent},
+    state::{ConfigData, MemeCoinData, TokenVotes},
+};
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token::{self, AssociatedToken},
+    associated_token::{self},
     metadata::{self, mpl_token_metadata::types::DataV2, Metadata},
-    token::{self, Mint, Token, TokenAccount},
+    token::{self, Mint},
 };
 
 #[derive(Accounts)]

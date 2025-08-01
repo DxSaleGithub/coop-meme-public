@@ -1,8 +1,12 @@
-use crate::{error::*, events::*, state::*};
+use crate::{
+    error::*,
+    events::{TradingOverEvent, VoteEvent},
+    state::{ConfigData, MemeCoinData, TokenVotes, UserTokenVotes, UserVoteInfo},
+    utils::{token_transfer_user, token_transfer_with_signer},
+};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    metadata::{self, Metadata},
     token::{self, Mint, Token, TokenAccount},
 };
 
@@ -132,7 +136,7 @@ impl<'info> UserVote<'info> {
         self.user_token_votes.total_votes += current_total_votes;
 
         // transfer token from user to vote_ata
-        self._token_transfer_user(
+        token_transfer_user(
             self.user_token_ata.to_account_info(),
             &self.user,
             self.vote_token_ata.to_account_info(),
@@ -204,7 +208,7 @@ impl<'info> UserVote<'info> {
         ];
 
         // transfer token from vote_ata to user
-        self._token_transfer_with_signer(
+        token_transfer_with_signer(
             self.vote_token_ata.to_account_info(),
             self.token_votes.to_account_info(),
             self.user_token_ata.to_account_info(),
@@ -291,52 +295,6 @@ impl<'info> UserVote<'info> {
             uri_votes.field_index <= 4,
             CoopMemeError::InvalidTokenVoteInfo
         );
-        Ok(())
-    }
-
-    //  transfer token from user
-    fn _token_transfer_user(
-        &self,
-        from: AccountInfo<'info>,
-        authority: &Signer<'info>,
-        to: AccountInfo<'info>,
-        token_program: &Program<'info, Token>,
-        amount: u64,
-    ) -> Result<()> {
-        let cpi_ctx: CpiContext<_> = CpiContext::new(
-            token_program.to_account_info(),
-            token::Transfer {
-                from,
-                authority: authority.to_account_info(),
-                to,
-            },
-        );
-        token::transfer(cpi_ctx, amount)?;
-
-        Ok(())
-    }
-
-    //  transfer token from PDA
-    fn _token_transfer_with_signer(
-        &self,
-        from: AccountInfo<'info>,
-        authority: AccountInfo<'info>,
-        to: AccountInfo<'info>,
-        token_program: &Program<'info, Token>,
-        signer_seeds: &[&[&[u8]]],
-        amount: u64,
-    ) -> Result<()> {
-        let cpi_ctx: CpiContext<_> = CpiContext::new_with_signer(
-            token_program.to_account_info(),
-            token::Transfer {
-                from,
-                to,
-                authority,
-            },
-            signer_seeds,
-        );
-        token::transfer(cpi_ctx, amount)?;
-
         Ok(())
     }
 }

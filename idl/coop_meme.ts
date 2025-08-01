@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "9WeAUyQn61U4ZEJLUoH1sFxccGyAayBA7oSgG8m4ZtVi",
+  "address": "F43PQufttirqktLapWBsp4xLwFgxcdsRQAdykc4Tu2Ep",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -695,7 +695,7 @@ export type CoopMeme = {
         },
         {
           "name": "tokenSharePrice",
-          "type": "u64"
+          "type": "u32"
         },
         {
           "name": "name",
@@ -2803,19 +2803,19 @@ export type CoopMeme = {
         {
           "name": "newFairlaunchPeriod",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
           "name": "newMinPricePerToken",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
           "name": "newMaxPricePerToken",
           "type": {
-            "option": "u64"
+            "option": "u32"
           }
         },
         {
@@ -3337,88 +3337,8 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
-      "name": "unauthorized",
-      "msg": "Only the admin is authorized to perform this action."
-    },
-    {
-      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
-    },
-    {
-      "code": 6002,
-      "name": "tradingNotActive",
-      "msg": "Trading not active"
-    },
-    {
-      "code": 6003,
-      "name": "insufficientAmount",
-      "msg": "Insufficient Amount"
-    },
-    {
-      "code": 6004,
-      "name": "invalidFairSharePrice",
-      "msg": "Invalid fairshare token price"
-    },
-    {
-      "code": 6005,
-      "name": "invalidTokenName",
-      "msg": "Invalid coop token name"
-    },
-    {
-      "code": 6006,
-      "name": "invalidTokenSymbol",
-      "msg": "Invalid coop token symbol"
-    },
-    {
-      "code": 6007,
-      "name": "invalidTokenUri",
-      "msg": "Invalid coop token uri"
-    },
-    {
-      "code": 6008,
-      "name": "invalidOperation",
-      "msg": "Invalid arithmetic operation"
-    },
-    {
-      "code": 6009,
-      "name": "tradingActive",
-      "msg": "Trading active"
-    },
-    {
-      "code": 6010,
-      "name": "notEnoughToken",
-      "msg": "Not enough token"
-    },
-    {
-      "code": 6011,
-      "name": "notEnoughSol",
-      "msg": "Not enough sol"
-    },
-    {
-      "code": 6012,
-      "name": "invalidTokenVoteInfo",
-      "msg": "Invalid token vote info"
-    },
-    {
-      "code": 6013,
-      "name": "votingNotFinalized",
-      "msg": "Token voting is not finalized"
-    },
-    {
-      "code": 6014,
-      "name": "votingFinalized",
-      "msg": "Token voting is finalized"
-    },
-    {
-      "code": 6015,
-      "name": "tokenAlreadyListed",
-      "msg": "Token is already listed"
-    },
-    {
-      "code": 6016,
-      "name": "invalidListingInfo",
-      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3559,15 +3479,15 @@ export type CoopMeme = {
           },
           {
             "name": "fairlaunchPeriod",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "minPricePerToken",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "maxPricePerToken",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "initVirtualSol",
@@ -3691,7 +3611,7 @@ export type CoopMeme = {
           },
           {
             "name": "tokenSharePrice",
-            "type": "u64"
+            "type": "u32"
           },
           {
             "name": "tokenTotalSupply",
