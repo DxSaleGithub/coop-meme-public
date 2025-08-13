@@ -1,5 +1,5 @@
 {
-  "address": "F43PQufttirqktLapWBsp4xLwFgxcdsRQAdykc4Tu2Ep",
+  "address": "AMqAJK5ho2J1vHG7x1YgSChG9mheRau8VfR1HjtgFqjs",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -7,6 +7,214 @@
     "description": "Created with Anchor"
   },
   "instructions": [
+    {
+      "name": "burn_lp_token",
+      "discriminator": [
+        246,
+        132,
+        119,
+        245,
+        169,
+        239,
+        213,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_0_mint"
+        },
+        {
+          "name": "token_1_mint"
+        },
+        {
+          "name": "coop_token",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lp_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool_state"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cp_swap_program"
+            }
+          }
+        },
+        {
+          "name": "owner_lp_token",
+          "writable": true
+        },
+        {
+          "name": "cp_swap_program",
+          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+        },
+        {
+          "name": "amm_config",
+          "docs": [
+            "Which config the pool belongs to."
+          ]
+        },
+        {
+          "name": "pool_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "amm_config"
+              },
+              {
+                "kind": "account",
+                "path": "token_0_mint"
+              },
+              {
+                "kind": "account",
+                "path": "token_1_mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cp_swap_program"
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "Program to create mint account and mint tokens"
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "docs": [
+            "Program to create an ATA for receiving position NFT"
+          ],
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "docs": [
+            "To create a new program account"
+          ],
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "docs": [
+            "Sysvar for program account"
+          ],
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
     {
       "name": "buy_tokens",
       "discriminator": [
@@ -3250,6 +3458,19 @@
       ]
     },
     {
+      "name": "BurnEvent",
+      "discriminator": [
+        33,
+        89,
+        47,
+        117,
+        82,
+        124,
+        238,
+        250
+      ]
+    },
+    {
       "name": "CreatedEvent",
       "discriminator": [
         231,
@@ -3331,8 +3552,93 @@
   "errors": [
     {
       "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "InvalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "TradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "TradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6010,
+      "name": "NotEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6011,
+      "name": "NotEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "VotingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "VotingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "TokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "TokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidListingInfo",
+      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3433,6 +3739,26 @@
           },
           {
             "name": "memecoin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BurnEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coop_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_mint",
             "type": "pubkey"
           }
         ]
@@ -4025,6 +4351,10 @@
           },
           {
             "name": "amount_out",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
             "type": "u64"
           }
         ]

@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "F43PQufttirqktLapWBsp4xLwFgxcdsRQAdykc4Tu2Ep",
+  "address": "AMqAJK5ho2J1vHG7x1YgSChG9mheRau8VfR1HjtgFqjs",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -13,6 +13,214 @@ export type CoopMeme = {
     "description": "Created with Anchor"
   },
   "instructions": [
+    {
+      "name": "burnLpToken",
+      "discriminator": [
+        246,
+        132,
+        119,
+        245,
+        169,
+        239,
+        213,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token0Mint"
+        },
+        {
+          "name": "token1Mint"
+        },
+        {
+          "name": "coopToken",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lpMint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "poolState"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "ownerLpToken",
+          "writable": true
+        },
+        {
+          "name": "cpSwapProgram",
+          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+        },
+        {
+          "name": "ammConfig",
+          "docs": [
+            "Which config the pool belongs to."
+          ]
+        },
+        {
+          "name": "poolState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "ammConfig"
+              },
+              {
+                "kind": "account",
+                "path": "token0Mint"
+              },
+              {
+                "kind": "account",
+                "path": "token1Mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cpSwapProgram"
+            }
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "docs": [
+            "Program to create mint account and mint tokens"
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "docs": [
+            "Program to create an ATA for receiving position NFT"
+          ],
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "docs": [
+            "To create a new program account"
+          ],
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "docs": [
+            "Sysvar for program account"
+          ],
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
     {
       "name": "buyTokens",
       "discriminator": [
@@ -3256,6 +3464,19 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "burnEvent",
+      "discriminator": [
+        33,
+        89,
+        47,
+        117,
+        82,
+        124,
+        238,
+        250
+      ]
+    },
+    {
       "name": "createdEvent",
       "discriminator": [
         231,
@@ -3337,8 +3558,93 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "tradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6010,
+      "name": "notEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6011,
+      "name": "notEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6012,
+      "name": "invalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "tokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6017,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
     }
   ],
   "types": [
@@ -3439,6 +3745,26 @@ export type CoopMeme = {
           },
           {
             "name": "memecoin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "burnEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "lpMint",
             "type": "pubkey"
           }
         ]
@@ -4031,6 +4357,10 @@ export type CoopMeme = {
           },
           {
             "name": "amountOut",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
             "type": "u64"
           }
         ]
