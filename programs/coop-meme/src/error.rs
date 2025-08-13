@@ -40,6 +40,8 @@ pub enum CoopMemeError {
     VotingFinalized,
     #[msg("Token is already listed")]
     TokenAlreadyListed,
+    #[msg("Token not listed")]
+    TokenNotListed,
     #[msg("Listing info not valid")]
     InvalidListingInfo,
 }

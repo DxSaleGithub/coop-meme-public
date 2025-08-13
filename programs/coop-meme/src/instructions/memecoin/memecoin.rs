@@ -124,7 +124,7 @@ impl<'info> MemeCoin<'info> {
             CoopMemeError::InvalidTotalSupply
         );
         require!(
-            self.config.min_price_per_token < token_share_price
+            self.config.min_price_per_token <= token_share_price
                 && token_share_price < self.config.max_price_per_token,
             CoopMemeError::InvalidFairSharePrice
         );

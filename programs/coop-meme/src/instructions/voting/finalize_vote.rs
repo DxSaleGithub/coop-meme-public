@@ -72,6 +72,7 @@ pub struct FinalizeVote<'info> {
 
 impl<'info> FinalizeVote<'info> {
     pub fn finalize_vote(&mut self) -> Result<()> {
+        //@audit what happens if there is no vote at all?
         require!(
             !self.memecoin.is_voting_finalized,
             CoopMemeError::VotingFinalized

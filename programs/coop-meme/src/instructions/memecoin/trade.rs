@@ -110,11 +110,21 @@ impl<'info> Trade<'info> {
         {
             self.memecoin.is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
-            self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
-            self.memecoin.virtual_token_reserves = (1_000_000_000u128)
-                .checked_mul(1_000_000_000) // 9 decimals
+            // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
+            // self.memecoin.virtual_token_reserves = (1_000_000_000u128)
+            //     .checked_mul(1_000_000_000) // 9 decimals
+            //     .unwrap()
+            //     .checked_div(self.memecoin.token_share_price as u128)
+            //     .unwrap()
+            //     .try_into()
+            //     .unwrap();
+
+            self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
+                .checked_mul(self.memecoin.virtual_token_reserves as u128)
+                .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
-                .checked_div(self.memecoin.token_share_price as u128)
+                .checked_div(1_000_000_000u128)
+                .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
                 .try_into()
                 .unwrap();
@@ -184,7 +194,8 @@ impl<'info> Trade<'info> {
             amount_in: amount as u64,
             direction: 1, // from SOL to tokens
             minimum_receive_amount: min_tokens_receive as u64,
-            amount_out: token_amount as u64
+            amount_out: token_amount as u64,
+            timestamp: Clock::get()?.unix_timestamp as u64
         });
 
         Ok(())
@@ -212,11 +223,20 @@ impl<'info> Trade<'info> {
         {
             self.memecoin.is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
-            self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
-            self.memecoin.virtual_token_reserves = (1_000_000_000u128)
-                .checked_mul(1_000_000_000) // 9 decimals
+            // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
+            // self.memecoin.virtual_token_reserves = (1_000_000_000u128)
+            //     .checked_mul(1_000_000_000) // 9 decimals
+            //     .unwrap()
+            //     .checked_div(self.memecoin.token_share_price as u128)
+            //     .unwrap()
+            //     .try_into()
+            //     .unwrap();
+            self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
+                .checked_mul(self.memecoin.virtual_token_reserves as u128)
+                .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
-                .checked_div(self.memecoin.token_share_price as u128)
+                .checked_div(1_000_000_000u128)
+                .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
                 .try_into()
                 .unwrap();
@@ -246,15 +266,15 @@ impl<'info> Trade<'info> {
             ._calculate_and_send_fees_with_signer(sol_amount)
             .unwrap()
             .unwrap();
-        let sol_amount_to_sell = sol_amount
-            .checked_sub(team_fees)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        // let sol_amount_to_sell = sol_amount
+        //     .checked_sub(team_fees)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap();
 
         self.memecoin.virtual_sol_reserves = self
             .memecoin
             .virtual_sol_reserves
-            .checked_sub(sol_amount_to_sell)
+            .checked_sub(sol_amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.virtual_token_reserves = self
@@ -266,7 +286,7 @@ impl<'info> Trade<'info> {
         self.memecoin.real_sol_reserves = self
             .memecoin
             .real_sol_reserves
-            .checked_sub(sol_amount_to_sell)
+            .checked_sub(sol_amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.real_token_reserves = self
@@ -283,7 +303,8 @@ impl<'info> Trade<'info> {
             amount_in: amount as u64,
             direction: 2, // from tokens to SOL
             minimum_receive_amount: min_sol_receive as u64,
-            amount_out: sol_amount as u64
+            amount_out: sol_amount as u64,
+            timestamp: Clock::get()?.unix_timestamp as u64
         });
 
         Ok(())

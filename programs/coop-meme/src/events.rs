@@ -26,6 +26,8 @@ pub struct TradeEvent {
     pub amount_in: u64,
     pub minimum_receive_amount: u64,
     pub amount_out: u64,
+
+    pub timestamp: u64,
 }
 
 #[event]
@@ -70,5 +72,12 @@ pub struct ListEvent {
     pub memecoin: Pubkey,
     pub token_in: u64,
     pub sol_in: u64,
+    pub lp_mint: Pubkey,
+}
+
+#[event]
+pub struct BurnEvent {
+    pub coop_token: Pubkey,
+    pub memecoin: Pubkey,
     pub lp_mint: Pubkey,
 }

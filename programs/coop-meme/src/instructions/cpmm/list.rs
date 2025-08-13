@@ -1,22 +1,22 @@
+use crate::state::{ConfigData, MemeCoinData};
+use crate::{
+    error::*,
+    events::{BurnEvent, ListEvent, TradingOverEvent},
+    utils::{sol_transfer_with_signer, token_transfer_with_signer},
+};
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::{
-    associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount},
+    associated_token::{self, AssociatedToken},
+    token::{self, burn, Burn, Mint, Token, TokenAccount},
 };
 use raydium_cpmm_cpi::{
     cpi,
     program::RaydiumCpmm,
     states::{AmmConfig, OBSERVATION_SEED, POOL_LP_MINT_SEED, POOL_VAULT_SEED},
 };
-
-use anchor_lang::system_program::{transfer, Transfer};
-
-use crate::state::{ConfigData, MemeCoinData};
-use crate::{
-    error::*,
-    events::{ListEvent, TradingOverEvent},
-    utils::{sol_transfer_with_signer, token_transfer_with_signer},
-};
+use solana_program::program_pack::Pack; // <-- This import is required
+use spl_token::state::Account as SplAccount;
 
 #[derive(Accounts)]
 pub struct List<'info> {
@@ -340,6 +340,16 @@ impl<'info> List<'info> {
             sol_in: (sol_to_list),
             lp_mint: self.lp_mint.key()
         });
+
+        // burn minted LP tokens
+        self._burn_lp_tokens()?;
+
+        emit!(BurnEvent {
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            lp_mint: self.lp_mint.key()
+        });
+
         Ok(())
     }
 
@@ -370,6 +380,29 @@ impl<'info> List<'info> {
             },
         ))?;
 
+        Ok(())
+    }
+
+    fn _burn_lp_tokens(&self) -> Result<()> {
+        let lp_mint_account_info = &self.lp_mint;
+        let owner_lp_token_account_info = &self.owner_lp_token;
+
+        // Scope the borrow
+        let amount = {
+            let account_data = &owner_lp_token_account_info.try_borrow_data()?;
+            let token_account = SplAccount::unpack_from_slice(account_data)?;
+            token_account.amount
+        }; // reference is dropped here
+
+        let burn_accounts = Burn {
+            mint: lp_mint_account_info.to_account_info(),
+            from: owner_lp_token_account_info.to_account_info(),
+            authority: self.owner.to_account_info(),
+        };
+
+        let burn_ctx = CpiContext::new(self.token_program.to_account_info(), burn_accounts);
+
+        burn(burn_ctx, amount)?;
         Ok(())
     }
 }

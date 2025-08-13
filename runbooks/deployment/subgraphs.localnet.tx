@@ -1,0 +1,63 @@
+
+action "coop_meme_bonding_curve_started_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "BondingCurveStartedEvent"
+    }
+}
+
+action "coop_meme_created_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "CreatedEvent"
+    }
+}
+
+action "coop_meme_list_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "ListEvent"
+    }
+}
+
+action "coop_meme_trade_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "TradeEvent"
+    }
+}
+
+action "coop_meme_trading_over_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "TradingOverEvent"
+    }
+}
+
+action "coop_meme_vote_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "VoteEvent"
+    }
+}
+
+action "coop_meme_vote_finalized_event" "svm::deploy_subgraph" {
+    program_id = action.deploy_coop_meme.program_id
+    program_idl = action.deploy_coop_meme.program_idl
+    block_height = 0 // action.deploy_coop_meme.block_height
+    event {
+        name = "VoteFinalizedEvent"
+    }
+}
