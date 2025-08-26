@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "AMqAJK5ho2J1vHG7x1YgSChG9mheRau8VfR1HjtgFqjs",
+  "address": "7v2a2DN8bVNERVRWVGWjU7ZQDHe4Apa8Eo4nsJz17TKk",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -918,30 +918,13 @@ export type CoopMeme = {
           "type": "string"
         },
         {
-          "name": "tokenNames",
+          "name": "tokenOptions",
           "type": {
-            "array": [
-              "string",
-              5
-            ]
-          }
-        },
-        {
-          "name": "tokenSymbols",
-          "type": {
-            "array": [
-              "string",
-              5
-            ]
-          }
-        },
-        {
-          "name": "tokenUris",
-          "type": {
-            "array": [
-              "string",
-              5
-            ]
+            "vec": {
+              "defined": {
+                "name": "tokenOption"
+              }
+            }
           }
         }
       ]
@@ -2905,30 +2888,304 @@ export type CoopMeme = {
       ],
       "args": [
         {
-          "name": "nameVote",
+          "name": "voteInfo",
           "type": {
             "defined": {
-              "name": "userVoteInfo"
-            }
-          }
-        },
-        {
-          "name": "symbolVote",
-          "type": {
-            "defined": {
-              "name": "userVoteInfo"
-            }
-          }
-        },
-        {
-          "name": "uriVote",
-          "type": {
-            "defined": {
-              "name": "userVoteInfo"
+              "name": "voteInfo"
             }
           }
         }
       ]
+    },
+    {
+      "name": "unvoteAllTokens",
+      "discriminator": [
+        241,
+        136,
+        191,
+        240,
+        113,
+        222,
+        21,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userTokenVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "voteTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "tokenVotes"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": []
     },
     {
       "name": "updateConfig",
@@ -3034,6 +3291,18 @@ export type CoopMeme = {
         },
         {
           "name": "newInitVirtualToken",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newMinVoteTokenAmount",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "newMinOptionAddTokenAmount",
           "type": {
             "option": "u64"
           }
@@ -3330,26 +3599,309 @@ export type CoopMeme = {
       ],
       "args": [
         {
-          "name": "nameVote",
+          "name": "voteInfo",
           "type": {
             "defined": {
-              "name": "userVoteInfo"
+              "name": "voteInfo"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "voteWithOption",
+      "discriminator": [
+        193,
+        131,
+        116,
+        197,
+        251,
+        185,
+        23,
+        44
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userTokenVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
             }
           }
         },
         {
-          "name": "symbolVote",
-          "type": {
-            "defined": {
-              "name": "userVoteInfo"
+          "name": "voteTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "tokenVotes"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
             }
           }
         },
         {
-          "name": "uriVote",
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "voteOptionInfo",
           "type": {
             "defined": {
-              "name": "userVoteInfo"
+              "name": "voteOptionInfo"
             }
           }
         }
@@ -3645,6 +4197,16 @@ export type CoopMeme = {
       "code": 6017,
       "name": "invalidListingInfo",
       "msg": "Listing info not valid"
+    },
+    {
+      "code": 6018,
+      "name": "optionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6019,
+      "name": "tokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
     }
   ],
   "types": [
@@ -3824,6 +4386,14 @@ export type CoopMeme = {
             "type": "u64"
           },
           {
+            "name": "minVoteTokenAmount",
+            "type": "u64"
+          },
+          {
+            "name": "minOptionAddTokenAmount",
+            "type": "u64"
+          },
+          {
             "name": "totalCoopCreated",
             "type": "u32"
           },
@@ -3988,30 +4558,13 @@ export type CoopMeme = {
             "type": "bool"
           },
           {
-            "name": "tokenNames",
+            "name": "tokenOptions",
             "type": {
-              "array": [
-                "string",
-                5
-              ]
-            }
-          },
-          {
-            "name": "tokenSymbols",
-            "type": {
-              "array": [
-                "string",
-                5
-              ]
-            }
-          },
-          {
-            "name": "tokenUris",
-            "type": {
-              "array": [
-                "string",
-                5
-              ]
+              "vec": {
+                "defined": {
+                  "name": "tokenOption"
+                }
+              }
             }
           },
           {
@@ -4280,43 +4833,38 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "tokenOption",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenName",
+            "type": "string"
+          },
+          {
+            "name": "tokenSymbol",
+            "type": "string"
+          },
+          {
+            "name": "tokenUri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "tokenVotes",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "minimumTokens",
-            "type": "u64"
-          },
-          {
             "name": "totalVotes",
             "type": "u64"
           },
           {
-            "name": "nameVotes",
+            "name": "votes",
             "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "symbolVotes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "uriVotes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
+              "vec": "u64"
             }
           },
           {
@@ -4392,51 +4940,14 @@ export type CoopMeme = {
             "type": "u64"
           },
           {
-            "name": "nameVotes",
+            "name": "votes",
             "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "symbolVotes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "uriVotes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
+              "vec": "u64"
             }
           },
           {
             "name": "bump",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "userVoteInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "fieldIndex",
-            "type": "u8"
-          },
-          {
-            "name": "tokenAmount",
-            "type": "u64"
           }
         ]
       }
@@ -4463,26 +4974,10 @@ export type CoopMeme = {
             "type": "u8"
           },
           {
-            "name": "nameVote",
+            "name": "voteInfo",
             "type": {
               "defined": {
-                "name": "userVoteInfo"
-              }
-            }
-          },
-          {
-            "name": "symbolVote",
-            "type": {
-              "defined": {
-                "name": "userVoteInfo"
-              }
-            }
-          },
-          {
-            "name": "uriVote",
-            "type": {
-              "defined": {
-                "name": "userVoteInfo"
+                "name": "voteInfo"
               }
             }
           },
@@ -4520,6 +5015,42 @@ export type CoopMeme = {
           },
           {
             "name": "totalVotes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "optionIndex",
+            "type": "u8"
+          },
+          {
+            "name": "tokenAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteOptionInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenOption",
+            "type": {
+              "defined": {
+                "name": "tokenOption"
+              }
+            }
+          },
+          {
+            "name": "tokenAmount",
             "type": "u64"
           }
         ]

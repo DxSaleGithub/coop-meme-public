@@ -1,5 +1,5 @@
 {
-  "address": "AMqAJK5ho2J1vHG7x1YgSChG9mheRau8VfR1HjtgFqjs",
+  "address": "7v2a2DN8bVNERVRWVGWjU7ZQDHe4Apa8Eo4nsJz17TKk",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -912,30 +912,13 @@
           "type": "string"
         },
         {
-          "name": "token_names",
+          "name": "token_options",
           "type": {
-            "array": [
-              "string",
-              5
-            ]
-          }
-        },
-        {
-          "name": "token_symbols",
-          "type": {
-            "array": [
-              "string",
-              5
-            ]
-          }
-        },
-        {
-          "name": "token_uris",
-          "type": {
-            "array": [
-              "string",
-              5
-            ]
+            "vec": {
+              "defined": {
+                "name": "TokenOption"
+              }
+            }
           }
         }
       ]
@@ -2899,30 +2882,304 @@
       ],
       "args": [
         {
-          "name": "name_vote",
+          "name": "vote_info",
           "type": {
             "defined": {
-              "name": "UserVoteInfo"
-            }
-          }
-        },
-        {
-          "name": "symbol_vote",
-          "type": {
-            "defined": {
-              "name": "UserVoteInfo"
-            }
-          }
-        },
-        {
-          "name": "uri_vote",
-          "type": {
-            "defined": {
-              "name": "UserVoteInfo"
+              "name": "VoteInfo"
             }
           }
         }
       ]
+    },
+    {
+      "name": "unvote_all_tokens",
+      "discriminator": [
+        241,
+        136,
+        191,
+        240,
+        113,
+        222,
+        21,
+        32
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "global_vault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coop_token",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_votes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_votes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vote_token_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_votes"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": []
     },
     {
       "name": "update_config",
@@ -3028,6 +3285,18 @@
         },
         {
           "name": "new_init_virtual_token",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_min_vote_token_amount",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "new_min_option_add_token_amount",
           "type": {
             "option": "u64"
           }
@@ -3324,26 +3593,309 @@
       ],
       "args": [
         {
-          "name": "name_vote",
+          "name": "vote_info",
           "type": {
             "defined": {
-              "name": "UserVoteInfo"
+              "name": "VoteInfo"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "vote_with_option",
+      "discriminator": [
+        193,
+        131,
+        116,
+        197,
+        251,
+        185,
+        23,
+        44
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "global_vault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coop_token",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_votes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_votes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
             }
           }
         },
         {
-          "name": "symbol_vote",
-          "type": {
-            "defined": {
-              "name": "UserVoteInfo"
+          "name": "vote_token_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_votes"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
             }
           }
         },
         {
-          "name": "uri_vote",
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_option_info",
           "type": {
             "defined": {
-              "name": "UserVoteInfo"
+              "name": "VoteOptionInfo"
             }
           }
         }
@@ -3639,6 +4191,16 @@
       "code": 6017,
       "name": "InvalidListingInfo",
       "msg": "Listing info not valid"
+    },
+    {
+      "code": 6018,
+      "name": "OptionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6019,
+      "name": "TokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
     }
   ],
   "types": [
@@ -3818,6 +4380,14 @@
             "type": "u64"
           },
           {
+            "name": "min_vote_token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "min_option_add_token_amount",
+            "type": "u64"
+          },
+          {
             "name": "total_coop_created",
             "type": "u32"
           },
@@ -3982,30 +4552,13 @@
             "type": "bool"
           },
           {
-            "name": "token_names",
+            "name": "token_options",
             "type": {
-              "array": [
-                "string",
-                5
-              ]
-            }
-          },
-          {
-            "name": "token_symbols",
-            "type": {
-              "array": [
-                "string",
-                5
-              ]
-            }
-          },
-          {
-            "name": "token_uris",
-            "type": {
-              "array": [
-                "string",
-                5
-              ]
+              "vec": {
+                "defined": {
+                  "name": "TokenOption"
+                }
+              }
             }
           },
           {
@@ -4274,43 +4827,38 @@
       }
     },
     {
+      "name": "TokenOption",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_name",
+            "type": "string"
+          },
+          {
+            "name": "token_symbol",
+            "type": "string"
+          },
+          {
+            "name": "token_uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenVotes",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "minimum_tokens",
-            "type": "u64"
-          },
-          {
             "name": "total_votes",
             "type": "u64"
           },
           {
-            "name": "name_votes",
+            "name": "votes",
             "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "symbol_votes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "uri_votes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
+              "vec": "u64"
             }
           },
           {
@@ -4386,51 +4934,14 @@
             "type": "u64"
           },
           {
-            "name": "name_votes",
+            "name": "votes",
             "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "symbol_votes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "uri_votes",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
+              "vec": "u64"
             }
           },
           {
             "name": "bump",
             "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UserVoteInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "field_index",
-            "type": "u8"
-          },
-          {
-            "name": "token_amount",
-            "type": "u64"
           }
         ]
       }
@@ -4457,26 +4968,10 @@
             "type": "u8"
           },
           {
-            "name": "name_vote",
+            "name": "vote_info",
             "type": {
               "defined": {
-                "name": "UserVoteInfo"
-              }
-            }
-          },
-          {
-            "name": "symbol_vote",
-            "type": {
-              "defined": {
-                "name": "UserVoteInfo"
-              }
-            }
-          },
-          {
-            "name": "uri_vote",
-            "type": {
-              "defined": {
-                "name": "UserVoteInfo"
+                "name": "VoteInfo"
               }
             }
           },
@@ -4514,6 +5009,42 @@
           },
           {
             "name": "total_votes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "option_index",
+            "type": "u8"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteOptionInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_option",
+            "type": {
+              "defined": {
+                "name": "TokenOption"
+              }
+            }
+          },
+          {
+            "name": "token_amount",
             "type": "u64"
           }
         ]

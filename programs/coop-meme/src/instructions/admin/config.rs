@@ -57,6 +57,8 @@ impl<'info> Config<'info> {
             init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token => init price = 0.01 sol per token
             total_coop_created: 0,
             total_coop_listed: 0,
+            min_vote_token_amount: 1000_000_000_000,
+            min_option_add_token_amount: 10000_000_000_000,
             config_bump: bumbs.config,
             global_vault_bump: bumbs.global_vault,
         });
@@ -95,6 +97,8 @@ impl<'info> UpdateConfig<'info> {
         new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
+        new_min_vote_token_amount: Option<u64>,
+        new_min_option_add_token_amount: Option<u64>,
     ) -> Result<()> {
         require!(
             self.admin.key() == self.config.admin,
@@ -143,6 +147,14 @@ impl<'info> UpdateConfig<'info> {
 
         if let Some(token) = new_init_virtual_token {
             self.config.init_virtual_token = token;
+        }
+
+        if let Some(token_amount) = new_min_vote_token_amount {
+            self.config.min_vote_token_amount = token_amount;
+        }
+
+        if let Some(token_amount) = new_min_option_add_token_amount {
+            self.config.min_option_add_token_amount = token_amount;
         }
 
         Ok(())

@@ -8,7 +8,8 @@ use anchor_spl::{
 use crate::{
     error::*,
     events::CreatedEvent,
-    state::{ConfigData, MemeCoinData, TokenVotes},
+    state::{ConfigData, MemeCoinData, TokenOption, TokenVotes},
+    VoteInfo,
 };
 #[derive(Accounts)]
 pub struct MemeCoin<'info> {
@@ -115,9 +116,10 @@ impl<'info> MemeCoin<'info> {
         name: String,
         symbol: String,
         uri: String,
-        token_names: [String; 5],
-        token_symbols: [String; 5],
-        token_uris: [String; 5],
+        token_options: Vec<TokenOption>,
+        // token_names: [String; 5],
+        // token_symbols: [String; 5],
+        // token_uris: [String; 5],
     ) -> Result<()> {
         require!(
             total_supply == 1_000_000_000_000_000_000,
@@ -167,19 +169,28 @@ impl<'info> MemeCoin<'info> {
             is_trading_active: true,
             is_token_listed: false,
             is_voting_finalized: false,
-            token_names,
-            token_symbols,
-            token_uris,
+            token_options: token_options,
+            // token_names,
+            // token_symbols,
+            // token_uris,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
         });
 
+        // let mut items: Vec<VoteInfo> = Vec::new();
+
+        // // Add default elements up to desired index, for example:
+        // while items.len() <= 20 {
+        //     items.push(VoteInfo::default());
+        // }
+
         self.token_votes.set_inner(TokenVotes {
-            minimum_tokens: 1_000_000_000_000,
+            // minimum_tokens: self.min,
             total_votes: 0,
-            name_votes: [0; 5],
-            symbol_votes: [0; 5],
-            uri_votes: [0; 5],
+            // name_votes: [0; 5],
+            // symbol_votes: [0; 5],
+            // uri_votes: [0; 5],
+            votes: Vec::new(),
             bump: bumps.token_votes,
         });
 

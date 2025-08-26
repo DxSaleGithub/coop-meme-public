@@ -1,3 +1,5 @@
+use std::string;
+
 use anchor_lang::prelude::*;
 
 #[account]
@@ -20,15 +22,27 @@ pub struct MemeCoinData {
     pub is_voting_finalized: bool,
     pub is_token_listed: bool,
 
-    #[max_len(16)]
-    pub token_names: [String; 5],
+    // #[max_len(16)]
+    // pub token_names: [String; 5],
 
-    #[max_len(6)]
-    pub token_symbols: [String; 5],
+    // #[max_len(6)]
+    // pub token_symbols: [String; 5],
 
-    #[max_len(128)]
-    pub token_uris: [String; 5],
-
+    // #[max_len(128)]
+    // pub token_uris: [String; 5],
+    #[max_len(20)]
+    pub token_options: Vec<TokenOption>,
     pub memecoin_bump: u8,
     pub token_bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct TokenOption {
+    #[max_len(16)]
+    pub token_name: String,
+    #[max_len(16)]
+    pub token_symbol: String,
+    #[max_len(256)]
+    pub token_uri: String,
 }

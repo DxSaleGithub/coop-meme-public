@@ -44,4 +44,8 @@ pub enum CoopMemeError {
     TokenNotListed,
     #[msg("Listing info not valid")]
     InvalidListingInfo,
+    #[msg("Option limit exceeded")]
+    OptionLimitExceeded,
+    #[msg("Token Option already exist")]
+    TokenOptionAlreadyExist,
 }

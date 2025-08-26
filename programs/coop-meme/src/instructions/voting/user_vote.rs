@@ -1,7 +1,9 @@
 use crate::{
     error::*,
     events::{TradingOverEvent, VoteEvent},
-    state::{ConfigData, MemeCoinData, TokenVotes, UserTokenVotes, UserVoteInfo},
+    state::{
+        ConfigData, MemeCoinData, TokenOption, TokenVotes, UserTokenVotes, VoteInfo, VoteOptionInfo,
+    },
     utils::{token_transfer_user, token_transfer_with_signer},
 };
 use anchor_lang::prelude::*;
@@ -89,9 +91,10 @@ pub struct UserVote<'info> {
 impl<'info> UserVote<'info> {
     pub fn user_votes(
         &mut self,
-        name_vote: UserVoteInfo,
-        symbol_vote: UserVoteInfo,
-        uri_vote: UserVoteInfo,
+        // name_vote: UserVoteInfo,
+        // symbol_vote: UserVoteInfo,
+        // uri_vote: UserVoteInfo,
+        vote_info: VoteInfo,
     ) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
@@ -109,28 +112,44 @@ impl<'info> UserVote<'info> {
             return Ok(());
         }
         require!(
-            self.user_token_ata.amount >= self.token_votes.minimum_tokens,
+            self.user_token_ata.amount >= self.config.min_vote_token_amount,
             CoopMemeError::NotEnoughToken
         );
-        self._validate_vote_info(&name_vote, &symbol_vote, &uri_vote)?;
+        self._validate_vote_info(&vote_info)?;
 
-        let current_total_votes = name_vote
-            .token_amount
-            .checked_add(symbol_vote.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_add(uri_vote.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        let current_total_votes = vote_info.token_amount;
 
-        self.token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
-        self.token_votes.symbol_votes[symbol_vote.field_index as usize] += symbol_vote.token_amount;
-        self.token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
+        // self.token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
+        // self.token_votes.symbol_votes[symbol_vote.field_index as usize] += symbol_vote.token_amount;
+        // self.token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
 
-        self.user_token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
-        self.user_token_votes.symbol_votes[symbol_vote.field_index as usize] +=
-            symbol_vote.token_amount;
-        self.user_token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
+        // let current_vote_list_length = self.token_votes.votes.len() as u8;
+
+        // if current_vote_list_length == 0 {
+        //     self.token_votes.votes.push(vote_info);
+        // } else if vote_info.option_index < current_vote_list_length {
+        //     self.token_votes.votes[vote_info.option_index as usize].token_amount +=
+        //         vote_info.token_amount;
+        // }
+
+        if self.token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.token_votes.votes.len() as u8;
+            self.token_votes.votes.extend(vec![0; missing as usize]);
+        }
+        self.token_votes.votes[vote_info.option_index as usize] += vote_info.token_amount;
+
+        if self.user_token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.user_token_votes.votes.len() as u8;
+            self.user_token_votes
+                .votes
+                .extend(vec![0; missing as usize]);
+        }
+        self.user_token_votes.votes[vote_info.option_index as usize] += vote_info.token_amount;
+
+        // self.user_token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
+        // self.user_token_votes.symbol_votes[symbol_vote.field_index as usize] +=
+        //     symbol_vote.token_amount;
+        // self.user_token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
 
         self.token_votes.total_votes += current_total_votes;
         self.user_token_votes.total_votes += current_total_votes;
@@ -149,9 +168,10 @@ impl<'info> UserVote<'info> {
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
             direction: 1, // vote and lock tokens
-            name_vote,
-            symbol_vote,
-            uri_vote,
+            vote_info,
+            // name_vote,
+            // symbol_vote,
+            // uri_vote,
             total_votes: current_total_votes
         });
         Ok(())
@@ -159,9 +179,10 @@ impl<'info> UserVote<'info> {
 
     pub fn user_unvotes(
         &mut self,
-        name_vote: UserVoteInfo,
-        symbol_vote: UserVoteInfo,
-        uri_vote: UserVoteInfo,
+        // name_vote: UserVoteInfo,
+        // symbol_vote: UserVoteInfo,
+        // uri_vote: UserVoteInfo,
+        vote_info: VoteInfo,
     ) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
@@ -178,24 +199,37 @@ impl<'info> UserVote<'info> {
             });
             return Ok(());
         }
-        self._validate_unvote_info(&name_vote, &symbol_vote, &uri_vote)?;
-        let current_total_votes = name_vote
-            .token_amount
-            .checked_add(symbol_vote.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_add(uri_vote.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        self._validate_unvote_info(&vote_info)?;
+        let current_total_votes = vote_info.token_amount;
 
-        self.token_votes.name_votes[name_vote.field_index as usize] -= name_vote.token_amount;
-        self.token_votes.symbol_votes[symbol_vote.field_index as usize] -= symbol_vote.token_amount;
-        self.token_votes.uri_votes[uri_vote.field_index as usize] -= uri_vote.token_amount;
+        // self.token_votes.votes[vote_info.option_index as usize].token_amount +=
+        //     vote_info.token_amount;
 
-        self.user_token_votes.name_votes[name_vote.field_index as usize] -= name_vote.token_amount;
-        self.user_token_votes.symbol_votes[symbol_vote.field_index as usize] -=
-            symbol_vote.token_amount;
-        self.user_token_votes.uri_votes[uri_vote.field_index as usize] -= uri_vote.token_amount;
+        // self.user_token_votes.votes[vote_info.option_index as usize].token_amount +=
+        //     vote_info.token_amount;
+
+        if self.token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.token_votes.votes.len() as u8;
+            self.token_votes.votes.extend(vec![0; missing as usize]);
+        }
+        self.token_votes.votes[vote_info.option_index as usize] -= vote_info.token_amount;
+
+        if self.user_token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.user_token_votes.votes.len() as u8;
+            self.user_token_votes
+                .votes
+                .extend(vec![0; missing as usize]);
+        }
+        self.user_token_votes.votes[vote_info.option_index as usize] -= vote_info.token_amount;
+
+        // self.token_votes.name_votes[name_vote.field_index as usize] -= name_vote.token_amount;
+        // self.token_votes.symbol_votes[symbol_vote.field_index as usize] -= symbol_vote.token_amount;
+        // self.token_votes.uri_votes[uri_vote.field_index as usize] -= uri_vote.token_amount;
+
+        // self.user_token_votes.name_votes[name_vote.field_index as usize] -= name_vote.token_amount;
+        // self.user_token_votes.symbol_votes[symbol_vote.field_index as usize] -=
+        //     symbol_vote.token_amount;
+        // self.user_token_votes.uri_votes[uri_vote.field_index as usize] -= uri_vote.token_amount;
 
         self.token_votes.total_votes -= current_total_votes;
         self.user_token_votes.total_votes -= current_total_votes;
@@ -221,78 +255,203 @@ impl<'info> UserVote<'info> {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 2, // vote and lock tokens
-            name_vote,
-            symbol_vote,
-            uri_vote,
+            direction: 2, // unvote and unlock tokens
+            // name_vote,
+            // symbol_vote,
+            // uri_vote,
+            vote_info,
             total_votes: current_total_votes
         });
         Ok(())
     }
 
-    fn _validate_vote_info(
-        &self,
-        name_votes: &UserVoteInfo,
-        sym_votes: &UserVoteInfo,
-        uri_votes: &UserVoteInfo,
+    pub fn user_vote_with_option(
+        &mut self,
+        // name_vote: UserVoteInfo,
+        // symbol_vote: UserVoteInfo,
+        // uri_vote: UserVoteInfo,
+        vote_option_info: VoteOptionInfo,
     ) -> Result<()> {
-        let current_total_votes = name_votes
-            .token_amount
-            .checked_add(sym_votes.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_add(uri_votes.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        require!(
+            self.memecoin.is_trading_active,
+            CoopMemeError::TradingNotActive
+        );
+        let clock = Clock::get()?; // Pull the clock sysvar
+        let current_time = clock.unix_timestamp; // i64 in seconds
+
+        if (current_time as u64 > self.memecoin.token_market_end_time) {
+            self.memecoin.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
+            return Ok(());
+        }
+        let vote_option_index = self.memecoin.token_options.len();
+        let current_total_votes = vote_option_info.token_amount;
+
+        let vote_info = VoteInfo {
+            option_index: vote_option_index as u8,
+            token_amount: current_total_votes,
+        };
+        require!(
+            self.user_token_ata.amount >= self.config.min_option_add_token_amount
+                && self.user_token_ata.amount >= current_total_votes,
+            CoopMemeError::NotEnoughToken
+        );
+        require!(
+            self.memecoin.token_options.len() <= 20,
+            CoopMemeError::OptionLimitExceeded
+        );
+
+        let new_option = &vote_option_info.token_option;
+        require!(
+            !self._contains_token_option(&self.memecoin.token_options, new_option),
+            CoopMemeError::TokenOptionAlreadyExist
+        );
+
+        self.memecoin
+            .token_options
+            .push(vote_option_info.token_option);
+
+        // self.token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
+        // self.token_votes.symbol_votes[symbol_vote.field_index as usize] += symbol_vote.token_amount;
+        // self.token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
+
+        // self.token_votes.votes[vote_option_index as usize].token_amount += current_total_votes;
+        // self.user_token_votes.votes[vote_option_index as usize].token_amount += current_total_votes;
+
+        if self.token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.token_votes.votes.len() as u8;
+            self.token_votes.votes.extend(vec![0; missing as usize]);
+        }
+        self.token_votes.votes[vote_info.option_index as usize] += vote_info.token_amount;
+
+        if self.user_token_votes.votes.len() <= vote_info.option_index as usize {
+            let missing = vote_info.option_index + 1 - self.user_token_votes.votes.len() as u8;
+            self.user_token_votes
+                .votes
+                .extend(vec![0; missing as usize]);
+        }
+        self.user_token_votes.votes[vote_info.option_index as usize] += vote_info.token_amount;
+
+        // self.user_token_votes.name_votes[name_vote.field_index as usize] += name_vote.token_amount;
+        // self.user_token_votes.symbol_votes[symbol_vote.field_index as usize] +=
+        //     symbol_vote.token_amount;
+        // self.user_token_votes.uri_votes[uri_vote.field_index as usize] += uri_vote.token_amount;
+
+        self.token_votes.total_votes += current_total_votes;
+        self.user_token_votes.total_votes += current_total_votes;
+
+        // transfer token from user to vote_ata
+        token_transfer_user(
+            self.user_token_ata.to_account_info(),
+            &self.user,
+            self.vote_token_ata.to_account_info(),
+            &self.token_program,
+            current_total_votes as u64,
+        )?;
+
+        emit!(VoteEvent {
+            user: self.user.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            direction: 3, // vote and lock tokens with option
+            vote_info,
+            // name_vote,
+            // symbol_vote,
+            // uri_vote,
+            total_votes: current_total_votes
+        });
+        Ok(())
+    }
+
+    pub fn unvote_all_tokens(&mut self) -> Result<()> {
+        let current_total_votes = self.user_token_votes.total_votes;
+        self.token_votes.total_votes -= current_total_votes;
+        for i in 0..self.token_votes.votes.len() {
+            self.token_votes.votes[i] -= self.user_token_votes.votes[i];
+            self.user_token_votes.votes[i] = 0;
+        }
+        self.user_token_votes.total_votes = 0;
+
+        let coop_token_key = self.coop_token.key(); // Pubkey copied here
+        let seeds: &[&[u8]] = &[
+            b"votes",
+            coop_token_key.as_ref(),  // your static seed
+            &[self.token_votes.bump], // your bump, wrapped as byte slice
+        ];
+
+        // transfer token from vote_ata to user
+        token_transfer_with_signer(
+            self.vote_token_ata.to_account_info(),
+            self.token_votes.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            &self.token_program,
+            &[seeds],
+            current_total_votes as u64,
+        )?;
+
+        let vote_info = VoteInfo {
+            option_index: (0),
+            token_amount: current_total_votes,
+        };
+
+        emit!(VoteEvent {
+            user: self.user.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            direction: 4, // unlock all tokens
+            // name_vote,
+            // symbol_vote,
+            // uri_vote,
+            vote_info,
+            total_votes: current_total_votes
+        });
+        Ok(())
+    }
+
+    fn _validate_vote_info(&self, vote_info: &VoteInfo) -> Result<()> {
+        let current_total_votes = vote_info.token_amount;
 
         require!(
             self.user_token_ata.amount >= current_total_votes,
             CoopMemeError::NotEnoughToken
         );
         require!(
-            name_votes.field_index <= 4,
+            vote_info.option_index <= self.memecoin.token_options.len() as u8 - 1,
             CoopMemeError::InvalidTokenVoteInfo
         );
-        require!(
-            sym_votes.field_index <= 4,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
-        require!(
-            uri_votes.field_index <= 4,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
+
         Ok(())
+    }
+    fn _contains_token_option(
+        &self,
+        token_options: &Vec<TokenOption>,
+        new_option: &TokenOption,
+    ) -> bool {
+        token_options.iter().any(|existing| {
+            existing.token_name == new_option.token_name
+                || existing.token_symbol == new_option.token_symbol
+                || existing.token_uri == new_option.token_uri
+        })
     }
 
     fn _validate_unvote_info(
         &self,
-        name_votes: &UserVoteInfo,
-        sym_votes: &UserVoteInfo,
-        uri_votes: &UserVoteInfo,
+        // name_votes: &UserVoteInfo,
+        // sym_votes: &UserVoteInfo,
+        // uri_votes: &UserVoteInfo,
+        vote_info: &VoteInfo,
     ) -> Result<()> {
-        let current_total_votes = name_votes
-            .token_amount
-            .checked_add(sym_votes.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_add(uri_votes.token_amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        let current_total_votes = vote_info.token_amount;
 
         require!(
             self.user_token_votes.total_votes >= current_total_votes,
             CoopMemeError::NotEnoughToken
         );
         require!(
-            name_votes.field_index <= 4,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
-        require!(
-            sym_votes.field_index <= 4,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
-        require!(
-            uri_votes.field_index <= 4,
+            vote_info.option_index <= self.memecoin.token_options.len() as u8 - 1,
             CoopMemeError::InvalidTokenVoteInfo
         );
         Ok(())

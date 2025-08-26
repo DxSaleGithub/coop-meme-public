@@ -225,14 +225,16 @@ impl<'info> List<'info> {
             owner_token_ata = self.owner_token_1.to_account_info();
 
             init_token_0 = sol_to_list;
-            init_token_1 = self.memecoin.real_token_reserves;
+            // init_token_1 = self.memecoin.real_token_reserves;
+            init_token_1 = self._calc_final_token_for_listing(sol_to_list).unwrap();
         } else if (self.token_1_mint.key() == self.native_mint.key()
             && self.token_0_mint.key() == self.coop_token.key())
         {
             owner_wsol_ata = self.owner_token_1.to_account_info();
             owner_token_ata = self.owner_token_0.to_account_info();
 
-            init_token_0 = self.memecoin.real_token_reserves;
+            // init_token_0 = self.memecoin.real_token_reserves;
+            init_token_0 = self._calc_final_token_for_listing(sol_to_list).unwrap();
             init_token_1 = sol_to_list;
         } else {
             return Err(CoopMemeError::InvalidListingInfo.into());
@@ -404,5 +406,26 @@ impl<'info> List<'info> {
 
         burn(burn_ctx, amount)?;
         Ok(())
+    }
+
+    fn _calc_final_token_for_listing(&self, sol_amount: u64) -> Option<u64> {
+        // token amount using bonding curve
+        if sol_amount == 0 {
+            return None;
+        }
+
+        // Convert to common decimal basis (using 9 decimals as base)
+        let current_sol = self.memecoin.virtual_sol_reserves;
+        let current_tokens = (self.memecoin.virtual_token_reserves);
+
+        // Calculate new reserves using constant product formula
+        let new_sol = current_sol.checked_add(sol_amount)?;
+        let new_tokens = ((current_sol as u128).checked_mul(current_tokens as u128)?)
+            .checked_div(new_sol as u128)?;
+
+        let tokens_out = current_tokens.checked_sub(new_tokens as u64)?;
+
+        // <u64 as TryInto<u64>>::try_into(tokens_out).ok()
+        return Some(tokens_out);
     }
 }

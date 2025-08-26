@@ -95,17 +95,17 @@ impl<'info> FinalizeVote<'info> {
             CoopMemeError::Unauthorized
         );
 
-        let name_votes = self.token_votes.name_votes;
-        let symbol_votes = self.token_votes.symbol_votes;
-        let uri_votes = self.token_votes.uri_votes;
+        // let name_votes = self.token_votes.name_votes;1q2
+        // let symbol_votes = self.token_votes.symbol_votes;
+        // let uri_votes = self.token_votes.uri_votes;
+        let all_votes = &self.token_votes.votes;
+        let final_option_index = self._find_highest_voted_index(all_votes);
+        // let final_symbol_index = self._find_highest_voted_index(&symbol_votes);
+        // let final_uri_index = self._find_highest_voted_index(&uri_votes);
 
-        let final_name_index = self._find_highest_voted_index(&name_votes);
-        let final_symbol_index = self._find_highest_voted_index(&symbol_votes);
-        let final_uri_index = self._find_highest_voted_index(&uri_votes);
-
-        let final_name = &self.memecoin.token_names[final_name_index as usize];
-        let final_symbol = &self.memecoin.token_symbols[final_symbol_index as usize];
-        let final_uri = &self.memecoin.token_uris[final_uri_index as usize];
+        let final_name = &self.memecoin.token_options[final_option_index as usize].token_name;
+        let final_symbol = &self.memecoin.token_options[final_option_index as usize].token_symbol;
+        let final_uri = &self.memecoin.token_options[final_option_index as usize].token_uri;
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
@@ -146,7 +146,7 @@ impl<'info> FinalizeVote<'info> {
         Ok(())
     }
 
-    fn _find_highest_voted_index(&self, votes: &[u64; 5]) -> u8 {
+    fn _find_highest_voted_index(&self, votes: &Vec<u64>) -> u8 {
         let mut highest_index = 0;
         let mut highest_value = votes[0];
 

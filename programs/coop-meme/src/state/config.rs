@@ -15,6 +15,8 @@ pub struct ConfigData {
     pub max_price_per_token: u32,
     pub init_virtual_sol: u64,
     pub init_virtual_token: u64,
+    pub min_vote_token_amount: u64, // minimum tokens to stake for voting an option
+    pub min_option_add_token_amount: u64, // minimum tokens to state for adding a new option
     pub total_coop_created: u32,
     pub total_coop_listed: u32,
     pub config_bump: u8,
