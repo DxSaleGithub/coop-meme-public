@@ -1,5 +1,5 @@
 {
-  "address": "7v2a2DN8bVNERVRWVGWjU7ZQDHe4Apa8Eo4nsJz17TKk",
+  "address": "BGuCFSyZiPtzFZcc1QNrQCMnuHbggBQn9EvdDZh5bJsz",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -143,7 +143,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -1838,7 +1838,7 @@
         {
           "name": "create_pool_fee",
           "writable": true,
-          "address": "G11FKBRaAkHAKuLCgLM6K6NUc9rTjPAznRCjZifrTQe2"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observation_state",
@@ -1874,7 +1874,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -2305,7 +2305,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -2456,7 +2456,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",

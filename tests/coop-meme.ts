@@ -28,15 +28,15 @@ describe('coop-meme-2', () => {
   );
   let affiliate = provider.wallet.publicKey;
   let cpSwapProgram = new PublicKey(
-    'CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW'
+    'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb'
   );
 
   let ammConfig = new PublicKey(
-    '9zSzfkYy6awexsHvmggeH36pfVUdDGyCcwmjT3AQPBj6'
+    'HTVWgp8CbUsRNmRE1p9RBYqopxe2qiyApSkiTFLrfxaW'
   );
 
   let createPoolFee = new PublicKey(
-    'G11FKBRaAkHAKuLCgLM6K6NUc9rTjPAznRCjZifrTQe2'
+    '3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy'
   );
 
   // let cpSwapProgram = new PublicKey(
@@ -51,7 +51,7 @@ describe('coop-meme-2', () => {
   //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
   // );
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -90,7 +90,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it('updates the config', async () => {
+  it.only('updates the config', async () => {
     const owner = provider.wallet.publicKey;
 
     const [configPda] =
@@ -107,8 +107,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(120);
-    const newFairlaunchPeriod = new anchor.BN(60);
+    const newCoopInterval = new anchor.BN(1200);
+    const newFairlaunchPeriod = new anchor.BN(120);
     const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
