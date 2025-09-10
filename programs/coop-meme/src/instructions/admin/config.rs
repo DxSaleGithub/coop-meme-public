@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{self, Mint, Token, TokenAccount},
 };
 
-use crate::{error::*, state::ConfigData};
+use crate::{error::*, state::ConfigData, RBAControlList};
 #[derive(Accounts)]
 pub struct Config<'info> {
     #[account[mut]]
@@ -17,6 +17,14 @@ pub struct Config<'info> {
       bump
     ]]
     pub config: Account<'info, ConfigData>,
+    #[account[
+      init,
+      space = 8 + RBAControlList::INIT_SPACE,
+      payer=owner,
+      seeds = [b"roles"],
+      bump
+    ]]
+    pub rbac: Account<'info, RBAControlList>,
     /// CHECK: global vault pda which stores SOL
     #[account(
       mut,
@@ -61,6 +69,12 @@ impl<'info> Config<'info> {
             min_option_add_token_amount: 10000_000_000_000,
             config_bump: bumbs.config,
             global_vault_bump: bumbs.global_vault,
+        });
+
+        self.rbac.set_inner(RBAControlList {
+            admin: self.owner.key(),
+            roles: Vec::new(),
+            bump: bumbs.rbac,
         });
 
         Ok(())

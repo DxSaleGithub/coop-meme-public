@@ -21,17 +21,8 @@ pub struct MemeCoinData {
     pub is_trading_active: bool,
     pub is_voting_finalized: bool,
     pub is_token_listed: bool,
-
-    // #[max_len(16)]
-    // pub token_names: [String; 5],
-
-    // #[max_len(6)]
-    // pub token_symbols: [String; 5],
-
-    // #[max_len(128)]
-    // pub token_uris: [String; 5],
-    #[max_len(20)]
-    pub token_options: Vec<TokenOption>,
+    pub total_votes: u64,
+    pub total_options: u32,
     pub memecoin_bump: u8,
     pub token_bump: u8,
 }
@@ -39,10 +30,18 @@ pub struct MemeCoinData {
 #[account]
 #[derive(InitSpace)]
 pub struct TokenOption {
-    #[max_len(16)]
-    pub token_name: String,
-    #[max_len(16)]
-    pub token_symbol: String,
+    pub token: Pubkey,
+    pub option_type: OptionType,
     #[max_len(256)]
-    pub token_uri: String,
+    pub option_value: String,
+    pub index: u32,
+    pub total_votes: u64,
+    pub bump: u8,
+}
+
+#[derive(InitSpace, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub enum OptionType {
+    NAME,
+    SYM,
+    URI,
 }

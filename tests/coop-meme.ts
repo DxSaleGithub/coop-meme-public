@@ -51,7 +51,7 @@ describe('coop-meme-2', () => {
   //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
   // );
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -90,7 +90,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const owner = provider.wallet.publicKey;
 
     const [configPda] =
@@ -107,8 +107,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(1200);
-    const newFairlaunchPeriod = new anchor.BN(120);
+    const newCoopInterval = new anchor.BN(300);
+    const newFairlaunchPeriod = new anchor.BN(60);
     const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -155,6 +155,55 @@ describe('coop-meme-2', () => {
       config.initVirtualToken.toString(),
       newInitVirtualToken.toString()
     );
+  });
+
+  it.skip('provide roles', async () => {
+    const owner = provider.wallet.publicKey;
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId
+    );
+
+    const creatorRoleType = {
+      creating: {},
+    };
+
+    const votingRoleType = {
+      voting: {},
+    };
+
+    const listingRoleType = {
+      listing: {},
+    };
+
+    await program.methods
+      .grantRole(creatorRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    await program.methods
+      .grantRole(votingRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    await program.methods
+      .grantRole(listingRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    const roleList = await program.account.rbaControlList.fetch(rbac);
+
+    console.log('Config state data:', roleList);
   });
 
   it('Is creating memecoin!', async () => {
@@ -372,20 +421,22 @@ describe('coop-meme-2', () => {
   //   );
   // });
 
-  it('first voting', async () => {
-    await vote(0);
+  it('first voting with option', async () => {
+    await vote_with_option('name', 'Token1');
+    await vote_with_option('sym', 'TKN1');
+    await vote_with_option('uri', 'uri1');
   });
 
-  it('first voting with option', async () => {
-    await vote_with_option('Token4', 'TKN4', 'uri4');
+  it('first voting', async () => {
+    await vote(1);
+    await vote(2);
+    await vote(3);
   });
 
   it('first unvoting', async () => {
-    await unvote(0);
-  });
-
-  it('unvoting all tokens', async () => {
-    await unvote_all_tokens();
+    await unvote(1);
+    await unvote(2);
+    await unvote(3);
   });
 
   it('multiple buy, sell, vote and unvote', async () => {
@@ -395,30 +446,31 @@ describe('coop-meme-2', () => {
     await sell_tokens();
     await sell_tokens();
     await sell_tokens();
-    await vote(0);
-    await unvote(0);
-    await vote_with_option('Token5', 'TKN5', 'uri5');
     await vote(1);
     await unvote(1);
-    await vote(2);
-    await unvote(2);
-    await vote_with_option('Token6', 'TKN6', 'uri6');
-
-    // await vote(3);
-    // await unvote(3);
+    await vote_with_option('name', 'Token2');
+    await vote(4);
+    await unvote(4);
+    await vote_with_option('sym', 'TKN2');
+    await vote(5);
+    await unvote(5);
   });
 
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(2 * 60 * 1000); // 2 minutes = 120000 ms
+    await delay(5 * 60 * 1000); // 2 minutes = 120000 ms
 
-    console.log('2 minutes passed.');
+    console.log('5 minutes passed.');
     await finalizeVote();
   });
 
   it('Is listing memecoin!', async () => {
     await listToken();
+  });
+
+  it('unvoting all tokens', async () => {
+    await unvote_all_tokens();
   });
 
   it('Is swapping SOL to memecoin!', async () => {
@@ -1136,6 +1188,11 @@ describe('coop-meme-2', () => {
       program.programId
     );
 
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId
+    );
+
     // Fetch the config to get `total_coop_created`
     const config = await program.account.configData.fetch(configPda);
     console.log('Config state data:', config);
@@ -1192,30 +1249,11 @@ describe('coop-meme-2', () => {
         anchor.utils.token.ASSOCIATED_PROGRAM_ID
       );
 
-    const [tokenVotesPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
-        program.programId
-      );
-
     const voteTokenAta = await getAssociatedTokenAddress(
       coopToken,
-      tokenVotesPda,
+      memecoinPda,
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
-
-    const tokenOptions = [
-      {
-        tokenName: 'TokenOne',
-        tokenSymbol: 'TOK1',
-        tokenUri: 'https://example.com/token1.json',
-      },
-      {
-        tokenName: 'TokenTwo',
-        tokenSymbol: 'TOK2',
-        tokenUri: 'https://example.com/token2.json',
-      },
-    ];
 
     const txSig = await program.methods
       .createToken(
@@ -1223,26 +1261,17 @@ describe('coop-meme-2', () => {
         new BN('1'),
         'Coop Token',
         'CTT',
-        'uri',
-        tokenOptions
-        // [
-        //   'Coop Token 1',
-        //   'Coop Token 2',
-        //   'Coop Token 3',
-        //   'Coop Token 4',
-        //   'Coop Token 5',
-        // ],
-        // ['CTFN1', 'CTFN2', 'CTFN3', 'CTFN4', 'CTFN5'],
-        // ['uri1', 'uri2', 'uri3', 'uri4', 'uri5']
+        'uri'
       )
       .accounts({
         creator,
         config: configPda,
+        rbac,
         globalVault,
         coopToken,
         memecoin: memecoinPda,
         tokenMetadataAccount: metadataPda,
-        tokenVotes: tokenVotesPda,
+        // tokenVotes: tokenVotesPda,
         globalTokenAta,
         voteTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
@@ -1408,7 +1437,7 @@ describe('coop-meme-2', () => {
     );
   }
 
-  async function vote(option_index: Number) {
+  async function vote(option_index) {
     const user = provider.wallet.publicKey;
 
     const creator = provider.wallet.publicKey;
@@ -1444,15 +1473,45 @@ describe('coop-meme-2', () => {
         [Buffer.from('memecoin'), coopToken.toBuffer()],
         program.programId
       );
-    const memecoinData = await program.account.memeCoinData.fetch(
-      memecoinPda
-    );
 
-    const [tokenVotesPda] =
+    const totalOptionIndex = new BN(Number(option_index)); // e.g., 0
+    const optionSeedBuffer = totalOptionIndex.toArrayLike(
+      Buffer,
+      'le',
+      4
+    ); // u64 LE
+
+    const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          optionSeedBuffer,
+        ],
         program.programId
       );
+
+    const tokenOptionData = await program.account.tokenOption.fetch(
+      tokenOption
+    );
+
+    console.log('tokenOptionData', tokenOptionData);
+
+    const [userTokenOptionVotes] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('option'),
+          user.toBuffer(),
+          tokenOption.toBuffer(),
+        ],
+        program.programId
+      );
+
+    // const [tokenVotesPda] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('votes'), coopToken.toBuffer()],
+    //     program.programId
+    //   );
 
     const [userTokenVotes] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -1468,7 +1527,7 @@ describe('coop-meme-2', () => {
 
     const voteTokenAta = await getAssociatedTokenAddress(
       coopToken,
-      tokenVotesPda,
+      memecoinPda,
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
@@ -1477,13 +1536,8 @@ describe('coop-meme-2', () => {
 
     console.log('user balance before voting', userTokenBal);
 
-    const voteInfo = {
-      optionIndex: new BN(option_index),
-      tokenAmount: new BN(30000_000_000_000),
-    };
-
     const txSig = await program.methods
-      .vote(voteInfo)
+      .vote(new BN(1000000000000))
       .accounts({
         user,
         creator,
@@ -1491,8 +1545,9 @@ describe('coop-meme-2', () => {
         globalVault,
         coopToken,
         memecoin: memecoinPda,
-        tokenVotes: tokenVotesPda,
+        tokenOption,
         userTokenVotes,
+        userTokenOptionVotes,
         userTokenAta,
         voteTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
@@ -1518,11 +1573,6 @@ describe('coop-meme-2', () => {
     );
 
     console.log('user balance after voting', userTokenBal);
-
-    const tokenVotesState = await program.account.tokenVotes.fetch(
-      tokenVotesPda
-    );
-    console.log('token votes state data:', tokenVotesState);
 
     let voteTokenBal =
       await provider.connection.getTokenAccountBalance(voteTokenAta);
@@ -1540,7 +1590,7 @@ describe('coop-meme-2', () => {
     console.log('user tokens vote state data:', userVotesState);
   }
 
-  async function vote_with_option(new_name, new_symbol, new_uri) {
+  async function vote_with_option(option_type, option_value) {
     const user = provider.wallet.publicKey;
 
     const creator = provider.wallet.publicKey;
@@ -1580,15 +1630,34 @@ describe('coop-meme-2', () => {
       memecoinPda
     );
 
-    const [tokenVotesPda] =
+    const totalOptions = new BN(memecoinData.totalOptions); // e.g., 0
+    const optionSeedBuffer = totalOptions
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
+
+    const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          optionSeedBuffer,
+        ],
         program.programId
       );
 
     const [userTokenVotes] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
+        program.programId
+      );
+
+    const [userTokenOptionVotes] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('option'),
+          user.toBuffer(),
+          tokenOption.toBuffer(),
+        ],
         program.programId
       );
 
@@ -1600,7 +1669,7 @@ describe('coop-meme-2', () => {
 
     const voteTokenAta = await getAssociatedTokenAddress(
       coopToken,
-      tokenVotesPda,
+      memecoinPda,
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
@@ -1609,17 +1678,22 @@ describe('coop-meme-2', () => {
 
     console.log('user balance before voting', userTokenBal);
 
-    const voteOptionInfo = {
-      tokenOption: {
-        tokenName: new_name,
-        tokenSymbol: new_symbol,
-        tokenUri: new_uri,
-      },
-      tokenAmount: new BN(30000_000_000_000),
+    let optionType;
+    if (option_type == 'name') {
+      optionType = { name: {} };
+    } else if (option_type == 'sym') {
+      optionType = { sym: {} };
+    } else if (option_type == 'uri') {
+      optionType = { uri: {} };
+    }
+    const createOption = {
+      optionType,
+      optionValue: option_value,
+      votes: new BN('1000000000000'),
     };
 
     const txSig = await program.methods
-      .voteWithOption(voteOptionInfo)
+      .voteWithOption(createOption)
       .accounts({
         user,
         creator,
@@ -1627,8 +1701,9 @@ describe('coop-meme-2', () => {
         globalVault,
         coopToken,
         memecoin: memecoinPda,
-        tokenVotes: tokenVotesPda,
+        tokenOption,
         userTokenVotes,
+        userTokenOptionVotes,
         userTokenAta,
         voteTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
@@ -1655,10 +1730,10 @@ describe('coop-meme-2', () => {
 
     console.log('user balance after voting', userTokenBal);
 
-    const tokenVotesState = await program.account.tokenVotes.fetch(
-      tokenVotesPda
-    );
-    console.log('token votes state data:', tokenVotesState);
+    // const tokenVotesState = await program.account.tokenVotes.fetch(
+    //   tokenVotesPda
+    // );
+    // console.log('token votes state data:', tokenVotesState);
 
     let voteTokenBal =
       await provider.connection.getTokenAccountBalance(voteTokenAta);
@@ -1676,7 +1751,7 @@ describe('coop-meme-2', () => {
     console.log('user tokens vote state data:', userVotesState);
   }
 
-  async function unvote(option_index: Number) {
+  async function unvote(option_index) {
     const user = provider.wallet.publicKey;
 
     const creator = provider.wallet.publicKey;
@@ -1716,9 +1791,36 @@ describe('coop-meme-2', () => {
       memecoinPda
     );
 
-    const [tokenVotesPda] =
+    const totalOptionIndex = new BN(Number(option_index)); // e.g., 0
+    const optionSeedBuffer = totalOptionIndex.toArrayLike(
+      Buffer,
+      'le',
+      4
+    ); // u64 LE
+
+    const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          optionSeedBuffer,
+        ],
+        program.programId
+      );
+
+    const tokenOptionData = await program.account.tokenOption.fetch(
+      tokenOption
+    );
+
+    console.log('tokenOptionData', tokenOptionData);
+
+    const [userTokenOptionVotes] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('option'),
+          user.toBuffer(),
+          tokenOption.toBuffer(),
+        ],
         program.programId
       );
 
@@ -1736,7 +1838,7 @@ describe('coop-meme-2', () => {
 
     const voteTokenAta = await getAssociatedTokenAddress(
       coopToken,
-      tokenVotesPda,
+      memecoinPda,
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
@@ -1745,13 +1847,8 @@ describe('coop-meme-2', () => {
 
     console.log('user balance before voting', userTokenBal);
 
-    const voteInfo = {
-      optionIndex: new BN(option_index),
-      tokenAmount: new BN(15000_000_000_000),
-    };
-
     const txSig = await program.methods
-      .unvote(voteInfo)
+      .unvote(new BN(1000000000000))
       .accounts({
         user,
         creator,
@@ -1759,8 +1856,9 @@ describe('coop-meme-2', () => {
         globalVault,
         coopToken,
         memecoin: memecoinPda,
-        tokenVotes: tokenVotesPda,
+        tokenOption,
         userTokenVotes,
+        userTokenOptionVotes,
         userTokenAta,
         voteTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
@@ -1786,11 +1884,6 @@ describe('coop-meme-2', () => {
     );
 
     console.log('user balance after voting', userTokenBal);
-
-    const tokenVotesState = await program.account.tokenVotes.fetch(
-      tokenVotesPda
-    );
-    console.log('token votes state data:', tokenVotesState);
 
     let voteTokenBal =
       await provider.connection.getTokenAccountBalance(voteTokenAta);
@@ -1848,11 +1941,11 @@ describe('coop-meme-2', () => {
       memecoinPda
     );
 
-    const [tokenVotesPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
-        program.programId
-      );
+    // const [tokenVotesPda] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('votes'), coopToken.toBuffer()],
+    //     program.programId
+    //   );
 
     const [userTokenVotes] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -1868,7 +1961,7 @@ describe('coop-meme-2', () => {
 
     const voteTokenAta = await getAssociatedTokenAddress(
       coopToken,
-      tokenVotesPda,
+      memecoinPda,
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
@@ -1886,7 +1979,7 @@ describe('coop-meme-2', () => {
         globalVault,
         coopToken,
         memecoin: memecoinPda,
-        tokenVotes: tokenVotesPda,
+        // tokenVotes: tokenVotesPda,
         userTokenVotes,
         userTokenAta,
         voteTokenAta,
@@ -1914,11 +2007,6 @@ describe('coop-meme-2', () => {
 
     console.log('user balance after voting', userTokenBal);
 
-    const tokenVotesState = await program.account.tokenVotes.fetch(
-      tokenVotesPda
-    );
-    console.log('token votes state data:', tokenVotesState);
-
     let voteTokenBal =
       await provider.connection.getTokenAccountBalance(voteTokenAta);
 
@@ -1942,6 +2030,11 @@ describe('coop-meme-2', () => {
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('config')],
+      program.programId
+    );
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
       program.programId
     );
 
@@ -1977,9 +2070,54 @@ describe('coop-meme-2', () => {
 
     console.log('Memecoin state data:', memecoinData);
 
-    const [tokenVotesPda] =
+    const nameOptionIndex = new BN(Number(1)); // e.g., 0
+    const nameOptionSeedBuffer = nameOptionIndex.toArrayLike(
+      Buffer,
+      'le',
+      4
+    ); // u64 LE
+
+    const symbolOptionIndex = new BN(Number(2)); // e.g., 0
+    const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
+      Buffer,
+      'le',
+      4
+    ); // u64 LE
+
+    const uriOptionIndex = new BN(Number(3)); // e.g., 0
+    const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
+      Buffer,
+      'le',
+      4
+    ); // u64 LE
+
+    const [nameTokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), coopToken.toBuffer()],
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          nameOptionSeedBuffer,
+        ],
+        program.programId
+      );
+
+    const [symbolTokenOption] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          symbolOptionSeedBuffer,
+        ],
+        program.programId
+      );
+
+    const [uriTokenOption] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('option'),
+          coopToken.toBuffer(),
+          uriOptionSeedBuffer,
+        ],
         program.programId
       );
 
@@ -2003,10 +2141,13 @@ describe('coop-meme-2', () => {
         user,
         creator,
         config: configPda,
+        rbac,
         globalVault,
         coopToken,
         memecoin: memecoinPda,
-        tokenVotes: tokenVotesPda,
+        nameOption: nameTokenOption,
+        symbolOption: symbolTokenOption,
+        uriOption: uriTokenOption,
         tokenMetadataAccount: metadataPda,
         mplTokenMetadataProgram: new anchor.web3.PublicKey(
           'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s' // Update if needed
@@ -2025,11 +2166,6 @@ describe('coop-meme-2', () => {
       console.log(tx.meta.logMessages);
     }
 
-    const tokenVotesState = await program.account.tokenVotes.fetch(
-      tokenVotesPda
-    );
-    console.log('token votes state data:', tokenVotesState);
-
     const memecoinState = await program.account.memeCoinData.fetch(
       memecoinPda
     );
@@ -2042,6 +2178,11 @@ describe('coop-meme-2', () => {
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('config')],
+      program.programId
+    );
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
       program.programId
     );
 
@@ -2201,6 +2342,7 @@ describe('coop-meme-2', () => {
         creator, // fine
         teamWallet, // fine
         config: configPda, // fine
+        rbac,
         globalVault, // fine
         token0Mint,
         token1Mint,
