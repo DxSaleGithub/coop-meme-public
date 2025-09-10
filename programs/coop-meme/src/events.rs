@@ -1,8 +1,6 @@
 use anchor_lang::prelude::*;
-use solana_program::vote::state::Vote;
 
-use crate::VoteInfo;
-
+use crate::OptionType;
 #[event]
 pub struct CreatedEvent {
     pub token_id: u32,
@@ -49,12 +47,18 @@ pub struct VoteEvent {
     pub coop_token: Pubkey,
     pub memecoin: Pubkey,
     pub direction: u8, // 1 -> Vote and Lock, 2 -> Unvote and Unlock
+    pub option_index: u32,
+    pub option_type: u8,
+    pub option_value: String,
+    pub votes: u64,
+}
 
-    // pub name_vote: UserVoteInfo,
-    // pub symbol_vote: UserVoteInfo,
-    // pub uri_vote: UserVoteInfo,
-    pub vote_info: VoteInfo,
-    pub total_votes: u64,
+#[event]
+pub struct UnlockAllTokens {
+    pub user: Pubkey,
+    pub coop_token: Pubkey,
+    pub memecoin: Pubkey,
+    pub votes: u64,
 }
 
 #[event]

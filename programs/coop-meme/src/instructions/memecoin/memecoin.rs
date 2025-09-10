@@ -8,8 +8,8 @@ use anchor_spl::{
 use crate::{
     error::*,
     events::CreatedEvent,
-    state::{ConfigData, MemeCoinData, TokenOption, TokenVotes},
-    VoteInfo,
+    state::{ConfigData, MemeCoinData, RBAControlList, RoleType},
+    utils::has_role,
 };
 #[derive(Accounts)]
 pub struct MemeCoin<'info> {
@@ -22,6 +22,12 @@ pub struct MemeCoin<'info> {
       bump = config.config_bump
     ]]
     pub config: Account<'info, ConfigData>,
+    #[account[
+      mut,
+      seeds = [b"roles"],
+      bump=rbac.bump
+    ]]
+    pub rbac: Account<'info, RBAControlList>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -62,15 +68,6 @@ pub struct MemeCoin<'info> {
     )]
     token_metadata_account: UncheckedAccount<'info>,
 
-    #[account[
-      init,
-      space = 8 + TokenVotes::INIT_SPACE,
-      payer=creator,
-      seeds = [b"votes", coop_token.key().as_ref()],
-      bump
-    ]]
-    pub token_votes: Box<Account<'info, TokenVotes>>,
-
     /// CHECK: This is an ATA for coop token with global vault as authority.
     #[account(
     mut,
@@ -88,7 +85,7 @@ pub struct MemeCoin<'info> {
     #[account(
       init_if_needed,
       associated_token::mint=coop_token,
-      associated_token::authority=token_votes,
+      associated_token::authority=memecoin,
       associated_token::token_program=token_program,
       payer=creator
     )]
@@ -116,11 +113,8 @@ impl<'info> MemeCoin<'info> {
         name: String,
         symbol: String,
         uri: String,
-        token_options: Vec<TokenOption>,
-        // token_names: [String; 5],
-        // token_symbols: [String; 5],
-        // token_uris: [String; 5],
     ) -> Result<()> {
+        has_role(&self.rbac.roles, RoleType::CREATING, self.creator.key())?;
         require!(
             total_supply == 1_000_000_000_000_000_000,
             CoopMemeError::InvalidTotalSupply
@@ -169,29 +163,10 @@ impl<'info> MemeCoin<'info> {
             is_trading_active: true,
             is_token_listed: false,
             is_voting_finalized: false,
-            token_options: token_options,
-            // token_names,
-            // token_symbols,
-            // token_uris,
+            total_options: 0,
+            total_votes: 0,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
-        });
-
-        // let mut items: Vec<VoteInfo> = Vec::new();
-
-        // // Add default elements up to desired index, for example:
-        // while items.len() <= 20 {
-        //     items.push(VoteInfo::default());
-        // }
-
-        self.token_votes.set_inner(TokenVotes {
-            // minimum_tokens: self.min,
-            total_votes: 0,
-            // name_votes: [0; 5],
-            // symbol_votes: [0; 5],
-            // uri_votes: [0; 5],
-            votes: Vec::new(),
-            bump: bumps.token_votes,
         });
 
         self.config.total_coop_created = self.config.total_coop_created + 1;

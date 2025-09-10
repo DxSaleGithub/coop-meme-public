@@ -1,9 +1,9 @@
 use crate::{
     error::*,
-    events::{TradingOverEvent, VoteEvent},
+    events::{TradingOverEvent, UnlockAllTokens, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
     utils::{token_transfer_user, token_transfer_with_signer},
-    OptionType,
+    CreateOptionInfo, OptionType,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -12,7 +12,7 @@ use anchor_spl::{
 };
 
 #[derive(Accounts)]
-pub struct UserVote<'info> {
+pub struct CreateOption<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
@@ -47,9 +47,11 @@ pub struct UserVote<'info> {
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
     #[account[
-      mut,
-      seeds = [b"option", coop_token.key().as_ref(), &token_option.index.to_le_bytes()],
-      bump = token_option.bump
+      init,
+      payer=user,
+      space = 8 + TokenOption::INIT_SPACE,
+      seeds = [b"option", coop_token.key().as_ref(), &(memecoin.total_options+1).to_le_bytes()],
+      bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,
     #[account[
@@ -93,8 +95,12 @@ pub struct UserVote<'info> {
     associated_token_program: Program<'info, AssociatedToken>,
 }
 
-impl<'info> UserVote<'info> {
-    pub fn user_votes(&mut self, votes: u64) -> Result<()> {
+impl<'info> CreateOption<'info> {
+    pub fn create_new_option(
+        &mut self,
+        bumps: &CreateOptionBumps,
+        create_option: CreateOptionInfo,
+    ) -> Result<()> {
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -110,16 +116,29 @@ impl<'info> UserVote<'info> {
             });
             return Ok(());
         }
+
+        self.token_option.set_inner(TokenOption {
+            token: self.coop_token.key(),
+            option_type: create_option.option_type,
+            option_value: create_option.option_value,
+            index: self.memecoin.total_options + 1,
+            total_votes: 0,
+            bump: bumps.token_option,
+        });
+
+        let current_total_votes = create_option.votes;
+
         require!(
-            self.user_token_ata.amount >= self.config.min_vote_token_amount,
+            self.user_token_ata.amount >= self.config.min_option_add_token_amount
+                && self.user_token_ata.amount >= current_total_votes,
             CoopMemeError::NotEnoughToken
         );
-        self._validate_vote_info(votes)?;
 
-        self.memecoin.total_votes += votes;
-        self.token_option.total_votes += votes;
-        self.user_token_votes.total_votes += votes;
-        self.user_token_option_votes.total_votes += votes;
+        self.memecoin.total_votes += current_total_votes;
+        self.token_option.total_votes += current_total_votes;
+        self.user_token_votes.total_votes += current_total_votes;
+        self.user_token_option_votes.total_votes += current_total_votes;
+        self.memecoin.total_options += 1;
 
         // transfer token from user to vote_ata
         token_transfer_user(
@@ -127,7 +146,7 @@ impl<'info> UserVote<'info> {
             &self.user,
             self.vote_token_ata.to_account_info(),
             &self.token_program,
-            votes,
+            current_total_votes as u64,
         )?;
 
         let option_value = &self.token_option.option_value;
@@ -144,37 +163,95 @@ impl<'info> UserVote<'info> {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 1, // vote and lock tokens
+            direction: 3, // vote and lock tokens with option
             option_index: self.token_option.index,
             option_type,
             option_value: option_value.to_string(),
-            votes
+            votes: current_total_votes
         });
+
         Ok(())
     }
+}
 
-    pub fn user_unvotes(&mut self, votes: u64) -> Result<()> {
+#[derive(Accounts)]
+pub struct UnlockAll<'info> {
+    #[account[mut]]
+    pub user: Signer<'info>,
+    /// CHECK: This is a system account so safe.
+    #[account[
+      constraint = memecoin.creator == creator.key()
+    ]]
+    pub creator: AccountInfo<'info>,
+    #[account[
+      mut,
+      seeds = [b"config"],
+      bump = config.config_bump
+    ]]
+    pub config: Box<Account<'info, ConfigData>>,
+    /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
+    /// It does not store any data and is used only for lamport/token transfers.
+    /// PDA seeds = [b"global"], bump = config.global_vault_bump
+    #[account(
+      mut,
+      seeds = [b"global"],
+      bump = config.global_vault_bump
+    )]
+    pub global_vault: AccountInfo<'info>,
+    #[account(
+      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      bump = memecoin.token_bump
+    )]
+    pub coop_token: Box<Account<'info, Mint>>,
+    #[account[
+      mut,
+      seeds = [b"memecoin", coop_token.key().as_ref()],
+      bump = memecoin.memecoin_bump
+    ]]
+    pub memecoin: Box<Account<'info, MemeCoinData>>,
+
+    #[account[
+      init_if_needed,
+      space = 8 + UserTokenVotes::INIT_SPACE,
+      payer=user,
+      seeds = [b"votes", user.key().as_ref(), coop_token.key().as_ref()],
+      bump
+    ]]
+    pub user_token_votes: Box<Account<'info, UserTokenVotes>>,
+    /// CHECK: This is an ata for coop token for user.
+    #[account(
+      mut,
+      associated_token::mint=coop_token,
+      associated_token::authority=user,
+      associated_token::token_program=token_program,
+    )]
+    pub user_token_ata: Box<Account<'info, TokenAccount>>,
+    #[account(
+      mut,
+      associated_token::mint=coop_token,
+      associated_token::authority=memecoin,
+      associated_token::token_program=token_program,
+    )]
+    pub vote_token_ata: Box<Account<'info, TokenAccount>>,
+
+    pub system_program: Program<'info, System>,
+
+    #[account(address = token::ID)]
+    token_program: Program<'info, Token>,
+
+    #[account(address = associated_token::ID)]
+    associated_token_program: Program<'info, AssociatedToken>,
+}
+
+impl<'info> UnlockAll<'info> {
+    pub fn unvote_all_tokens(&mut self) -> Result<()> {
+        require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
         require!(
-            self.memecoin.is_trading_active,
-            CoopMemeError::TradingNotActive
+            !self.user_token_votes.all_unlocked,
+            CoopMemeError::NotEnoughToken
         );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
-            return Ok(());
-        }
-        self._validate_unvote_info(votes)?;
-
-        self.memecoin.total_votes -= votes;
-        self.token_option.total_votes -= votes;
-        self.user_token_votes.total_votes -= votes;
-        self.user_token_option_votes.total_votes -= votes;
+        let current_total_votes = self.user_token_votes.total_votes;
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
@@ -183,6 +260,8 @@ impl<'info> UserVote<'info> {
             &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
         ];
 
+        self.user_token_votes.all_unlocked = true;
+
         // transfer token from vote_ata to user
         token_transfer_with_signer(
             self.vote_token_ata.to_account_info(),
@@ -190,58 +269,16 @@ impl<'info> UserVote<'info> {
             self.user_token_ata.to_account_info(),
             &self.token_program,
             &[seeds],
-            votes,
+            current_total_votes as u64,
         )?;
 
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
-
-        emit!(VoteEvent {
+        emit!(UnlockAllTokens {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 2, // unvote and unlock tokens
-            option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
-            votes
+            votes: current_total_votes
         });
 
-        Ok(())
-    }
-
-    fn _validate_vote_info(&self, votes: u64) -> Result<()> {
-        require!(
-            self.user_token_ata.amount >= votes,
-            CoopMemeError::NotEnoughToken
-        );
-        require!(
-            self.token_option.index <= self.memecoin.total_options,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
-        Ok(())
-    }
-
-    fn _validate_unvote_info(&self, votes: u64) -> Result<()> {
-        require!(
-            self.user_token_votes.total_votes >= votes,
-            CoopMemeError::NotEnoughToken
-        );
-        require!(
-            self.token_option.index <= self.memecoin.total_options,
-            CoopMemeError::InvalidTokenVoteInfo
-        );
-        require!(
-            self.user_token_option_votes.total_votes >= votes,
-            CoopMemeError::NotEnoughToken
-        );
         Ok(())
     }
 }

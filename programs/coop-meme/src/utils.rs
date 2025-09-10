@@ -1,3 +1,4 @@
+use crate::error::CoopMemeError;
 use crate::*;
 use anchor_spl::token::{self, Token};
 use solana_program::program::{invoke, invoke_signed};
@@ -87,5 +88,17 @@ pub fn sol_transfer_with_signer<'info>(
         &[source, destination, system_program.to_account_info()],
         signers_seeds,
     )?;
+    Ok(())
+}
+
+pub fn has_role<'info>(roles: &Vec<Role>, role_type: RoleType, user: Pubkey) -> Result<()> {
+    let exists = roles
+        .iter()
+        .any(|r| r.user == user && r.role_type == role_type && r.status == true);
+
+    if !exists {
+        return Err(CoopMemeError::InSufficientRole.into());
+    }
+
     Ok(())
 }

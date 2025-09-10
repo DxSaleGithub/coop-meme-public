@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("BGuCFSyZiPtzFZcc1QNrQCMnuHbggBQn9EvdDZh5bJsz");
+declare_id!("6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3");
 
 #[program]
 pub mod coop_meme {
@@ -25,7 +25,6 @@ pub mod coop_meme {
     }
 
     pub fn update_config(
-        // only admin
         ctx: Context<UpdateConfig>,
         new_team_fee: Option<u16>,
         new_owner_fee: Option<u16>,
@@ -58,18 +57,21 @@ pub mod coop_meme {
         )
     }
 
+    pub fn grant_role(ctx: Context<RBAControl>, role_type: RoleType, user: Pubkey) -> Result<()> {
+        ctx.accounts.grant_role(role_type, user)
+    }
+
+    pub fn revoke_role(ctx: Context<RBAControl>, role_type: RoleType, user: Pubkey) -> Result<()> {
+        ctx.accounts.revoke_role(role_type, user)
+    }
+
     pub fn create_token(
-        // only admin can call
         ctx: Context<MemeCoin>,
         total_supply: u64,
         token_share_price: u32,
         name: String,
         symbol: String,
         uri: String,
-        // token_names: [String; 5],
-        // token_symbols: [String; 5],
-        // token_uris: [String; 5],
-        token_options: Vec<TokenOption>,
     ) -> Result<()> {
         ctx.accounts.create_memecoin(
             &ctx.bumps,
@@ -78,10 +80,6 @@ pub mod coop_meme {
             name,
             symbol,
             uri,
-            token_options,
-            // token_names,
-            // token_symbols,
-            // token_uris,
         )
     }
 
@@ -94,7 +92,6 @@ pub mod coop_meme {
     }
 
     pub fn list_token(ctx: Context<List>) -> Result<()> {
-        // only admin can call
         ctx.accounts.list_token()
     }
 
@@ -119,37 +116,22 @@ pub mod coop_meme {
         ctx.accounts.swap_base_output(max_amount_in, amount_out)
     }
 
-    pub fn vote(
-        ctx: Context<UserVote>,
-        // name_vote: UserVoteInfo,
-        // symbol_vote: UserVoteInfo,
-        // uri_vote: UserVoteInfo,
-        vote_info: VoteInfo,
-    ) -> Result<()> {
-        ctx.accounts.user_votes(vote_info)
+    pub fn vote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
+        ctx.accounts.user_votes(votes)
     }
 
     pub fn vote_with_option(
-        ctx: Context<UserVote>,
-        // name_vote: UserVoteInfo,
-        // symbol_vote: UserVoteInfo,
-        // uri_vote: UserVoteInfo,
-        vote_option_info: VoteOptionInfo,
+        ctx: Context<CreateOption>,
+        create_option: CreateOptionInfo,
     ) -> Result<()> {
-        ctx.accounts.user_vote_with_option(vote_option_info)
+        ctx.accounts.create_new_option(&ctx.bumps, create_option)
     }
 
-    pub fn unvote(
-        ctx: Context<UserVote>,
-        // name_vote: UserVoteInfo,
-        // symbol_vote: UserVoteInfo,
-        // uri_vote: UserVoteInfo,
-        vote_info: VoteInfo,
-    ) -> Result<()> {
-        ctx.accounts.user_unvotes(vote_info)
+    pub fn unvote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
+        ctx.accounts.user_unvotes(votes)
     }
 
-    pub fn unvote_all_tokens(ctx: Context<UserVote>) -> Result<()> {
+    pub fn unvote_all_tokens(ctx: Context<UnlockAll>) -> Result<()> {
         ctx.accounts.unvote_all_tokens()
     }
 

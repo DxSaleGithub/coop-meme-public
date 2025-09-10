@@ -1,8 +1,8 @@
-use crate::state::{ConfigData, MemeCoinData};
+use crate::state::{ConfigData, MemeCoinData, RBAControlList, RoleType};
 use crate::{
     error::*,
     events::{BurnEvent, ListEvent, TradingOverEvent},
-    utils::{sol_transfer_with_signer, token_transfer_with_signer},
+    utils::{has_role, sol_transfer_with_signer, token_transfer_with_signer},
 };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
@@ -26,7 +26,7 @@ pub struct List<'info> {
     pub owner: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[
-      mut,
+      // mut
     ]]
     pub creator: AccountInfo<'info>,
     /// CHECK: This is a system account so safe.
@@ -36,11 +36,17 @@ pub struct List<'info> {
     ]]
     pub team_wallet: AccountInfo<'info>,
     #[account[
-      mut,
+      // mut,
       seeds = [b"config"],
       bump = config.config_bump
     ]]
     pub config: Box<Account<'info, ConfigData>>,
+    #[account[
+      // mut,
+      seeds = [b"roles"],
+      bump=rbac.bump
+    ]]
+    pub rbac: Box<Account<'info, RBAControlList>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -193,6 +199,8 @@ pub struct List<'info> {
 
 impl<'info> List<'info> {
     pub fn list_token(&mut self) -> Result<()> {
+        has_role(&self.rbac.roles, RoleType::LISTING, self.owner.key())?;
+
         require!(
             !self.memecoin.is_token_listed,
             CoopMemeError::TokenAlreadyListed
@@ -257,10 +265,10 @@ impl<'info> List<'info> {
             self.memecoin.is_voting_finalized,
             CoopMemeError::VotingNotFinalized
         );
-        require!(
-            self.config.admin.key() == self.owner.key(),
-            CoopMemeError::Unauthorized
-        );
+        // require!(
+        //     self.config.admin.key() == self.owner.key(),
+        //     CoopMemeError::Unauthorized
+        // );
         require!(
             self.memecoin.creator == self.creator.key(),
             CoopMemeError::Unauthorized

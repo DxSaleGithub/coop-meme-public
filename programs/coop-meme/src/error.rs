@@ -48,4 +48,12 @@ pub enum CoopMemeError {
     OptionLimitExceeded,
     #[msg("Token Option already exist")]
     TokenOptionAlreadyExist,
+    #[msg("Token Option invalid")]
+    InvalidOption,
+    #[msg("Role already exists")]
+    RoleExist,
+    #[msg("Role does not exist")]
+    RoleDoesNotExist,
+    #[msg("Signer does not have sufficient role")]
+    InSufficientRole,
 }

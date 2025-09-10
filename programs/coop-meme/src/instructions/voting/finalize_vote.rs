@@ -1,7 +1,9 @@
 use crate::{
     error::*,
     events::{TradingOverEvent, VoteFinalizedEvent},
-    state::{ConfigData, MemeCoinData, TokenVotes},
+    state::{ConfigData, MemeCoinData, RBAControlList, RoleType},
+    utils::has_role,
+    OptionType, TokenOption,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -27,6 +29,12 @@ pub struct FinalizeVote<'info> {
       bump = config.config_bump
     ]]
     pub config: Box<Account<'info, ConfigData>>,
+    #[account[
+      mut,
+      seeds = [b"roles"],
+      bump=rbac.bump
+    ]]
+    pub rbac: Account<'info, RBAControlList>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -47,12 +55,15 @@ pub struct FinalizeVote<'info> {
       bump = memecoin.memecoin_bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
-    #[account[
-      mut,
-      seeds = [b"votes", coop_token.key().as_ref()],
-      bump = token_votes.bump
-    ]]
-    pub token_votes: Box<Account<'info, TokenVotes>>,
+    /// CHECK: This is a PDA for coop token metadata account
+    #[account(mut)]
+    name_option: Account<'info, TokenOption>,
+    /// CHECK: This is a PDA for coop token metadata account
+    #[account(mut)]
+    symbol_option: Account<'info, TokenOption>,
+    /// CHECK: This is a PDA for coop token metadata account
+    #[account(mut)]
+    uri_option: Account<'info, TokenOption>,
     /// CHECK: This is a PDA for coop token metadata account
     #[account(
       mut,
@@ -72,7 +83,11 @@ pub struct FinalizeVote<'info> {
 
 impl<'info> FinalizeVote<'info> {
     pub fn finalize_vote(&mut self) -> Result<()> {
-        //@audit what happens if there is no vote at all?
+        has_role(&self.rbac.roles, RoleType::VOTING, self.user.key())?;
+        // require!(
+        //     self.config.admin.key() == self.user.key(),
+        //     CoopMemeError::Unauthorized
+        // );
         require!(
             !self.memecoin.is_voting_finalized,
             CoopMemeError::VotingFinalized
@@ -94,18 +109,73 @@ impl<'info> FinalizeVote<'info> {
             self.memecoin.creator == self.creator.key(),
             CoopMemeError::Unauthorized
         );
+        require!(
+            self.symbol_option.token == self.coop_token.key(),
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.uri_option.token == self.coop_token.key(),
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.name_option.token == self.coop_token.key(),
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.name_option.option_type == OptionType::NAME,
+            CoopMemeError::InvalidTokenName
+        );
+        require!(
+            self.symbol_option.option_type == OptionType::SYM,
+            CoopMemeError::InvalidTokenSymbol
+        );
+        require!(
+            self.uri_option.option_type == OptionType::URI,
+            CoopMemeError::InvalidTokenUri
+        );
+        require!(
+            self.name_option.index < self.memecoin.total_options,
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.symbol_option.index < self.memecoin.total_options,
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.uri_option.index < self.memecoin.total_options,
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.name_option.option_value.len() != 0,
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.symbol_option.option_value.len() != 0,
+            CoopMemeError::InvalidOption
+        );
+        require!(
+            self.uri_option.option_value.len() != 0,
+            CoopMemeError::InvalidOption
+        );
 
-        // let name_votes = self.token_votes.name_votes;1q2
-        // let symbol_votes = self.token_votes.symbol_votes;
-        // let uri_votes = self.token_votes.uri_votes;
-        let all_votes = &self.token_votes.votes;
-        let final_option_index = self._find_highest_voted_index(all_votes);
-        // let final_symbol_index = self._find_highest_voted_index(&symbol_votes);
-        // let final_uri_index = self._find_highest_voted_index(&uri_votes);
+        if self.memecoin.total_votes > 0 {
+            require!(
+                self.name_option.total_votes > 0,
+                CoopMemeError::InvalidTokenVoteInfo
+            );
+            require!(
+                self.uri_option.total_votes > 0,
+                CoopMemeError::InvalidTokenVoteInfo
+            );
+            require!(
+                self.symbol_option.total_votes > 0,
+                CoopMemeError::InvalidTokenVoteInfo
+            );
+        }
 
-        let final_name = &self.memecoin.token_options[final_option_index as usize].token_name;
-        let final_symbol = &self.memecoin.token_options[final_option_index as usize].token_symbol;
-        let final_uri = &self.memecoin.token_options[final_option_index as usize].token_uri;
+        let final_name = &self.name_option.option_value;
+        let final_symbol = &self.symbol_option.option_value;
+        let final_uri = &self.uri_option.option_value;
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
@@ -138,24 +208,11 @@ impl<'info> FinalizeVote<'info> {
             final_name: final_name.to_string(),
             final_symbol: final_symbol.to_string(),
             final_uri: final_uri.to_string(),
-            total_votes: self.token_votes.total_votes
+            total_votes: self.memecoin.total_votes
         });
 
         self.memecoin.is_voting_finalized = true;
 
         Ok(())
-    }
-
-    fn _find_highest_voted_index(&self, votes: &Vec<u64>) -> u8 {
-        let mut highest_index = 0;
-        let mut highest_value = votes[0];
-
-        for i in 1..votes.len() {
-            if votes[i] > highest_value {
-                highest_index = i;
-                highest_value = votes[i];
-            }
-        }
-        highest_index as u8
     }
 }
