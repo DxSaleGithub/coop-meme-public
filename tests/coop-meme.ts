@@ -51,7 +51,7 @@ describe('coop-meme-2', () => {
   //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
   // );
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -107,12 +107,12 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(300);
-    const newFairlaunchPeriod = new anchor.BN(60);
+    const newCoopInterval = new anchor.BN(1200);
+    const newFairlaunchPeriod = new anchor.BN(300);
     const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
-    const newMinOptionToken = new anchor.BN(10000_000_000_000);
+    const newMinOptionToken = new anchor.BN(0);
 
     const newMinPricePerToken = 1;
 
@@ -157,8 +157,18 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it.skip('provide roles', async () => {
-    const owner = provider.wallet.publicKey;
+  it.only('provide roles', async () => {
+    // const owner = provider.wallet.publicKey;
+    // const owner = new PublicKey(
+    //   '6D3YqGMtYHDYpVZNY8VeKrZRLPPYmDsLcZ5dKSUuarYP' // Mark
+    // );
+    // const owner = new PublicKey(
+    //   'E3VZ1CWgXa4yULeYyFBYtvBPXfHurvn2DqEdTBvhDvcq' // Kenny
+    // );
+
+    const owner = new PublicKey(
+      'pFV11axxRCogW3nPGchmV6YbK4EpgQGFZrSyk1KZFEL' // Lovish
+    );
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('roles')],

@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct RBAControlList {
     pub admin: Pubkey,
-    #[max_len(10)]
+    #[max_len(50)]
     pub roles: Vec<Role>,
     pub bump: u8,
 }
