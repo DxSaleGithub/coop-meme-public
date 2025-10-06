@@ -8,7 +8,8 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
     metadata::{self, Metadata},
-    token::{self, Mint, Token, TokenAccount},
+    token_2022::{self, Token2022},
+    token_interface::{Mint, TokenAccount},
 };
 #[derive(Accounts)]
 pub struct Trade<'info> {
@@ -49,10 +50,10 @@ pub struct Trade<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      seeds = [b"mint", &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_bump
     )]
-    pub coop_token: Box<Account<'info, Mint>>,
+    pub coop_token: Box<InterfaceAccount<'info, Mint>>,
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
@@ -62,9 +63,11 @@ pub struct Trade<'info> {
     #[account(
       mut,
       associated_token::mint = coop_token,
-      associated_token::authority = global_vault
+      associated_token::authority = global_vault,
+      associated_token::token_program = token_program
+
     )]
-    pub global_token_ata: Box<Account<'info, TokenAccount>>,
+    pub global_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: This is an ATA for coop token for trader.
     #[account(
       init_if_needed,
@@ -73,18 +76,23 @@ pub struct Trade<'info> {
       associated_token::token_program=token_program,
       payer=trader
     )]
-    pub trader_token_ata: Box<Account<'info, TokenAccount>>,
-
+    pub trader_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
+    /// CHECK: ExtraAccountMetaList Account,
+    #[account(mut)]
+    pub extra_account_meta_list: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub hook_program: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub whitelist: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 
-    #[account(address = token::ID)]
-    token_program: Program<'info, Token>,
+    #[account(address = token_2022::ID)]
+    token_program: Program<'info, Token2022>,
 
     #[account(address = associated_token::ID)]
     associated_token_program: Program<'info, AssociatedToken>,
-
-    #[account(address = metadata::ID)]
-    mpl_token_metadata_program: Program<'info, Metadata>,
 }
 
 impl<'info> Trade<'info> {
@@ -109,16 +117,6 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
-            // Set virtual reserves to preserve price and ensure curve continuity
-            // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
-            // self.memecoin.virtual_token_reserves = (1_000_000_000u128)
-            //     .checked_mul(1_000_000_000) // 9 decimals
-            //     .unwrap()
-            //     .checked_div(self.memecoin.token_share_price as u128)
-            //     .unwrap()
-            //     .try_into()
-            //     .unwrap();
-
             self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
                 .checked_mul(self.memecoin.virtual_token_reserves as u128)
                 .ok_or(CoopMemeError::InvalidOperation)
@@ -178,13 +176,19 @@ impl<'info> Trade<'info> {
             CoopMemeError::InsufficientAmount
         );
 
-        token_transfer_with_signer(
-            self.global_token_ata.to_account_info(),
-            self.global_vault.to_account_info(),
-            self.trader_token_ata.to_account_info(),
-            &self.token_program,
+        token_transfer_signer_with_extra(
+            &self.token_program.to_account_info(),
+            &self.global_token_ata.to_account_info(),
+            &self.coop_token.to_account_info(),
+            &self.trader_token_ata.to_account_info(),
+            &self.global_vault.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.extra_account_meta_list.to_account_info(),
+            &self.hook_program.to_account_info(),
+            &self.whitelist.to_account_info(),
             &[seeds],
-            token_amount as u64,
+            token_amount,
+            9,
         )?;
 
         emit!(TradeEvent {
@@ -222,15 +226,6 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
-            // Set virtual reserves to preserve price and ensure curve continuity
-            // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
-            // self.memecoin.virtual_token_reserves = (1_000_000_000u128)
-            //     .checked_mul(1_000_000_000) // 9 decimals
-            //     .unwrap()
-            //     .checked_div(self.memecoin.token_share_price as u128)
-            //     .unwrap()
-            //     .try_into()
-            //     .unwrap();
             self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
                 .checked_mul(self.memecoin.virtual_token_reserves as u128)
                 .ok_or(CoopMemeError::InvalidOperation)
@@ -254,12 +249,18 @@ impl<'info> Trade<'info> {
             CoopMemeError::InsufficientAmount
         );
 
-        token_transfer_user(
-            self.trader_token_ata.to_account_info(),
-            &self.trader,
-            self.global_token_ata.to_account_info(),
-            &self.token_program,
-            amount as u64,
+        token_transfer_with_extra(
+            &self.token_program.to_account_info(),
+            &self.trader_token_ata.to_account_info(),
+            &self.coop_token.to_account_info(),
+            &self.global_token_ata.to_account_info(),
+            &self.trader.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.extra_account_meta_list.to_account_info(),
+            &self.hook_program.to_account_info(),
+            &self.whitelist.to_account_info(),
+            amount,
+            9,
         )?;
 
         let team_fees = self

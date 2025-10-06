@@ -8,8 +8,11 @@ use crate::{
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self},
-    metadata::{self, mpl_token_metadata::types::DataV2, Metadata},
-    token::{self, Mint},
+    token_2022::{self, Token2022},
+    token_interface::{
+        spl_token_metadata_interface::state::Field, token_metadata_update_field, Mint,
+        TokenAccount, TokenInterface, TokenMetadataUpdateField,
+    },
 };
 
 #[derive(Accounts)]
@@ -45,10 +48,11 @@ pub struct FinalizeVote<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      mut,
+      seeds = [b"mint", &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_bump
     )]
-    pub coop_token: Box<Account<'info, Mint>>,
+    pub coop_token: Box<InterfaceAccount<'info, Mint>>,
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
@@ -64,21 +68,25 @@ pub struct FinalizeVote<'info> {
     /// CHECK: This is a PDA for coop token metadata account
     #[account(mut)]
     uri_option: Account<'info, TokenOption>,
-    /// CHECK: This is a PDA for coop token metadata account
-    #[account(
-      mut,
-      seeds = [
-          b"metadata",
-          metadata::ID.as_ref(),
-          coop_token.key().as_ref(),
-      ],
-      bump,
-      seeds::program = metadata::ID
-    )]
-    token_metadata_account: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
 
-    #[account(address = metadata::ID)]
-    mpl_token_metadata_program: Program<'info, Metadata>,
+    #[account(address = token_2022::ID)]
+    token_program: Program<'info, Token2022>,
+    // / CHECK: This is a PDA for coop token metadata account
+    // #[account(
+    //   mut,
+    //   seeds = [
+    //       b"metadata",
+    //       metadata::ID.as_ref(),
+    //       coop_token.key().as_ref(),
+    //   ],
+    //   bump,
+    //   seeds::program = metadata::ID
+    // )]
+    // token_metadata_account: UncheckedAccount<'info>,
+
+    // #[account(address = metadata::ID)]
+    // mpl_token_metadata_program: Program<'info, Metadata>,
 }
 
 impl<'info> FinalizeVote<'info> {
@@ -105,10 +113,10 @@ impl<'info> FinalizeVote<'info> {
             !self.memecoin.is_trading_active,
             CoopMemeError::TradingActive
         );
-        require!(
-            self.memecoin.creator == self.creator.key(),
-            CoopMemeError::Unauthorized
-        );
+        // require!(
+        //     self.memecoin.creator == self.creator.key(),
+        //     CoopMemeError::Unauthorized
+        // );
         require!(
             self.symbol_option.token == self.coop_token.key(),
             CoopMemeError::InvalidOption
@@ -179,28 +187,68 @@ impl<'info> FinalizeVote<'info> {
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
-        metadata::update_metadata_accounts_v2(
-            CpiContext::new_with_signer(
-                self.mpl_token_metadata_program.to_account_info(),
-                metadata::UpdateMetadataAccountsV2 {
-                    metadata: self.token_metadata_account.to_account_info(),
-                    update_authority: self.global_vault.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            Some(self.global_vault.key()),
-            Some(DataV2 {
-                name: final_name.to_string(),
-                symbol: final_symbol.to_string(),
-                uri: final_uri.to_string(),
-                seller_fee_basis_points: 0, // or your actual value
-                creators: None,             // set if you want to update
-                collection: None,
-                uses: None,
-            }), // optional new update authority
-            None,        // optional primary_sale_happened
-            Some(false), // optional is_mutable)?;
-        )?;
+        let cpi_accounts_name = TokenMetadataUpdateField {
+            metadata: self.coop_token.to_account_info(),
+            update_authority: self.global_vault.to_account_info(),
+            program_id: self.token_program.to_account_info(),
+        };
+
+        let cpi_accounts_symbol = TokenMetadataUpdateField {
+            metadata: self.coop_token.to_account_info(),
+            update_authority: self.global_vault.to_account_info(),
+            program_id: self.token_program.to_account_info(),
+        };
+
+        let cpi_accounts_uri = TokenMetadataUpdateField {
+            metadata: self.coop_token.to_account_info(),
+            update_authority: self.global_vault.to_account_info(),
+            program_id: self.token_program.to_account_info(),
+        };
+
+        let cpi_ctx_name = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts_name,
+            signer_seeds,
+        );
+
+        let cpi_ctx_symbol = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts_symbol,
+            signer_seeds,
+        );
+
+        let cpi_ctx_uri = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts_uri,
+            signer_seeds,
+        );
+
+        token_metadata_update_field(cpi_ctx_name, Field::Name, final_name.to_string())?;
+        token_metadata_update_field(cpi_ctx_symbol, Field::Symbol, final_symbol.to_string())?;
+        token_metadata_update_field(cpi_ctx_uri, Field::Uri, final_uri.to_string())?;
+
+        // metadata::update_metadata_accounts_v2(
+        //     CpiContext::new_with_signer(
+        //         self.mpl_token_metadata_program.to_account_info(),
+        //         metadata::UpdateMetadataAccountsV2 {
+        //             metadata: self.token_metadata_account.to_account_info(),
+        //             update_authority: self.global_vault.to_account_info(),
+        //         },
+        //         signer_seeds,
+        //     ),
+        //     Some(self.global_vault.key()),
+        //     Some(DataV2 {
+        //         name: final_name.to_string(),
+        //         symbol: final_symbol.to_string(),
+        //         uri: final_uri.to_string(),
+        //         seller_fee_basis_points: 0, // or your actual value
+        //         creators: None,             // set if you want to update
+        //         collection: None,
+        //         uses: None,
+        //     }), // optional new update authority
+        //     None,        // optional primary_sale_happened
+        //     Some(false), // optional is_mutable)?;
+        // )?;
 
         emit!(VoteFinalizedEvent {
             coop_token: self.coop_token.key(),

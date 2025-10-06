@@ -2,13 +2,15 @@ use crate::{
     error::*,
     events::{TradingOverEvent, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
-    utils::{token_transfer_user, token_transfer_with_signer},
+    utils::{token_transfer_signer_with_extra, token_transfer_with_extra},
     OptionType,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    token::{self, Mint, Token, TokenAccount},
+    // token::{self, Mint, Token, TokenAccount},
+    token_2022::{self, transfer, Token2022},
+    token_interface::{Mint, TokenAccount},
 };
 
 #[derive(Accounts)]
@@ -36,10 +38,10 @@ pub struct UserVote<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      seeds = [b"mint", &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_bump
     )]
-    pub coop_token: Box<Account<'info, Mint>>,
+    pub coop_token: Box<InterfaceAccount<'info, Mint>>,
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
@@ -75,19 +77,27 @@ pub struct UserVote<'info> {
       associated_token::authority=user,
       associated_token::token_program=token_program,
     )]
-    pub user_token_ata: Box<Account<'info, TokenAccount>>,
+    pub user_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(
       mut,
       associated_token::mint=coop_token,
       associated_token::authority=memecoin,
       associated_token::token_program=token_program,
     )]
-    pub vote_token_ata: Box<Account<'info, TokenAccount>>,
-
+    pub vote_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
+    /// CHECK: ExtraAccountMetaList Account,
+    #[account(mut)]
+    pub extra_account_meta_list: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub hook_program: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub whitelist: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 
-    #[account(address = token::ID)]
-    token_program: Program<'info, Token>,
+    #[account(address = token_2022::ID)]
+    token_program: Program<'info, Token2022>,
 
     #[account(address = associated_token::ID)]
     associated_token_program: Program<'info, AssociatedToken>,
@@ -121,13 +131,27 @@ impl<'info> UserVote<'info> {
         self.user_token_votes.total_votes += votes;
         self.user_token_option_votes.total_votes += votes;
 
-        // transfer token from user to vote_ata
-        token_transfer_user(
-            self.user_token_ata.to_account_info(),
-            &self.user,
-            self.vote_token_ata.to_account_info(),
-            &self.token_program,
+        // // transfer token from user to vote_ata
+        // token_transfer_user(
+        //     self.user_token_ata.to_account_info(),
+        //     &self.user,
+        //     self.vote_token_ata.to_account_info(),
+        //     &self.token_program,
+        //     votes,
+        // )?;
+
+        token_transfer_with_extra(
+            &self.token_program.to_account_info(),
+            &self.user_token_ata.to_account_info(),
+            &self.coop_token.to_account_info(),
+            &self.vote_token_ata.to_account_info(),
+            &self.user.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.extra_account_meta_list.to_account_info(),
+            &self.hook_program.to_account_info(),
+            &self.whitelist.to_account_info(),
             votes,
+            9,
         )?;
 
         let option_value = &self.token_option.option_value;
@@ -183,14 +207,30 @@ impl<'info> UserVote<'info> {
             &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
         ];
 
-        // transfer token from vote_ata to user
-        token_transfer_with_signer(
-            self.vote_token_ata.to_account_info(),
-            self.memecoin.to_account_info(),
-            self.user_token_ata.to_account_info(),
-            &self.token_program,
+        // // transfer token from vote_ata to user
+        // token_transfer_with_signer(
+        //     self.coop_token.to_account_info(),
+        //     self.vote_token_ata.to_account_info(),
+        //     self.memecoin.to_account_info(),
+        //     self.user_token_ata.to_account_info(),
+        //     &self.token_program,
+        //     &[seeds],
+        //     votes,
+        // )?;
+
+        token_transfer_signer_with_extra(
+            &self.token_program.to_account_info(),
+            &self.vote_token_ata.to_account_info(),
+            &self.coop_token.to_account_info(),
+            &self.user_token_ata.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.extra_account_meta_list.to_account_info(),
+            &self.hook_program.to_account_info(),
+            &self.whitelist.to_account_info(),
             &[seeds],
             votes,
+            9,
         )?;
 
         let option_value = &self.token_option.option_value;

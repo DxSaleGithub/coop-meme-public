@@ -2,13 +2,18 @@ use crate::state::{ConfigData, MemeCoinData, RBAControlList, RoleType};
 use crate::{
     error::*,
     events::{BurnEvent, ListEvent, TradingOverEvent},
-    utils::{has_role, sol_transfer_with_signer, token_transfer_with_signer},
+    utils::{
+        has_role, sol_transfer_with_signer, token_transfer_signer_with_extra,
+        token_transfer_with_signer,
+    },
 };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    token::{self, burn, Burn, Mint, Token, TokenAccount},
+    token::{self, burn, Burn, Token},
+    token_2022::{self, Token2022},
+    token_interface::{Mint, TokenAccount, TokenInterface},
 };
 use raydium_cpmm_cpi::{
     cpi,
@@ -25,10 +30,10 @@ pub struct List<'info> {
     ]]
     pub owner: Signer<'info>,
     /// CHECK: This is a system account so safe.
-    #[account[
-      // mut
-    ]]
-    pub creator: AccountInfo<'info>,
+    // #[account[
+    //   // mut
+    // ]]
+    // pub creator: AccountInfo<'info>,
     /// CHECK: This is a system account so safe.
     #[account[
       mut,
@@ -56,24 +61,25 @@ pub struct List<'info> {
       bump = config.global_vault_bump
     )]
     pub global_vault: AccountInfo<'info>,
-
+    /// CHECK: This is a PDA owned by the program
     // Token_0 mint, the key must smaller then token_1 mint.
     #[account(
         constraint = token_0_mint.key() < token_1_mint.key(),
-        mint::token_program = token_program,
+        // mint::token_program = token_0_program,
     )]
-    pub token_0_mint: Box<Account<'info, Mint>>,
-
+    pub token_0_mint: UncheckedAccount<'info>,
+    /// CHECK: This is a PDA owned by the program
     // Token_1 mint, the key must be greater than token_0 mint.
     #[account(
-        mint::token_program = token_program,
+        // mint::token_program = token_1_program,
     )]
-    pub token_1_mint: Box<Account<'info, Mint>>,
+    pub token_1_mint: UncheckedAccount<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_bump
+      seeds = [b"mint", &memecoin.token_id.to_le_bytes()],
+      bump = memecoin.token_bump,
+      mint::token_program = token_22_program
     )]
-    pub coop_token: Box<Account<'info, Mint>>, // token 1
+    pub coop_token: Box<InterfaceAccount<'info, Mint>>, // token 1
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
@@ -83,25 +89,29 @@ pub struct List<'info> {
     #[account(
       mut,
       associated_token::mint = coop_token,
-      associated_token::authority = global_vault
+      associated_token::authority = global_vault,
+      associated_token::token_program=token_22_program
     )]
-    pub global_token_ata: Box<Account<'info, TokenAccount>>,
+    pub global_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: This is an ATA for owner for token0.
     #[account(
-      init_if_needed,
-      associated_token::mint=token_0_mint,
-      associated_token::authority=owner,
-      payer=owner
+      mut
+      // init_if_needed,
+      // associated_token::mint=token_0_mint,
+      // associated_token::authority=owner,
+      // payer=owner
     )]
-    pub owner_token_0: Box<Account<'info, TokenAccount>>,
+    pub owner_token_0: UncheckedAccount<'info>,
+    /// CHECK: This is a PDA owned by the program
     // This will be the WSOL ATA for `payer`
     #[account(
-        init_if_needed,
-        payer = owner,
-        associated_token::mint = token_1_mint,
-        associated_token::authority = owner
+      mut
+        // init_if_needed,
+        // payer = owner,
+        // associated_token::mint = token_1_mint,
+        // associated_token::authority = owner
     )]
-    pub owner_token_1: Box<Account<'info, TokenAccount>>,
+    pub owner_token_1: UncheckedAccount<'info>,
     /// CHECK: pool lp mint, init by cp-swap
     #[account(
         mut,
@@ -145,7 +155,7 @@ pub struct List<'info> {
         mut,
         address= raydium_cpmm_cpi::create_pool_fee_reveiver::id(),
     )]
-    pub create_pool_fee: Box<Account<'info, TokenAccount>>,
+    pub create_pool_fee: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: an account to store oracle observations, init by cp-swap
     #[account(
         mut,
@@ -186,9 +196,24 @@ pub struct List<'info> {
     #[account(
       address = spl_token::native_mint::ID
     )]
-    pub native_mint: Account<'info, Mint>,
+    pub native_mint: Box<InterfaceAccount<'info, Mint>>,
+    /// CHECK: ExtraAccountMetaList Account,
+    #[account(mut)]
+    pub extra_account_meta_list: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub hook_program: UncheckedAccount<'info>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(mut)]
+    pub whitelist: UncheckedAccount<'info>,
     /// Program to create mint account and mint tokens
     pub token_program: Program<'info, Token>,
+    /// Program to create mint account and mint tokens
+    pub token_22_program: Program<'info, Token2022>,
+    // /// Spl token program or token program 2022
+    // pub token_0_program: Interface<'info, TokenInterface>,
+    // /// Spl token program or token program 2022
+    // pub token_1_program: Interface<'info, TokenInterface>,
     /// Program to create an ATA for receiving position NFT
     pub associated_token_program: Program<'info, AssociatedToken>,
     /// To create a new program account
@@ -269,10 +294,10 @@ impl<'info> List<'info> {
         //     self.config.admin.key() == self.owner.key(),
         //     CoopMemeError::Unauthorized
         // );
-        require!(
-            self.memecoin.creator == self.creator.key(),
-            CoopMemeError::Unauthorized
-        );
+        // require!(
+        //     self.memecoin.creator == self.creator.key(),
+        //     CoopMemeError::Unauthorized
+        // );
 
         // transfer listing fee from gloval vault to team wallet
         let seeds: &[&[u8]] = &[
@@ -296,14 +321,42 @@ impl<'info> List<'info> {
         );
 
         // transfer tokens from global token ata to owner token ata
-        token_transfer_with_signer(
-            self.global_token_ata.to_account_info(),
-            self.global_vault.to_account_info(),
-            owner_token_ata.to_account_info(),
-            &self.token_program,
+        // token_transfer_with_signer(
+        //     self.global_token_ata.to_account_info(),
+        //     self.global_vault.to_account_info(),
+        //     owner_token_ata.to_account_info(),
+        //     &self.token_program,
+        //     &[seeds],
+        //     self.memecoin.real_token_reserves as u64,
+        // )?;
+
+        token_transfer_signer_with_extra(
+            &self.token_22_program.to_account_info(),
+            &self.global_token_ata.to_account_info(),
+            &self.coop_token.to_account_info(),
+            &owner_token_ata.to_account_info(),
+            &self.global_vault.to_account_info(),
+            &self.memecoin.to_account_info(),
+            &self.extra_account_meta_list.to_account_info(),
+            &self.hook_program.to_account_info(),
+            &self.whitelist.to_account_info(),
             &[seeds],
-            self.memecoin.real_token_reserves as u64,
+            self.memecoin.real_token_reserves,
+            9,
         )?;
+
+        let token_0_program;
+        let token_1_program;
+
+        if (self.token_0_mint.key() == self.native_mint.key()
+            && self.token_1_mint.key() == self.coop_token.key())
+        {
+            token_0_program = self.token_program.to_account_info();
+            token_1_program = self.token_22_program.to_account_info();
+        } else {
+            token_1_program = self.token_program.to_account_info();
+            token_0_program = self.token_22_program.to_account_info();
+        }
 
         let cpi_accounts = cpi::accounts::Initialize {
             creator: self.owner.to_account_info(),
@@ -321,8 +374,8 @@ impl<'info> List<'info> {
             create_pool_fee: self.create_pool_fee.to_account_info(),
             observation_state: self.observation_state.to_account_info(),
             token_program: self.token_program.to_account_info(),
-            token_0_program: self.token_program.to_account_info(),
-            token_1_program: self.token_program.to_account_info(),
+            token_0_program,
+            token_1_program,
             associated_token_program: self.associated_token_program.to_account_info(),
             system_program: self.system_program.to_account_info(),
             rent: self.rent.to_account_info(),

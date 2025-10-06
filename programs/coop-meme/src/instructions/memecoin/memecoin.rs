@@ -1,9 +1,25 @@
+use crate::utils::{extend_mint_for_transfer_hook, set_transfer_hook_authority};
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::rent::{
+    DEFAULT_EXEMPTION_THRESHOLD, DEFAULT_LAMPORTS_PER_BYTE_YEAR,
+};
+// use anchor_lang::system_program::{transfer, Transfer};
+// use anchor_spl::token_2022_extensions::spl_token_metadata_interface::state::TokenMetadata;
+// use anchor_spl::token_interface::spl_token_metadata_interface::state::TokenMetadata;
+// use spl_type_length_value::variable_len_pack::VariableLenPack;
+use anchor_lang::{
+    prelude::*, solana_program::program::invoke, solana_program::system_instruction::transfer,
+};
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    metadata::{self, mpl_token_metadata::types::DataV2, Metadata},
-    token::{self, spl_token::instruction::AuthorityType, Mint, Token, TokenAccount},
+    // metadata::{self, mpl_token_metadata::types::DataV2, Metadata},
+    token_2022::{self, spl_token_2022::instruction::AuthorityType, Token2022},
+    token_interface::{
+        token_metadata_initialize, token_metadata_update_field, Mint, TokenAccount,
+        TokenMetadataInitialize, TokenMetadataUpdateField,
+    },
 };
+use borsh::BorshSerialize;
 
 use crate::{
     error::*,
@@ -39,14 +55,20 @@ pub struct MemeCoin<'info> {
     pub global_vault: AccountInfo<'info>,
 
     #[account(
-        init,
-        seeds = [b"mint", creator.key().as_ref(), &(config.total_coop_created+1).to_le_bytes() ],
-        bump,
-        payer = creator,
-        mint::decimals = 9,
-        mint::authority = global_vault.key(),
+      init,
+      seeds = [b"mint", &(config.total_coop_created+1).to_le_bytes()],
+      bump,
+      payer = creator,
+      mint::token_program = token_program,
+      mint::decimals = 9,
+      mint::authority = global_vault.key(),
+      extensions::transfer_hook::program_id = hook_program.key(),
+      extensions::transfer_hook::authority = global_vault.key(),
+      extensions::metadata_pointer::authority = global_vault.key(),
+      extensions::metadata_pointer::metadata_address = coop_token.key(),
     )]
-    pub coop_token: Box<Account<'info, Mint>>,
+    pub coop_token: Box<InterfaceAccount<'info, Mint>>,
+
     #[account[
       init,
       space = 8 + MemeCoinData::INIT_SPACE,
@@ -55,29 +77,16 @@ pub struct MemeCoin<'info> {
       bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
-    /// CHECK: This is a PDA for coop token metadata account
+    /// CHECK: This is an ATA for coop token with global vault as authority.
     #[account(
       mut,
       seeds = [
-          b"metadata",
-          metadata::ID.as_ref(),
-          coop_token.key().as_ref(),
+          global_vault.key().as_ref(),             // authority
+          token_2022::ID.as_ref(),                      //  Token 2022 Program
+          coop_token.key().as_ref(),                    // mint
       ],
       bump,
-      seeds::program = metadata::ID
-    )]
-    token_metadata_account: UncheckedAccount<'info>,
-
-    /// CHECK: This is an ATA for coop token with global vault as authority.
-    #[account(
-    mut,
-    seeds = [
-        global_vault.key().as_ref(),             // authority
-        token::ID.as_ref(),                      // SPL Token Program
-        coop_token.key().as_ref(),                    // mint
-    ],
-    bump,
-    seeds::program = associated_token::ID        // Associated Token Program
+      seeds::program = associated_token::ID        // Associated Token Program
     )]
     pub global_token_ata: AccountInfo<'info>,
 
@@ -89,19 +98,19 @@ pub struct MemeCoin<'info> {
       associated_token::token_program=token_program,
       payer=creator
     )]
-    pub vote_token_ata: Box<Account<'info, TokenAccount>>,
-
+    pub vote_token_ata: Box<InterfaceAccount<'info, TokenAccount>>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    pub hook_program: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 
-    #[account(address = token::ID)]
-    token_program: Program<'info, Token>,
+    #[account(address = token_2022::ID)]
+    token_program: Program<'info, Token2022>,
 
     #[account(address = associated_token::ID)]
     associated_token_program: Program<'info, AssociatedToken>,
-
-    #[account(address = metadata::ID)]
-    mpl_token_metadata_program: Program<'info, Metadata>,
+    // #[account(address = metadata::ID)]
+    // mpl_token_metadata_program: Program<'info, Metadata>,
 }
 
 impl<'info> MemeCoin<'info> {
@@ -114,6 +123,8 @@ impl<'info> MemeCoin<'info> {
         symbol: String,
         uri: String,
     ) -> Result<()> {
+        msg!("i m here {}");
+
         has_role(&self.rbac.roles, RoleType::CREATING, self.creator.key())?;
         require!(
             total_supply == 1_000_000_000_000_000_000,
@@ -187,10 +198,10 @@ impl<'info> MemeCoin<'info> {
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
         // mint tokens to global vault ata for token
-        token::mint_to(
+        token_2022::mint_to(
             CpiContext::new_with_signer(
                 self.token_program.to_account_info(),
-                token::MintTo {
+                token_2022::MintTo {
                     mint: self.coop_token.to_account_info(),
                     to: self.global_token_ata.to_account_info(),
                     authority: self.global_vault.to_account_info(),
@@ -200,55 +211,148 @@ impl<'info> MemeCoin<'info> {
             total_supply as u64,
         )?;
 
-        // create metadata
-        metadata::create_metadata_accounts_v3(
-            CpiContext::new_with_signer(
-                self.mpl_token_metadata_program.to_account_info(),
-                metadata::CreateMetadataAccountsV3 {
-                    metadata: self.token_metadata_account.to_account_info(),
-                    mint: self.coop_token.to_account_info(),
-                    mint_authority: self.global_vault.to_account_info(),
-                    payer: self.creator.to_account_info(),
-                    update_authority: self.global_vault.to_account_info(),
-                    system_program: self.system_program.to_account_info(),
-                    rent: self.rent.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            DataV2 {
-                name,
-                symbol,
-                uri,
-                seller_fee_basis_points: 0,
-                creators: None,
-                collection: None,
-                uses: None,
-            },
-            true,
-            true,
-            None,
-        )?;
+        let cpi_accounts = TokenMetadataInitialize {
+            program_id: self.token_program.to_account_info(),
+            mint: self.coop_token.to_account_info(),
+            metadata: self.coop_token.to_account_info(), // metadata account is the mint, since data is stored in mint
+            mint_authority: self.global_vault.to_account_info(),
+            update_authority: self.global_vault.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds,
+        );
+        token_metadata_initialize(cpi_ctx, name, symbol, uri)?;
+
+        let data = self.coop_token.to_account_info().data_len();
+        let min_balance = Rent::get()?.minimum_balance(data);
+        if min_balance > self.coop_token.to_account_info().get_lamports() {
+            invoke(
+                &transfer(
+                    &self.creator.key(),
+                    &self.coop_token.to_account_info().key(),
+                    min_balance - self.coop_token.to_account_info().get_lamports(),
+                ),
+                &[
+                    self.creator.to_account_info(),
+                    self.coop_token.to_account_info(),
+                    self.system_program.to_account_info(),
+                ],
+            )?;
+        }
+
+        // let cpi_accounts = TokenMetadataUpdateField {
+        //     metadata: self.coop_token.to_account_info(),
+        //     update_authority: self.creator.to_account_info(),
+        //     program_id: self.token_program.to_account_info(),
+        // };
+
+        // let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_accounts);
+
+        // token_metadata_update_field(cpi_ctx, Field::Key("AB".to_string()), args.mode.to_string())?;
+
+        // let TokenMetadataArgs { name, symbol, uri } = TokenMetadataArgs { name, symbol, uri };
+
+        // // Define token metadata
+        // let token_metadata = TokenMetadata {
+        //     name: name.clone(),
+        //     symbol: symbol.clone(),
+        //     uri: uri.clone(),
+        //     // update_authority: self.global_vault.key(),
+        //     ..Default::default()
+        // };
+
+        // // Add 4 extra bytes for size of MetadataExtension (2 bytes for type, 2 bytes for length)
+        // let data_len = 4 + token_metadata.get_packed_len()?;
+
+        // // let packed_data = token_metadata.try_to_vec()?;
+        // // let data_len = 4 + packed_data.len(); // 4 extra bytes for MetadataExtension size prefix
+
+        // // Calculate lamports required for the additional metadata
+        // let lamports =
+        //     data_len as u64 * DEFAULT_LAMPORTS_PER_BYTE_YEAR * DEFAULT_EXEMPTION_THRESHOLD as u64;
+
+        // // Transfer additional lamports to mint account
+        // transfer(
+        //     CpiContext::new(
+        //         self.system_program.to_account_info(),
+        //         Transfer {
+        //             from: self.creator.to_account_info(),
+        //             to: self.coop_token.to_account_info(),
+        //         },
+        //     ),
+        //     lamports,
+        // )?;
+
+        // // Initialize token metadata
+        // token_metadata_initialize(
+        //     CpiContext::new(
+        //         self.token_program.to_account_info(),
+        //         TokenMetadataInitialize {
+        //             program_id: self.token_program.to_account_info(),
+        //             mint: self.coop_token.to_account_info(),
+        //             metadata: self.coop_token.to_account_info(),
+        //             mint_authority: self.global_vault.to_account_info(),
+        //             update_authority: self.global_vault.to_account_info(),
+        //         },
+        //     ),
+        //     name,
+        //     symbol,
+        //     uri,
+        // )?;
+
+        // self.create_token_with_transfer_hook(hook_program_id);
+
+        // // create metadata
+        // metadata::create_metadata_accounts_v3(
+        //     CpiContext::new_with_signer(
+        //         self.mpl_token_metadata_program.to_account_info(),
+        //         metadata::CreateMetadataAccountsV3 {
+        //             metadata: self.token_metadata_account.to_account_info(),
+        //             mint: self.coop_token.to_account_info(),
+        //             mint_authority: self.global_vault.to_account_info(),
+        //             payer: self.creator.to_account_info(),
+        //             update_authority: self.global_vault.to_account_info(),
+        //             system_program: self.system_program.to_account_info(),
+        //             rent: self.rent.to_account_info(),
+        //         },
+        //         signer_seeds,
+        //     ),
+        //     DataV2 {
+        //         name,
+        //         symbol,
+        //         uri,
+        //         seller_fee_basis_points: 0,
+        //         creators: None,
+        //         collection: None,
+        //         uses: None,
+        //     },
+        //     true,
+        //     true,
+        //     None,
+        // )?;
 
         //  revoke mint authority
-        token::set_authority(
-            CpiContext::new_with_signer(
-                self.token_program.to_account_info(),
-                token::SetAuthority {
-                    current_authority: self.global_vault.to_account_info(),
-                    account_or_mint: self.coop_token.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            AuthorityType::MintTokens,
-            None,
-        )?;
+        // token_2022::set_authority(
+        //     CpiContext::new_with_signer(
+        //         self.token_program.to_account_info(),
+        //         token_2022::SetAuthority {
+        //             current_authority: self.global_vault.to_account_info(),
+        //             account_or_mint: self.coop_token.to_account_info(),
+        //         },
+        //         signer_seeds,
+        //     ),
+        //     AuthorityType::MintTokens,
+        //     None,
+        // )?;
 
         emit!(CreatedEvent {
             token_id: self.memecoin.token_id,
             creator: self.creator.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            metadata: self.token_metadata_account.key(),
+            metadata: self.coop_token.key(),
             decimals: 9,
             token_supply: total_supply as u64,
             token_creation_time: self.memecoin.token_creation_time,
@@ -258,4 +362,32 @@ impl<'info> MemeCoin<'info> {
 
         Ok(())
     }
+
+    // /// A simple function to extend the mint account with Transfer Hook and set its authority
+    // pub fn create_token_with_transfer_hook(&self, hook_program_id: Pubkey) -> Result<()> {
+    //     // 1. Extend mint account with Transfer Hook extension
+    //     extend_mint_for_transfer_hook(
+    //         self.coop_token.to_account_info(),
+    //         self.creator.to_account_info(),
+    //         self.token_program.to_account_info(),
+    //         self.system_program.to_account_info(),
+    //         self.rent.to_account_info(),
+    //     )?;
+
+    //     // 2. Set Transfer Hook authority to the hook_program_id
+    //     set_transfer_hook_authority(
+    //         self.coop_token.to_account_info(),
+    //         self.token_program.to_account_info(),
+    //         hook_program_id,
+    //     )?;
+
+    //     Ok(())
+    // }
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize)]
+pub struct TokenMetadataArgs {
+    pub name: String,
+    pub symbol: String,
+    pub uri: String,
 }

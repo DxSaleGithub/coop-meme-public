@@ -23,3 +23,4 @@ anchor-spl = { version = "0.31.0", features = ["metadata"] }
 solana-program = "2.3.0"
 spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
 raydium-cpmm-cpi = { git = "https://github.com/raydium-io/raydium-cpi", package = "raydium-cpmm-cpi", branch = "anchor-0.31.0" }
+# spl-type-length-value = "0.6.0"

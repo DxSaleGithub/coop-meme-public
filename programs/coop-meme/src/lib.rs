@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3");
+declare_id!("832KukzzgqyGzC2W1NEqViRq9aTrP4okDGm7gKWa59V5");
 
 #[program]
 pub mod coop_meme {
