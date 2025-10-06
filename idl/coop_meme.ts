@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3",
+  "address": "832KukzzgqyGzC2W1NEqViRq9aTrP4okDGm7gKWa59V5",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -308,10 +308,6 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
               }
@@ -353,41 +349,8 @@ export type CoopMeme = {
                 "path": "globalVault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -491,20 +454,28 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mplTokenMetadataProgram",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -626,105 +597,6 @@ export type CoopMeme = {
           }
         },
         {
-          "name": "tokenMetadataAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  11,
-                  112,
-                  101,
-                  177,
-                  227,
-                  209,
-                  124,
-                  69,
-                  56,
-                  157,
-                  82,
-                  127,
-                  107,
-                  4,
-                  195,
-                  205,
-                  88,
-                  184,
-                  108,
-                  115,
-                  26,
-                  160,
-                  253,
-                  181,
-                  73,
-                  182,
-                  209,
-                  188,
-                  3,
-                  248,
-                  41,
-                  70
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                11,
-                112,
-                101,
-                177,
-                227,
-                209,
-                124,
-                69,
-                56,
-                157,
-                82,
-                127,
-                107,
-                4,
-                195,
-                205,
-                88,
-                184,
-                108,
-                115,
-                26,
-                160,
-                253,
-                181,
-                73,
-                182,
-                209,
-                188,
-                3,
-                248,
-                41,
-                70
-              ]
-            }
-          }
-        },
-        {
           "name": "globalTokenAta",
           "writable": true,
           "pda": {
@@ -740,34 +612,34 @@ export type CoopMeme = {
                   221,
                   246,
                   225,
-                  215,
-                  101,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
                   161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
+                  139,
+                  252
                 ]
               },
               {
@@ -872,6 +744,9 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "hookProgram"
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
@@ -881,15 +756,11 @@ export type CoopMeme = {
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mplTokenMetadataProgram",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -998,6 +869,7 @@ export type CoopMeme = {
         },
         {
           "name": "coopToken",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -1008,10 +880,6 @@ export type CoopMeme = {
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -1059,107 +927,12 @@ export type CoopMeme = {
           "writable": true
         },
         {
-          "name": "tokenMetadataAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  11,
-                  112,
-                  101,
-                  177,
-                  227,
-                  209,
-                  124,
-                  69,
-                  56,
-                  157,
-                  82,
-                  127,
-                  107,
-                  4,
-                  195,
-                  205,
-                  88,
-                  184,
-                  108,
-                  115,
-                  26,
-                  160,
-                  253,
-                  181,
-                  73,
-                  182,
-                  209,
-                  188,
-                  3,
-                  248,
-                  41,
-                  70
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                11,
-                112,
-                101,
-                177,
-                227,
-                209,
-                124,
-                69,
-                56,
-                157,
-                82,
-                127,
-                107,
-                4,
-                195,
-                205,
-                88,
-                184,
-                108,
-                115,
-                26,
-                160,
-                253,
-                181,
-                73,
-                182,
-                209,
-                188,
-                3,
-                248,
-                41,
-                70
-              ]
-            }
-          }
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         },
         {
-          "name": "mplTokenMetadataProgram",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+          "name": "tokenProgram",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ],
       "args": []
@@ -1427,9 +1200,6 @@ export type CoopMeme = {
           "signer": true
         },
         {
-          "name": "creator"
-        },
-        {
           "name": "teamWallet",
           "writable": true
         },
@@ -1512,10 +1282,6 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
               }
@@ -1557,41 +1323,8 @@ export type CoopMeme = {
                 "path": "globalVault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "token22Program"
               },
               {
                 "kind": "account",
@@ -1639,183 +1372,11 @@ export type CoopMeme = {
         },
         {
           "name": "ownerToken0",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "owner"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token0Mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "ownerToken1",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "owner"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token1Mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "lpMint",
@@ -2052,11 +1613,30 @@ export type CoopMeme = {
           "address": "So11111111111111111111111111111111111111112"
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "tokenProgram",
           "docs": [
             "Program to create mint account and mint tokens"
           ],
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token22Program",
+          "docs": [
+            "Program to create mint account and mint tokens"
+          ],
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
@@ -2225,10 +1805,6 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
               }
@@ -2270,41 +1846,8 @@ export type CoopMeme = {
                 "path": "globalVault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -2408,20 +1951,28 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mplTokenMetadataProgram",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -2815,10 +2366,6 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
               }
@@ -3046,12 +2593,24 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
@@ -3140,10 +2699,6 @@ export type CoopMeme = {
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -3319,12 +2874,24 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
@@ -3533,10 +3100,6 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
               }
@@ -3764,12 +3327,24 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
@@ -3858,10 +3433,6 @@ export type CoopMeme = {
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -4068,12 +3639,24 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "extraAccountMetaList",
+          "writable": true
+        },
+        {
+          "name": "hookProgram",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associatedTokenProgram",
@@ -4333,8 +3916,123 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "tradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6010,
+      "name": "notEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6011,
+      "name": "notEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6012,
+      "name": "invalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "tokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6017,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
+    },
+    {
+      "code": 6018,
+      "name": "optionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6019,
+      "name": "tokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
+    },
+    {
+      "code": 6020,
+      "name": "invalidOption",
+      "msg": "Token Option invalid"
+    },
+    {
+      "code": 6021,
+      "name": "roleExist",
+      "msg": "Role already exists"
+    },
+    {
+      "code": 6022,
+      "name": "roleDoesNotExist",
+      "msg": "Role does not exist"
+    },
+    {
+      "code": 6023,
+      "name": "inSufficientRole",
+      "msg": "Signer does not have sufficient role"
     }
   ],
   "types": [

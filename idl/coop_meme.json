@@ -1,5 +1,5 @@
 {
-  "address": "6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3",
+  "address": "832KukzzgqyGzC2W1NEqViRq9aTrP4okDGm7gKWa59V5",
   "metadata": {
     "name": "coop_meme",
     "version": "0.1.0",
@@ -302,10 +302,6 @@
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
               }
@@ -347,41 +343,8 @@
                 "path": "global_vault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "token_program"
               },
               {
                 "kind": "account",
@@ -485,20 +448,28 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mpl_token_metadata_program",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -620,105 +591,6 @@
           }
         },
         {
-          "name": "token_metadata_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  11,
-                  112,
-                  101,
-                  177,
-                  227,
-                  209,
-                  124,
-                  69,
-                  56,
-                  157,
-                  82,
-                  127,
-                  107,
-                  4,
-                  195,
-                  205,
-                  88,
-                  184,
-                  108,
-                  115,
-                  26,
-                  160,
-                  253,
-                  181,
-                  73,
-                  182,
-                  209,
-                  188,
-                  3,
-                  248,
-                  41,
-                  70
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                11,
-                112,
-                101,
-                177,
-                227,
-                209,
-                124,
-                69,
-                56,
-                157,
-                82,
-                127,
-                107,
-                4,
-                195,
-                205,
-                88,
-                184,
-                108,
-                115,
-                26,
-                160,
-                253,
-                181,
-                73,
-                182,
-                209,
-                188,
-                3,
-                248,
-                41,
-                70
-              ]
-            }
-          }
-        },
-        {
           "name": "global_token_ata",
           "writable": true,
           "pda": {
@@ -734,34 +606,34 @@
                   221,
                   246,
                   225,
-                  215,
-                  101,
+                  238,
+                  117,
+                  143,
+                  222,
+                  24,
+                  66,
+                  93,
+                  188,
+                  228,
+                  108,
+                  205,
+                  218,
+                  182,
+                  26,
+                  252,
+                  77,
+                  131,
+                  185,
+                  13,
+                  39,
+                  254,
+                  189,
+                  249,
+                  40,
+                  216,
                   161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
+                  139,
+                  252
                 ]
               },
               {
@@ -866,6 +738,9 @@
           }
         },
         {
+          "name": "hook_program"
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
@@ -875,15 +750,11 @@
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mpl_token_metadata_program",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -992,6 +863,7 @@
         },
         {
           "name": "coop_token",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -1002,10 +874,6 @@
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -1053,107 +921,12 @@
           "writable": true
         },
         {
-          "name": "token_metadata_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  11,
-                  112,
-                  101,
-                  177,
-                  227,
-                  209,
-                  124,
-                  69,
-                  56,
-                  157,
-                  82,
-                  127,
-                  107,
-                  4,
-                  195,
-                  205,
-                  88,
-                  184,
-                  108,
-                  115,
-                  26,
-                  160,
-                  253,
-                  181,
-                  73,
-                  182,
-                  209,
-                  188,
-                  3,
-                  248,
-                  41,
-                  70
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                11,
-                112,
-                101,
-                177,
-                227,
-                209,
-                124,
-                69,
-                56,
-                157,
-                82,
-                127,
-                107,
-                4,
-                195,
-                205,
-                88,
-                184,
-                108,
-                115,
-                26,
-                160,
-                253,
-                181,
-                73,
-                182,
-                209,
-                188,
-                3,
-                248,
-                41,
-                70
-              ]
-            }
-          }
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         },
         {
-          "name": "mpl_token_metadata_program",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ],
       "args": []
@@ -1421,9 +1194,6 @@
           "signer": true
         },
         {
-          "name": "creator"
-        },
-        {
           "name": "team_wallet",
           "writable": true
         },
@@ -1506,10 +1276,6 @@
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
               }
@@ -1551,41 +1317,8 @@
                 "path": "global_vault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "token_22_program"
               },
               {
                 "kind": "account",
@@ -1633,183 +1366,11 @@
         },
         {
           "name": "owner_token_0",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "owner"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_0_mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "owner_token_1",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "owner"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_1_mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "lp_mint",
@@ -2046,11 +1607,30 @@
           "address": "So11111111111111111111111111111111111111112"
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "token_program",
           "docs": [
             "Program to create mint account and mint tokens"
           ],
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_22_program",
+          "docs": [
+            "Program to create mint account and mint tokens"
+          ],
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
@@ -2219,10 +1799,6 @@
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
               }
@@ -2264,41 +1840,8 @@
                 "path": "global_vault"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "token_program"
               },
               {
                 "kind": "account",
@@ -2402,20 +1945,28 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "mpl_token_metadata_program",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
       "args": [
@@ -2809,10 +2360,6 @@
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
               }
@@ -3040,12 +2587,24 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
@@ -3134,10 +2693,6 @@
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -3313,12 +2868,24 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
@@ -3527,10 +3094,6 @@
               },
               {
                 "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
               }
@@ -3758,12 +3321,24 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
@@ -3852,10 +3427,6 @@
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
               },
               {
                 "kind": "account",
@@ -4062,12 +3633,24 @@
           }
         },
         {
+          "name": "extra_account_meta_list",
+          "writable": true
+        },
+        {
+          "name": "hook_program",
+          "writable": true
+        },
+        {
+          "name": "whitelist",
+          "writable": true
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "associated_token_program",
@@ -4327,8 +3910,123 @@
   "errors": [
     {
       "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "InvalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "TradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "InsufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "TradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6010,
+      "name": "NotEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6011,
+      "name": "NotEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "VotingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "VotingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "TokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "TokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidListingInfo",
+      "msg": "Listing info not valid"
+    },
+    {
+      "code": 6018,
+      "name": "OptionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6019,
+      "name": "TokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidOption",
+      "msg": "Token Option invalid"
+    },
+    {
+      "code": 6021,
+      "name": "RoleExist",
+      "msg": "Role already exists"
+    },
+    {
+      "code": 6022,
+      "name": "RoleDoesNotExist",
+      "msg": "Role does not exist"
+    },
+    {
+      "code": 6023,
+      "name": "InSufficientRole",
+      "msg": "Signer does not have sufficient role"
     }
   ],
   "types": [
