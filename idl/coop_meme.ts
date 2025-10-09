@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3",
+  "address": "58Pbrmtb3Ai1S1vtafW8CrvrUZGhgtRGxDErzr4oVvcu",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -914,6 +914,363 @@ export type CoopMeme = {
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "emergencyWithdrawCoopToken",
+      "discriminator": [
+        253,
+        200,
+        248,
+        16,
+        24,
+        153,
+        55,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "globalVault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "teamWallet",
+          "writable": true
+        },
+        {
+          "name": "mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adminTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "emergencyWithdrawSol",
+      "discriminator": [
+        219,
+        156,
+        123,
+        176,
+        91,
+        105,
+        30,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "teamWallet",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "finalizeVote",
@@ -2083,6 +2440,49 @@ export type CoopMeme = {
       "args": []
     },
     {
+      "name": "pause",
+      "discriminator": [
+        211,
+        22,
+        221,
+        251,
+        74,
+        121,
+        193,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "revokeRole",
       "discriminator": [
         179,
@@ -2436,6 +2836,92 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "startEmergencyMode",
+      "discriminator": [
+        142,
+        34,
+        175,
+        73,
+        55,
+        191,
+        23,
+        167
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "stopEmergencyMode",
+      "discriminator": [
+        182,
+        27,
+        31,
+        1,
+        206,
+        90,
+        172,
+        138
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "swapTokenBaseInput",
       "discriminator": [
         121,
@@ -2736,6 +3222,49 @@ export type CoopMeme = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "unpause",
+      "discriminator": [
+        169,
+        144,
+        4,
+        38,
+        10,
+        141,
+        188,
+        255
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "unvote",
@@ -4090,6 +4619,289 @@ export type CoopMeme = {
           }
         }
       ]
+    },
+    {
+      "name": "withdrawListedCoopToken",
+      "discriminator": [
+        150,
+        47,
+        83,
+        85,
+        160,
+        133,
+        148,
+        22
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "globalVault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "teamWallet",
+          "writable": true
+        },
+        {
+          "name": "mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "adminTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -4333,8 +5145,143 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "tradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6010,
+      "name": "notEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6011,
+      "name": "notEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6012,
+      "name": "invalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6013,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6014,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6015,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6016,
+      "name": "tokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6017,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
+    },
+    {
+      "code": 6018,
+      "name": "optionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6019,
+      "name": "tokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
+    },
+    {
+      "code": 6020,
+      "name": "invalidOption",
+      "msg": "Token Option invalid"
+    },
+    {
+      "code": 6021,
+      "name": "roleExist",
+      "msg": "Role already exists"
+    },
+    {
+      "code": 6022,
+      "name": "roleDoesNotExist",
+      "msg": "Role does not exist"
+    },
+    {
+      "code": 6023,
+      "name": "inSufficientRole",
+      "msg": "Signer does not have sufficient role"
+    },
+    {
+      "code": 6024,
+      "name": "paused",
+      "msg": "Operation is paused currently"
+    },
+    {
+      "code": 6025,
+      "name": "notPaused",
+      "msg": "Operation is not paused currently"
+    },
+    {
+      "code": 6026,
+      "name": "inEmergency",
+      "msg": "Operation is in emergency mode"
+    },
+    {
+      "code": 6027,
+      "name": "notInEmergency",
+      "msg": "Operation is not in emergency mode"
     }
   ],
   "types": [
@@ -4468,6 +5415,14 @@ export type CoopMeme = {
           {
             "name": "admin",
             "type": "pubkey"
+          },
+          {
+            "name": "isPaused",
+            "type": "bool"
+          },
+          {
+            "name": "inEmergency",
+            "type": "bool"
           },
           {
             "name": "teamWallet",
