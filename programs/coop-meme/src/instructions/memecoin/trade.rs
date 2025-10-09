@@ -8,8 +8,11 @@ use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
     metadata::{self, Metadata},
-    token::{self, Mint, Token, TokenAccount},
+    token::{self, FreezeAccount, Mint, Token, TokenAccount},
 };
+use solana_program::program_pack::Pack;
+use spl_token::state::Account as SplTokenAccount;
+
 #[derive(Accounts)]
 pub struct Trade<'info> {
     #[account[
@@ -89,6 +92,7 @@ pub struct Trade<'info> {
 
 impl<'info> Trade<'info> {
     pub fn buy_tokens(&mut self, amount: u64, min_tokens_receive: u64) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -178,6 +182,18 @@ impl<'info> Trade<'info> {
             CoopMemeError::InsufficientAmount
         );
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.trader_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         token_transfer_with_signer(
             self.global_token_ata.to_account_info(),
             self.global_vault.to_account_info(),
@@ -185,6 +201,19 @@ impl<'info> Trade<'info> {
             &self.token_program,
             &[seeds],
             token_amount as u64,
+        )?;
+
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.trader_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
         )?;
 
         emit!(TradeEvent {
@@ -202,6 +231,7 @@ impl<'info> Trade<'info> {
     }
 
     pub fn sell_tokens(&mut self, amount: u64, min_sol_receive: u64) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -254,6 +284,19 @@ impl<'info> Trade<'info> {
             CoopMemeError::InsufficientAmount
         );
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.trader_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         token_transfer_user(
             self.trader_token_ata.to_account_info(),
             &self.trader,
@@ -296,6 +339,18 @@ impl<'info> Trade<'info> {
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
 
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.trader_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
+        )?;
         emit!(TradeEvent {
             trader: self.trader.key(),
             coop_token: self.coop_token.key(),

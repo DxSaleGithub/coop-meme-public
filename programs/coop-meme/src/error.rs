@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+use crate::Emergency;
+
 #[error_code]
 pub enum ErrorCode {
     #[msg("Invalid total supply")]
@@ -56,4 +58,12 @@ pub enum CoopMemeError {
     RoleDoesNotExist,
     #[msg("Signer does not have sufficient role")]
     InSufficientRole,
+    #[msg("Operation is paused currently")]
+    Paused,
+    #[msg("Operation is not paused currently")]
+    NotPaused,
+    #[msg("Operation is in emergency mode")]
+    InEmergency,
+    #[msg("Operation is not in emergency mode")]
+    NotInEmergency,
 }

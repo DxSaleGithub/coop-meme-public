@@ -52,6 +52,8 @@ impl<'info> Config<'info> {
     pub fn init(&mut self, bumbs: &ConfigBumps, team_wallet: Pubkey) -> Result<()> {
         self.config.set_inner(ConfigData {
             admin: self.owner.key(),
+            is_paused: false,
+            in_emergency: false,
             team_wallet: team_wallet,
             team_fee: 1000,
             owner_fee: 1000,
@@ -173,6 +175,4 @@ impl<'info> UpdateConfig<'info> {
 
         Ok(())
     }
-
-    // update methods here
 }

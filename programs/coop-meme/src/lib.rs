@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("6waZVFJmuW5z4HdWAHNN19ixyGWV4SjThe1E3PuLKaQ3");
+declare_id!("58Pbrmtb3Ai1S1vtafW8CrvrUZGhgtRGxDErzr4oVvcu");
 
 #[program]
 pub mod coop_meme {
@@ -63,6 +63,34 @@ pub mod coop_meme {
 
     pub fn revoke_role(ctx: Context<RBAControl>, role_type: RoleType, user: Pubkey) -> Result<()> {
         ctx.accounts.revoke_role(role_type, user)
+    }
+
+    pub fn pause(ctx: Context<Pause>) -> Result<()> {
+        ctx.accounts.set_pause(Some(true))
+    }
+
+    pub fn unpause(ctx: Context<Pause>) -> Result<()> {
+        ctx.accounts.set_pause(Some(false))
+    }
+
+    pub fn start_emergency_mode(ctx: Context<Emergency>) -> Result<()> {
+        ctx.accounts.set_emergency(Some(true))
+    }
+
+    pub fn stop_emergency_mode(ctx: Context<Emergency>) -> Result<()> {
+        ctx.accounts.set_emergency(Some(false))
+    }
+
+    pub fn emergency_withdraw_sol(ctx: Context<EmergencyWithdrawSOL>) -> Result<()> {
+        ctx.accounts.emergency_withdraw_sol()
+    }
+
+    pub fn emergency_withdraw_coop_token(ctx: Context<EmergencyWithdrawCoopToken>) -> Result<()> {
+        ctx.accounts.emergency_withdraw_coop_token()
+    }
+
+    pub fn withdraw_listed_coop_token(ctx: Context<EmergencyWithdrawCoopToken>) -> Result<()> {
+        ctx.accounts.withdraw_listed_coop_token()
     }
 
     pub fn create_token(

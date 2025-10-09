@@ -2,7 +2,9 @@ use crate::state::{ConfigData, MemeCoinData, RBAControlList, RoleType};
 use crate::{
     error::*,
     events::{BurnEvent, ListEvent, TradingOverEvent},
-    utils::{has_role, sol_transfer_with_signer, token_transfer_with_signer},
+    utils::{
+        has_role, sol_transfer_with_signer, token_transfer_with_signer, unfreeze_user_token_account,
+    },
 };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
@@ -199,6 +201,8 @@ pub struct List<'info> {
 
 impl<'info> List<'info> {
     pub fn list_token(&mut self) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         has_role(&self.rbac.roles, RoleType::LISTING, self.owner.key())?;
 
         require!(
@@ -294,6 +298,18 @@ impl<'info> List<'info> {
             (self.memecoin.real_token_reserves as u64) <= self.global_token_ata.amount,
             CoopMemeError::NotEnoughToken
         );
+
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            owner_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
 
         // transfer tokens from global token ata to owner token ata
         token_transfer_with_signer(

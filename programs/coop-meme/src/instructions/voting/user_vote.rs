@@ -2,7 +2,10 @@ use crate::{
     error::*,
     events::{TradingOverEvent, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
-    utils::{token_transfer_user, token_transfer_with_signer},
+    utils::{
+        freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
+        unfreeze_user_token_account,
+    },
     OptionType,
 };
 use anchor_lang::prelude::*;
@@ -95,6 +98,8 @@ pub struct UserVote<'info> {
 
 impl<'info> UserVote<'info> {
     pub fn user_votes(&mut self, votes: u64) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -121,6 +126,18 @@ impl<'info> UserVote<'info> {
         self.user_token_votes.total_votes += votes;
         self.user_token_option_votes.total_votes += votes;
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         // transfer token from user to vote_ata
         token_transfer_user(
             self.user_token_ata.to_account_info(),
@@ -128,6 +145,19 @@ impl<'info> UserVote<'info> {
             self.vote_token_ata.to_account_info(),
             &self.token_program,
             votes,
+        )?;
+
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
         )?;
 
         let option_value = &self.token_option.option_value;
@@ -154,6 +184,8 @@ impl<'info> UserVote<'info> {
     }
 
     pub fn user_unvotes(&mut self, votes: u64) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -183,6 +215,18 @@ impl<'info> UserVote<'info> {
             &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
         ];
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         // transfer token from vote_ata to user
         token_transfer_with_signer(
             self.vote_token_ata.to_account_info(),
@@ -191,6 +235,19 @@ impl<'info> UserVote<'info> {
             &self.token_program,
             &[seeds],
             votes,
+        )?;
+
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
         )?;
 
         let option_value = &self.token_option.option_value;

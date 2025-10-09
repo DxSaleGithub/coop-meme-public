@@ -83,6 +83,8 @@ pub struct FinalizeVote<'info> {
 
 impl<'info> FinalizeVote<'info> {
     pub fn finalize_vote(&mut self) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         has_role(&self.rbac.roles, RoleType::VOTING, self.user.key())?;
         // require!(
         //     self.config.admin.key() == self.user.key(),

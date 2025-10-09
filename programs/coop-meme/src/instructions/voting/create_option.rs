@@ -2,7 +2,10 @@ use crate::{
     error::*,
     events::{TradingOverEvent, UnlockAllTokens, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
-    utils::{token_transfer_user, token_transfer_with_signer},
+    utils::{
+        freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
+        unfreeze_user_token_account,
+    },
     CreateOptionInfo, OptionType,
 };
 use anchor_lang::prelude::*;
@@ -101,6 +104,8 @@ impl<'info> CreateOption<'info> {
         bumps: &CreateOptionBumps,
         create_option: CreateOptionInfo,
     ) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
@@ -140,6 +145,18 @@ impl<'info> CreateOption<'info> {
         self.user_token_option_votes.total_votes += current_total_votes;
         self.memecoin.total_options += 1;
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         // transfer token from user to vote_ata
         token_transfer_user(
             self.user_token_ata.to_account_info(),
@@ -147,6 +164,19 @@ impl<'info> CreateOption<'info> {
             self.vote_token_ata.to_account_info(),
             &self.token_program,
             current_total_votes as u64,
+        )?;
+
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
         )?;
 
         let option_value = &self.token_option.option_value;
@@ -245,6 +275,8 @@ pub struct UnlockAll<'info> {
 
 impl<'info> UnlockAll<'info> {
     pub fn unvote_all_tokens(&mut self) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
         require!(
             !self.user_token_votes.all_unlocked,
@@ -254,23 +286,38 @@ impl<'info> UnlockAll<'info> {
         let current_total_votes = self.user_token_votes.total_votes;
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
-        let seeds: &[&[u8]] = &[
-            b"memecoin",
-            coop_token_key.as_ref(),        // your static seed
-            &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
-        ];
 
         self.user_token_votes.all_unlocked = true;
 
-        // transfer token from vote_ata to user
-        token_transfer_with_signer(
-            self.vote_token_ata.to_account_info(),
-            self.memecoin.to_account_info(),
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
             self.user_token_ata.to_account_info(),
-            &self.token_program,
-            &[seeds],
-            current_total_votes as u64,
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
         )?;
+
+        if current_total_votes > 0 {
+            let seeds: &[&[u8]] = &[
+                b"memecoin",
+                coop_token_key.as_ref(),        // your static seed
+                &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
+            ];
+
+            // transfer token from vote_ata to user
+            token_transfer_with_signer(
+                self.vote_token_ata.to_account_info(),
+                self.memecoin.to_account_info(),
+                self.user_token_ata.to_account_info(),
+                &self.token_program,
+                &[seeds],
+                current_total_votes as u64,
+            )?;
+        }
 
         emit!(UnlockAllTokens {
             user: self.user.key(),

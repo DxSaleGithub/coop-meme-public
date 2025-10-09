@@ -45,6 +45,7 @@ pub struct MemeCoin<'info> {
         payer = creator,
         mint::decimals = 9,
         mint::authority = global_vault.key(),
+        mint::freeze_authority=global_vault.key()
     )]
     pub coop_token: Box<Account<'info, Mint>>,
     #[account[
@@ -114,6 +115,7 @@ impl<'info> MemeCoin<'info> {
         symbol: String,
         uri: String,
     ) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
         has_role(&self.rbac.roles, RoleType::CREATING, self.creator.key())?;
         require!(
             total_supply == 1_000_000_000_000_000_000,

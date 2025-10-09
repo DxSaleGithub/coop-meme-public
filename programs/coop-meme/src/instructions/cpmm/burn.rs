@@ -95,6 +95,8 @@ pub struct BurnLP<'info> {
 
 impl<'info> BurnLP<'info> {
     pub fn burn_lp_token(&mut self) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+
         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
         require!(
             self.config.admin.key() == self.owner.key(),

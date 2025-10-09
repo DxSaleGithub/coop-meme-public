@@ -1,7 +1,9 @@
 use crate::error::CoopMemeError;
 use crate::*;
-use anchor_spl::token::{self, Token};
+use anchor_spl::token::{self, FreezeAccount, Token};
 use solana_program::program::{invoke, invoke_signed};
+use solana_program::program_pack::Pack;
+use spl_token::state::Account as SplTokenAccount;
 use std::ops::{Div, Mul};
 
 pub fn convert_to_float(value: u64, decimals: u8) -> f64 {
@@ -98,6 +100,55 @@ pub fn has_role<'info>(roles: &Vec<Role>, role_type: RoleType, user: Pubkey) -> 
 
     if !exists {
         return Err(CoopMemeError::InSufficientRole.into());
+    }
+
+    Ok(())
+}
+
+pub fn freeze_user_token_account<'info>(
+    global_vault: AccountInfo<'info>,
+    mint: AccountInfo<'info>,
+    user_ata: AccountInfo<'info>,
+    token_program: AccountInfo<'info>,
+    signers_seeds: &[&[&[u8]]],
+) -> Result<()> {
+    let cpi_accounts = FreezeAccount {
+        account: user_ata,
+        mint,
+        authority: global_vault,
+    };
+
+    let cpi_ctx = CpiContext::new_with_signer(token_program, cpi_accounts, signers_seeds);
+
+    token::freeze_account(cpi_ctx)
+}
+
+pub fn unfreeze_user_token_account<'info>(
+    global_vault: AccountInfo<'info>,
+    mint: AccountInfo<'info>,
+    user_ata: AccountInfo<'info>,
+    token_program: AccountInfo<'info>,
+    signers_seeds: &[&[&[u8]]],
+) -> Result<()> {
+    let token_account_info = &user_ata;
+
+    // Deserialize the raw account data into spl_token::state::Account
+    let token_account_data =
+        SplTokenAccount::unpack(&token_account_info.data.borrow()).map_err(|_| {
+            error!(CoopMemeError::InvalidOperation);
+            ProgramError::InvalidAccountData
+        })?;
+
+    if token_account_data.state == spl_token::state::AccountState::Frozen {
+        let cpi_accounts = token::ThawAccount {
+            account: user_ata,
+            mint,
+            authority: global_vault,
+        };
+
+        let cpi_ctx = CpiContext::new_with_signer(token_program, cpi_accounts, signers_seeds);
+
+        token::thaw_account(cpi_ctx)?;
     }
 
     Ok(())

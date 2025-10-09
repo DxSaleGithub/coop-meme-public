@@ -4,6 +4,8 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct ConfigData {
     pub admin: Pubkey,
+    pub is_paused: bool,
+    pub in_emergency: bool,
     pub team_wallet: Pubkey,
     pub team_fee: u16,
     pub owner_fee: u16,
