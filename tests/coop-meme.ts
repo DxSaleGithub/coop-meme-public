@@ -123,12 +123,12 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(180);
-    const newFairlaunchPeriod = new anchor.BN(60);
+    const newCoopInterval = new anchor.BN(900);
+    const newFairlaunchPeriod = new anchor.BN(300);
     const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
-    const newMinOptionToken = new anchor.BN(0);
+    const newMinOptionToken = new anchor.BN(1000_000_000_000);
 
     const newMinPricePerToken = 1;
 
@@ -173,8 +173,8 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it.skip('provide roles', async () => {
-    const owner = provider.wallet.publicKey;
+  it.only('provide roles', async () => {
+    // const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
     // const owner = new PublicKey(
@@ -187,6 +187,10 @@ describe('coop-meme-2', () => {
     // const owner = new PublicKey(
     //   'pFV11axxRCogW3nPGchmV6YbK4EpgQGFZrSyk1KZFEL' // Lovish
     // );
+
+    const owner = new PublicKey(
+      'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis
+    );
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('roles')],
