@@ -1,5 +1,7 @@
 use crate::state::MemeCoinData;
-use crate::utils::token_transfer_with_signer;
+use crate::utils::{
+    sol_transfer_with_signer, token_transfer_with_signer, unfreeze_user_token_account,
+};
 use crate::{error::*, state::ConfigData};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::{self, AssociatedToken};
@@ -26,7 +28,7 @@ impl<'info> Emergency<'info> {
         );
 
         if let Some(emergency_status) = in_emergency {
-            self.config.is_paused = emergency_status;
+            self.config.in_emergency = emergency_status;
         }
 
         Ok(())
@@ -84,12 +86,27 @@ impl<'info> EmergencyWithdrawSOL<'info> {
             .checked_sub(rent_exempt_minimum)
             .ok_or(CoopMemeError::NotEnoughSol)?;
 
-        // Only transfer if there is a positive withdrawable amount
+        let seeds: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
         if withdraw_amount > 0 {
-            // Use invoke_signed for PDA authority
-            **vault_info.try_borrow_mut_lamports()? -= withdraw_amount;
-            **admin_info.try_borrow_mut_lamports()? += withdraw_amount;
+            sol_transfer_with_signer(
+                self.global_vault.to_account_info(),
+                self.admin.to_account_info(),
+                &self.system_program,
+                &[seeds],
+                withdraw_amount,
+            )?;
         }
+
+        // // Only transfer if there is a positive withdrawable amount
+        // if withdraw_amount > 0 {
+        //     // Use invoke_signed for PDA authority
+        //     **vault_info.try_borrow_mut_lamports()? -= withdraw_amount;
+        //     **admin_info.try_borrow_mut_lamports()? += withdraw_amount;
+        // }
 
         Ok(())
     }
@@ -169,6 +186,18 @@ impl<'info> EmergencyWithdrawCoopToken<'info> {
         require!(self.config.is_paused, CoopMemeError::NotPaused);
         require!(self.config.in_emergency, CoopMemeError::NotInEmergency);
 
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.mint.to_account_info(),
+            self.admin_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
+
         let seeds: &[&[u8]] = &[
             b"global",                        // your static seed
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
@@ -195,6 +224,18 @@ impl<'info> EmergencyWithdrawCoopToken<'info> {
         );
 
         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+
+        let seeds_for_unfreeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+        unfreeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.mint.to_account_info(),
+            self.admin_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_unfreeze],
+        )?;
 
         let seeds: &[&[u8]] = &[
             b"global",                        // your static seed

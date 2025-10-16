@@ -29,17 +29,17 @@ describe('coop-meme-2', () => {
     'An7Lica1BAXqKuY5ScViHwBnQLqnUQt1eYmDvHgYdaMQ'
   );
   let affiliate = provider.wallet.publicKey;
-  let cpSwapProgram = new PublicKey(
-    'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb'
-  );
+  // let cpSwapProgram = new PublicKey(
+  //   'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb'
+  // );
 
-  let ammConfig = new PublicKey(
-    'HTVWgp8CbUsRNmRE1p9RBYqopxe2qiyApSkiTFLrfxaW'
-  );
+  // let ammConfig = new PublicKey(
+  //   'HTVWgp8CbUsRNmRE1p9RBYqopxe2qiyApSkiTFLrfxaW'
+  // );
 
-  let createPoolFee = new PublicKey(
-    '3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy'
-  );
+  // let createPoolFee = new PublicKey(
+  //   '3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy'
+  // );
 
   // const creator = Keypair.generate();
 
@@ -55,19 +55,19 @@ describe('coop-meme-2', () => {
   //   `Funded account ${creator.publicKey.toBase58()} with 1 SOL`
   // );
 
-  // let cpSwapProgram = new PublicKey(
-  //   'CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'
-  // );
+  let cpSwapProgram = new PublicKey(
+    'CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'
+  );
 
-  // let ammConfig = new PublicKey(
-  //   'D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2'
-  // );
+  let ammConfig = new PublicKey(
+    'D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2'
+  );
 
-  // let createPoolFee = new PublicKey(
-  //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
-  // );
+  let createPoolFee = new PublicKey(
+    'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
+  );
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -106,7 +106,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.skip('updates the config', async () => {
+  it('updates the config', async () => {
     const owner = provider.wallet.publicKey;
 
     const [configPda] =
@@ -173,8 +173,8 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it.only('provide roles', async () => {
-    // const owner = provider.wallet.publicKey;
+  it('provide roles', async () => {
+    const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
     // const owner = new PublicKey(
@@ -188,9 +188,9 @@ describe('coop-meme-2', () => {
     //   'pFV11axxRCogW3nPGchmV6YbK4EpgQGFZrSyk1KZFEL' // Lovish
     // );
 
-    const owner = new PublicKey(
-      'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis
-    );
+    // const owner = new PublicKey(
+    //   'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis
+    // );
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('roles')],
@@ -242,137 +242,6 @@ describe('coop-meme-2', () => {
     await create_tokens();
   });
 
-  // it('first buying memecoin!', async () => {
-  //   const trader = provider.wallet.publicKey;
-  //   const creator = provider.wallet.publicKey;
-
-  //   const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from('config')],
-  //     program.programId
-  //   );
-
-  //   // Fetch the config to get `total_coop_created`
-  //   const config = await program.account.configData.fetch(configPda);
-
-  //   const [globalVault] =
-  //     anchor.web3.PublicKey.findProgramAddressSync(
-  //       [Buffer.from('global')],
-  //       program.programId
-  //     );
-
-  //   const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-  //   const seedBuffer = totalCoopCreated
-  //     .addn(1)
-  //     .toArrayLike(Buffer, 'le', 4); // u64 LE
-
-  //   const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-  //     program.programId
-  //   );
-
-  //   const [memecoinPda] =
-  //     anchor.web3.PublicKey.findProgramAddressSync(
-  //       [Buffer.from('memecoin'), coopToken.toBuffer()],
-  //       program.programId
-  //     );
-
-  //   let memecoinState = await program.account.memeCoinData.fetch(
-  //     memecoinPda
-  //   );
-  //   console.log('Memecoin state data:', memecoinState);
-  //   console.log(
-  //     'Memecoin state data: virtual sol reserves',
-  //     memecoinState.virtualSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: virtual token reserves',
-  //     memecoinState.virtualTokenReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real sol reserves',
-  //     memecoinState.realSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real token reserves',
-  //     memecoinState.realTokenReserves.toString()
-  //   );
-  //   const [globalTokenAta] =
-  //     anchor.web3.PublicKey.findProgramAddressSync(
-  //       [
-  //         globalVault.toBuffer(),
-  //         anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-  //         coopToken.toBuffer(),
-  //       ],
-  //       anchor.utils.token.ASSOCIATED_PROGRAM_ID
-  //     );
-
-  //   const traderTokenAta = await getAssociatedTokenAddress(
-  //     coopToken,
-  //     trader,
-  //     false // allowOwnerOffCurve = false (always false unless you know it's needed)
-  //   );
-
-  //   const txSig = await program.methods
-  //     .buyTokens(new BN(1_000_000_00), new BN(0))
-  //     .accounts({
-  //       trader,
-  //       affiliate,
-  //       creator,
-  //       teamWallet,
-  //       config: configPda,
-  //       globalVault,
-  //       coopToken,
-  //       memecoin: memecoinPda,
-  //       globalTokenAta,
-  //       traderTokenAta,
-  //       tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-  //       associatedTokenProgram:
-  //         anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-  //       mplTokenMetadataProgram: new anchor.web3.PublicKey(
-  //         'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s' // Update if needed
-  //       ),
-  //       systemProgram: anchor.web3.SystemProgram.programId,
-  //     })
-  //     .rpc();
-
-  //   console.log('Tx hash:', txSig);
-
-  //   const tx = await provider.connection.getTransaction(txSig, {
-  //     commitment: 'confirmed',
-  //     maxSupportedTransactionVersion: 0,
-  //   });
-  //   if (!tx || !tx.meta) {
-  //     console.error('Transaction or metadata not found');
-  //   } else {
-  //     console.log(tx.meta.logMessages);
-  //   }
-
-  //   memecoinState = await program.account.memeCoinData.fetch(
-  //     memecoinPda
-  //   );
-  //   console.log('Memecoin state data:', memecoinState);
-  //   console.log(
-  //     'Memecoin state data: virtual sol reserves',
-  //     memecoinState.virtualSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: virtual token reserves',
-  //     memecoinState.virtualTokenReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real sol reserves',
-  //     memecoinState.realSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real token reserves',
-  //     memecoinState.realTokenReserves.toString()
-  //   );
-
-  //   // real sol & real token
-  //   // user token balance
-  //   // vault sol balance
-  // });
-
   it('first buying memecoin!', async () => {
     await buy_tokens();
   });
@@ -381,101 +250,109 @@ describe('coop-meme-2', () => {
     await sell_tokens();
   });
 
-  // it('tests buy/sell for price changes', async () => {
-  //   const creator = provider.wallet.publicKey;
+  it('emergency withdraw SOL', async () => {
+    await emergencyWithdrawSol();
+  });
 
-  //   const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from('config')],
-  //     program.programId
-  //   );
+  it('emergency withdraw Coop token', async () => {
+    await emergencyWithdrawCoopToken();
+  });
 
-  //   // Fetch the config to get `total_coop_created`
-  //   const config = await program.account.configData.fetch(configPda);
+  it.skip('tests buy/sell for price changes', async () => {
+    const creator = provider.wallet.publicKey;
 
-  //   const [globalVault] =
-  //     anchor.web3.PublicKey.findProgramAddressSync(
-  //       [Buffer.from('global')],
-  //       program.programId
-  //     );
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
 
-  //   const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-  //   const seedBuffer = totalCoopCreated
-  //     .addn(1)
-  //     .toArrayLike(Buffer, 'le', 4); // u64 LE
+    // Fetch the config to get `total_coop_created`
+    const config = await program.account.configData.fetch(configPda);
 
-  //   const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-  //     program.programId
-  //   );
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
 
-  //   const [memecoinPda] =
-  //     anchor.web3.PublicKey.findProgramAddressSync(
-  //       [Buffer.from('memecoin'), coopToken.toBuffer()],
-  //       program.programId
-  //     );
+    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    const seedBuffer = totalCoopCreated
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
 
-  //   let memecoinState = await program.account.memeCoinData.fetch(
-  //     memecoinPda
-  //   );
-  //   console.log('Memecoin state data:', memecoinState);
-  //   console.log(
-  //     'Memecoin state data: virtual sol reserves',
-  //     memecoinState.virtualSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: virtual token reserves',
-  //     memecoinState.virtualTokenReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real sol reserves',
-  //     memecoinState.realSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real token reserves',
-  //     memecoinState.realTokenReserves.toString()
-  //   );
-  //   await buy_tokens();
-  //   memecoinState = await program.account.memeCoinData.fetch(
-  //     memecoinPda
-  //   );
-  //   console.log('Memecoin state data:', memecoinState);
-  //   console.log(
-  //     'Memecoin state data: virtual sol reserves',
-  //     memecoinState.virtualSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: virtual token reserves',
-  //     memecoinState.virtualTokenReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real sol reserves',
-  //     memecoinState.realSolReserves.toString()
-  //   );
-  //   console.log(
-  //     'Memecoin state data: real token reserves',
-  //     memecoinState.realTokenReserves.toString()
-  //   );
-  // });
+    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+      program.programId
+    );
 
-  it('first voting with option', async () => {
+    const [memecoinPda] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('memecoin'), coopToken.toBuffer()],
+        program.programId
+      );
+
+    let memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+    await buy_tokens();
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+  });
+
+  it.skip('first voting with option', async () => {
     await vote_with_option('name', 'Token1');
     await vote_with_option('sym', 'TKN1');
     await vote_with_option('uri', 'uri1');
   });
 
-  it('first voting', async () => {
+  it.skip('first voting', async () => {
     await vote(1);
     await vote(2);
     await vote(3);
   });
 
-  it('first unvoting', async () => {
+  it.skip('first unvoting', async () => {
     await unvote(1);
     await unvote(2);
     await unvote(3);
   });
 
-  it('multiple buy, sell, vote and unvote', async () => {
+  it.skip('multiple buy, sell, vote and unvote', async () => {
     await buy_tokens();
     await buy_tokens();
     await buy_tokens();
@@ -492,7 +369,7 @@ describe('coop-meme-2', () => {
     await unvote(5);
   });
 
-  it('Is finalizing voting', async () => {
+  it.skip('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(3 * 60 * 1000); // 2 minutes = 120000 ms
@@ -501,15 +378,15 @@ describe('coop-meme-2', () => {
     await finalizeVote();
   });
 
-  it('Is listing memecoin!', async () => {
+  it.skip('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it('unvoting all tokens', async () => {
+  it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it('Is swapping SOL to memecoin!', async () => {
+  it.skip('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -713,7 +590,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping memecoin to SOL!', async () => {
+  it.skip('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -1131,91 +1008,6 @@ describe('coop-meme-2', () => {
   //   console.log('Config state data:', configState);
   // });
 
-  async function buy_tokens() {
-    const trader = provider.wallet.publicKey;
-    const creator = provider.wallet.publicKey;
-
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId
-    );
-
-    // Fetch the config to get `total_coop_created`
-    const config = await program.account.configData.fetch(configPda);
-
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId
-      );
-
-    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-    const seedBuffer = totalCoopCreated
-      .addn(1)
-      .toArrayLike(Buffer, 'le', 4); // u64 LE
-
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId
-    );
-
-    const [memecoinPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('memecoin'), coopToken.toBuffer()],
-        program.programId
-      );
-    const [globalTokenAta] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          globalVault.toBuffer(),
-          anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-          coopToken.toBuffer(),
-        ],
-        anchor.utils.token.ASSOCIATED_PROGRAM_ID
-      );
-
-    const traderTokenAta = await getAssociatedTokenAddress(
-      coopToken,
-      trader,
-      false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
-
-    const txSig = await program.methods
-      .buyTokens(new BN(1_000_000_00), new BN(0))
-      .accounts({
-        trader,
-        affiliate,
-        creator,
-        teamWallet,
-        config: configPda,
-        globalVault,
-        coopToken,
-        memecoin: memecoinPda,
-        globalTokenAta,
-        traderTokenAta,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        associatedTokenProgram:
-          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-        mplTokenMetadataProgram: new anchor.web3.PublicKey(
-          'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s' // Update if needed
-        ),
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc();
-
-    console.log('Tx hash:', txSig);
-
-    const tx = await provider.connection.getTransaction(txSig, {
-      commitment: 'confirmed',
-      maxSupportedTransactionVersion: 0,
-    });
-    if (!tx || !tx.meta) {
-      console.error('Transaction or metadata not found');
-    } else {
-      console.log(tx.meta.logMessages);
-    }
-  }
-
   async function create_tokens() {
     const creator = provider.wallet.publicKey;
 
@@ -1398,6 +1190,91 @@ describe('coop-meme-2', () => {
     assert.strictEqual(memecoinState.isTradingActive, true);
     assert.strictEqual(memecoinState.isBondingCurveActive, false);
     assert.strictEqual(memecoinState.isTokenListed, false);
+  }
+
+  async function buy_tokens() {
+    const trader = provider.wallet.publicKey;
+    const creator = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    // Fetch the config to get `total_coop_created`
+    const config = await program.account.configData.fetch(configPda);
+
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
+
+    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    const seedBuffer = totalCoopCreated
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
+
+    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+      program.programId
+    );
+
+    const [memecoinPda] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('memecoin'), coopToken.toBuffer()],
+        program.programId
+      );
+    const [globalTokenAta] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          globalVault.toBuffer(),
+          anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
+          coopToken.toBuffer(),
+        ],
+        anchor.utils.token.ASSOCIATED_PROGRAM_ID
+      );
+
+    const traderTokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      trader,
+      false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    );
+
+    const txSig = await program.methods
+      .buyTokens(new BN(1_000_000_00), new BN(0))
+      .accounts({
+        trader,
+        affiliate,
+        creator,
+        teamWallet,
+        config: configPda,
+        globalVault,
+        coopToken,
+        memecoin: memecoinPda,
+        globalTokenAta,
+        traderTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram:
+          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        mplTokenMetadataProgram: new anchor.web3.PublicKey(
+          'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s' // Update if needed
+        ),
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
   }
 
   async function sell_tokens() {
@@ -1961,128 +1838,6 @@ describe('coop-meme-2', () => {
     console.log('user tokens vote state data:', userVotesState);
   }
 
-  async function unvote_all_tokens() {
-    const user = provider.wallet.publicKey;
-
-    const creator = provider.wallet.publicKey;
-
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId
-    );
-
-    // Fetch the config to get `total_coop_created`
-    const config = await program.account.configData.fetch(configPda);
-
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId
-      );
-
-    console.log('global vault', globalVault);
-
-    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-    const seedBuffer = totalCoopCreated
-      .addn(1)
-      .toArrayLike(Buffer, 'le', 4); // u64 LE
-
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId
-    );
-
-    const [memecoinPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('memecoin'), coopToken.toBuffer()],
-        program.programId
-      );
-    const memecoinData = await program.account.memeCoinData.fetch(
-      memecoinPda
-    );
-
-    // const [tokenVotesPda] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [Buffer.from('votes'), coopToken.toBuffer()],
-    //     program.programId
-    //   );
-
-    const [userTokenVotes] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
-        program.programId
-      );
-
-    const userTokenAta = await getAssociatedTokenAddress(
-      coopToken,
-      user,
-      false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
-
-    const voteTokenAta = await getAssociatedTokenAddress(
-      coopToken,
-      memecoinPda,
-      true // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
-
-    let userTokenBal =
-      await provider.connection.getTokenAccountBalance(userTokenAta);
-
-    console.log('user balance before voting', userTokenBal);
-
-    const txSig = await program.methods
-      .unvoteAllTokens()
-      .accounts({
-        user,
-        creator,
-        config: configPda,
-        globalVault,
-        coopToken,
-        memecoin: memecoinPda,
-        // tokenVotes: tokenVotesPda,
-        userTokenVotes,
-        userTokenAta,
-        voteTokenAta,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        associatedTokenProgram:
-          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc();
-
-    console.log('Tx hash:', txSig);
-    const tx = await provider.connection.getTransaction(txSig, {
-      commitment: 'confirmed',
-      maxSupportedTransactionVersion: 0,
-    });
-    if (!tx || !tx.meta) {
-      console.error('Transaction or metadata not found');
-    } else {
-      console.log(tx.meta.logMessages);
-    }
-
-    userTokenBal = await provider.connection.getTokenAccountBalance(
-      userTokenAta
-    );
-
-    console.log('user balance after voting', userTokenBal);
-
-    let voteTokenBal =
-      await provider.connection.getTokenAccountBalance(voteTokenAta);
-
-    console.log('vote token pda balance after voting', voteTokenBal);
-
-    const memecoinState = await program.account.memeCoinData.fetch(
-      memecoinPda
-    );
-    console.log('Memecoin state data:', memecoinState);
-
-    const userVotesState = await program.account.userTokenVotes.fetch(
-      userTokenVotes
-    );
-    console.log('user tokens vote state data:', userVotesState);
-  }
-
   async function finalizeVote() {
     const user = provider.wallet.publicKey;
 
@@ -2456,6 +2211,359 @@ describe('coop-meme-2', () => {
       configPda
     );
     console.log('Config state data:', configState);
+  }
+
+  async function unvote_all_tokens() {
+    const user = provider.wallet.publicKey;
+
+    const creator = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    // Fetch the config to get `total_coop_created`
+    const config = await program.account.configData.fetch(configPda);
+
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
+
+    console.log('global vault', globalVault);
+
+    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    const seedBuffer = totalCoopCreated
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
+
+    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+      program.programId
+    );
+
+    const [memecoinPda] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('memecoin'), coopToken.toBuffer()],
+        program.programId
+      );
+    const memecoinData = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+
+    // const [tokenVotesPda] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('votes'), coopToken.toBuffer()],
+    //     program.programId
+    //   );
+
+    const [userTokenVotes] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
+        program.programId
+      );
+
+    const userTokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      user,
+      false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    );
+
+    const voteTokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      memecoinPda,
+      true // allowOwnerOffCurve = false (always false unless you know it's needed)
+    );
+
+    let userTokenBal =
+      await provider.connection.getTokenAccountBalance(userTokenAta);
+
+    console.log('user balance before voting', userTokenBal);
+
+    const txSig = await program.methods
+      .unvoteAllTokens()
+      .accounts({
+        user,
+        creator,
+        config: configPda,
+        globalVault,
+        coopToken,
+        memecoin: memecoinPda,
+        // tokenVotes: tokenVotesPda,
+        userTokenVotes,
+        userTokenAta,
+        voteTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram:
+          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
+
+    userTokenBal = await provider.connection.getTokenAccountBalance(
+      userTokenAta
+    );
+
+    console.log('user balance after voting', userTokenBal);
+
+    let voteTokenBal =
+      await provider.connection.getTokenAccountBalance(voteTokenAta);
+
+    console.log('vote token pda balance after voting', voteTokenBal);
+
+    const memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+
+    const userVotesState = await program.account.userTokenVotes.fetch(
+      userTokenVotes
+    );
+    console.log('user tokens vote state data:', userVotesState);
+  }
+
+  async function pause() {
+    const admin = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    await program.methods
+      .pause()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+  }
+
+  async function unpause() {
+    const admin = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    await program.methods
+      .unpause()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+  }
+
+  async function startEmergencyMode() {
+    const admin = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    await program.methods
+      .startEmergencyMode()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+  }
+
+  async function stopEmergencyMode() {
+    const admin = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    await program.methods
+      .stopEmergencyMode()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+  }
+
+  async function emergencyWithdrawSol() {
+    const admin = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
+
+    await pause();
+
+    // await startEmergencyMode();
+    await program.methods
+      .startEmergencyMode()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+
+    const txSig = await program.methods
+      .emergencyWithdrawSol()
+      .accounts({
+        admin,
+        config: configPda,
+        globalVault,
+        teamWallet,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
+
+    let balanceAfterEmergencyWithdraw =
+      await provider.connection.getBalance(globalVault);
+
+    assert.strictEqual(balanceAfterEmergencyWithdraw, 890880);
+
+    await unpause();
+  }
+
+  async function emergencyWithdrawCoopToken() {
+    const admin = provider.wallet.publicKey;
+    const creator = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    // Fetch the config to get `total_coop_created`
+    const config = await program.account.configData.fetch(configPda);
+
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
+
+    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    const seedBuffer = totalCoopCreated
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
+
+    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+      program.programId
+    );
+
+    const [memecoinPda] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('memecoin'), coopToken.toBuffer()],
+        program.programId
+      );
+    const [globalTokenAta] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          globalVault.toBuffer(),
+          anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
+          coopToken.toBuffer(),
+        ],
+        anchor.utils.token.ASSOCIATED_PROGRAM_ID
+      );
+
+    const adminTokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      admin,
+      false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    );
+
+    await pause();
+
+    // await startEmergencyMode();
+    await program.methods
+      .startEmergencyMode()
+      .accounts({
+        admin,
+        config: configPda,
+      })
+      .rpc();
+
+    const txSig = await program.methods
+      .emergencyWithdrawCoopToken()
+      .accounts({
+        admin,
+        creator,
+        config: configPda,
+        globalVault,
+        globalTokenAta,
+        teamWallet,
+        mint: coopToken,
+        memecoin: memecoinPda,
+        adminTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram:
+          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
+
+    let globalTokenAtaBalance =
+      await provider.connection.getTokenAccountBalance(
+        globalTokenAta
+      );
+
+    // let balanceAfterEmergencyWithdraw =
+    //   await provider.connection.getBalance(globalVault);
+
+    assert.strictEqual(
+      globalTokenAtaBalance.value.amount.toString(),
+      '0'
+    );
+
+    await unpause();
   }
 
   function delay(ms: number) {
