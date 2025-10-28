@@ -129,6 +129,9 @@ describe('coop-meme-2', () => {
     const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
     const newMinOptionToken = new anchor.BN(1000_000_000_000);
+    const newTeamWallet = new PublicKey(
+      '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM'
+    );
 
     const newMinPricePerToken = 1;
 
@@ -138,7 +141,7 @@ describe('coop-meme-2', () => {
         newOwnerFee,
         null,
         null,
-        null,
+        newTeamWallet,
         newCoopInterval,
         newFairlaunchPeriod,
         newMinPricePerToken,
@@ -1874,6 +1877,10 @@ describe('coop-meme-2', () => {
       program.programId
     );
 
+    // const coopToken = new PublicKey(
+    //   'Eta57k6dDGDfiDCXzZTeWzT5idpr4R8tiBXVDp3kaCT3'
+    // );
+
     const [memecoinPda] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [Buffer.from('memecoin'), coopToken.toBuffer()],
@@ -1885,21 +1892,21 @@ describe('coop-meme-2', () => {
 
     console.log('Memecoin state data:', memecoinData);
 
-    const nameOptionIndex = new BN(Number(1)); // e.g., 0
+    const nameOptionIndex = new BN(Number(5)); // e.g., 0
     const nameOptionSeedBuffer = nameOptionIndex.toArrayLike(
       Buffer,
       'le',
       4
     ); // u64 LE
 
-    const symbolOptionIndex = new BN(Number(2)); // e.g., 0
+    const symbolOptionIndex = new BN(Number(1)); // e.g., 0
     const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
       Buffer,
       'le',
       4
     ); // u64 LE
 
-    const uriOptionIndex = new BN(Number(3)); // e.g., 0
+    const uriOptionIndex = new BN(Number(8)); // e.g., 0
     const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
       Buffer,
       'le',

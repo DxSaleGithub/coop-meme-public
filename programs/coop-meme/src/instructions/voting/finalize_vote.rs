@@ -136,15 +136,15 @@ impl<'info> FinalizeVote<'info> {
             CoopMemeError::InvalidTokenUri
         );
         require!(
-            self.name_option.index < self.memecoin.total_options,
+            self.name_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(
-            self.symbol_option.index < self.memecoin.total_options,
+            self.symbol_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(
-            self.uri_option.index < self.memecoin.total_options,
+            self.uri_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(
