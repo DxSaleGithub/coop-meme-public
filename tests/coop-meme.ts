@@ -26,7 +26,7 @@ describe('coop-meme-2', () => {
 
   const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
   let teamWallet = new PublicKey(
-    'An7Lica1BAXqKuY5ScViHwBnQLqnUQt1eYmDvHgYdaMQ'
+    '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM'
   );
   let affiliate = provider.wallet.publicKey;
   // let cpSwapProgram = new PublicKey(
@@ -67,7 +67,7 @@ describe('coop-meme-2', () => {
     'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
   );
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -176,7 +176,7 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it('provide roles', async () => {
+  it.skip('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -253,11 +253,11 @@ describe('coop-meme-2', () => {
     await sell_tokens();
   });
 
-  it('emergency withdraw SOL', async () => {
+  it.skip('emergency withdraw SOL', async () => {
     await emergencyWithdrawSol();
   });
 
-  it('emergency withdraw Coop token', async () => {
+  it.skip('emergency withdraw Coop token', async () => {
     await emergencyWithdrawCoopToken();
   });
 

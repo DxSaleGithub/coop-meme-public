@@ -7,7 +7,7 @@ use anchor_spl::{
 use crate::{error::*, state::ConfigData, RBAControlList};
 #[derive(Accounts)]
 pub struct Config<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub owner: Signer<'info>,
     #[account[
       init,
@@ -60,6 +60,7 @@ impl<'info> Config<'info> {
             affiliated_fee: 1000,
             listing_fee: 500,
             coop_interval: 600,
+            last_coop_market_end_time: Clock::get()?.unix_timestamp as u64,
             fairlaunch_period: 300,
             min_price_per_token: 100,                      //  0.0000001 sol
             max_price_per_token: 1_000_000_0,              // 0.01 sol
@@ -87,7 +88,7 @@ impl<'info> Config<'info> {
 
 #[derive(Accounts)]
 pub struct UpdateConfig<'info> {
-    #[account(mut)]
+    #[account(mut, signer)]
     pub admin: Signer<'info>,
 
     #[account(

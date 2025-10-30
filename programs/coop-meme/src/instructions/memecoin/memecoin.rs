@@ -13,7 +13,7 @@ use crate::{
 };
 #[derive(Accounts)]
 pub struct MemeCoin<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub creator: Signer<'info>,
 
     #[account[
@@ -142,6 +142,11 @@ impl<'info> MemeCoin<'info> {
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp as u64; // i64 in seconds
 
+        require!(
+            current_time > self.config.last_coop_market_end_time,
+            CoopMemeError::LastCoopTradeNotOver
+        );
+
         self.memecoin.set_inner(MemeCoinData {
             token_id: self.config.total_coop_created.checked_add(1).unwrap(),
             token_mint: self.coop_token.key(),
@@ -172,6 +177,10 @@ impl<'info> MemeCoin<'info> {
         });
 
         self.config.total_coop_created = self.config.total_coop_created + 1;
+        self.config.last_coop_market_end_time = current_time
+            .checked_add(self.config.coop_interval)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
 
         // create global token account
         associated_token::create(CpiContext::new(

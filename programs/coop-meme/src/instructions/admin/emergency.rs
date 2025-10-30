@@ -8,7 +8,7 @@ use anchor_spl::associated_token::{self, AssociatedToken};
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
 #[derive(Accounts)]
 pub struct Emergency<'info> {
-    #[account(mut)]
+    #[account(mut, signer)]
     pub admin: Signer<'info>,
 
     #[account(
@@ -37,7 +37,7 @@ impl<'info> Emergency<'info> {
 
 #[derive(Accounts)]
 pub struct EmergencyWithdrawSOL<'info> {
-    #[account(mut)]
+    #[account(mut, signer)]
     pub admin: Signer<'info>,
 
     #[account(
@@ -114,7 +114,7 @@ impl<'info> EmergencyWithdrawSOL<'info> {
 
 #[derive(Accounts)]
 pub struct EmergencyWithdrawCoopToken<'info> {
-    #[account(mut)]
+    #[account(mut, signer)]
     pub admin: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[

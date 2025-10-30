@@ -14,6 +14,8 @@ pub enum CoopMemeError {
     Unauthorized,
     #[msg("Invalid total supply")]
     InvalidTotalSupply,
+    #[msg("Last coop token is stil trading")]
+    LastCoopTradeNotOver,
     #[msg("Trading not active")]
     TradingNotActive,
     #[msg("Insufficient Amount")]

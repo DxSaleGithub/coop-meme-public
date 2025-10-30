@@ -15,9 +15,7 @@ use spl_token::state::Account as SplTokenAccount;
 
 #[derive(Accounts)]
 pub struct Trade<'info> {
-    #[account[
-      mut
-    ]]
+    #[account[mut,signer]]
     pub trader: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[

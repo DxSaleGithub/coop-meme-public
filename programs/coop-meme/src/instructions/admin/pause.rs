@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct Pause<'info> {
-    #[account(mut)]
+    #[account(mut, signer)]
     pub admin: Signer<'info>,
 
     #[account(

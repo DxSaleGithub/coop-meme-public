@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use crate::{error::*, RBAControlList, Role, RoleType};
 #[derive(Accounts)]
 pub struct RBAControl<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub owner: Signer<'info>,
     #[account[
       mut,

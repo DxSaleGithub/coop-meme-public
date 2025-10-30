@@ -14,9 +14,7 @@ use anchor_spl::{
 
 #[derive(Accounts)]
 pub struct FinalizeVote<'info> {
-    #[account[
-    mut
-  ]]
+    #[account[mut, signer]]
     pub user: Signer<'info>,
     #[account[
       constraint = memecoin.creator == creator.key()

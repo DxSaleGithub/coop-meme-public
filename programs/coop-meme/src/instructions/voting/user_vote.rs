@@ -16,7 +16,7 @@ use anchor_spl::{
 
 #[derive(Accounts)]
 pub struct UserVote<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[

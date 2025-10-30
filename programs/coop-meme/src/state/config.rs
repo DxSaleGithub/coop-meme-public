@@ -12,6 +12,7 @@ pub struct ConfigData {
     pub affiliated_fee: u16,
     pub listing_fee: u16,
     pub coop_interval: u64,
+    pub last_coop_market_end_time: u64,
     pub fairlaunch_period: u32,
     pub min_price_per_token: u32,
     pub max_price_per_token: u32,

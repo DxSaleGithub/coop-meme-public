@@ -15,9 +15,7 @@ use spl_token::state::Account as SplAccount;
 
 #[derive(Accounts)]
 pub struct BurnLP<'info> {
-    #[account[
-      mut
-    ]]
+    #[account[mut,signer]]
     pub owner: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[

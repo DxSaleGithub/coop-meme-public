@@ -16,7 +16,7 @@ use anchor_spl::{
 
 #[derive(Accounts)]
 pub struct CreateOption<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[
@@ -206,7 +206,7 @@ impl<'info> CreateOption<'info> {
 
 #[derive(Accounts)]
 pub struct UnlockAll<'info> {
-    #[account[mut]]
+    #[account[mut, signer]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
     #[account[
