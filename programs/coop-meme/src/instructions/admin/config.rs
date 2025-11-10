@@ -61,10 +61,10 @@ impl<'info> Config<'info> {
             listing_fee: 500,
             coop_interval: 600,
             fairlaunch_period: 300,
-            min_price_per_token: 100,                      //  0.0000001 sol
-            max_price_per_token: 1_000_000_0,              // 0.01 sol
-            init_virtual_sol: 10_000_000_000_000_000,      // 10 million sol
-            init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token => init price = 0.01 sol per token
+            min_price_per_token: 100,                  //  0.0000001 sol
+            max_price_per_token: 1_000_000_0,          // 0.01 sol
+            init_virtual_sol: 30_000_000_000,          // 30 sol
+            init_virtual_token: 1_073_000_000_000_000, // 1+ billion token => init price = 0.01 sol per token
             total_coop_created: 0,
             total_coop_listed: 0,
             min_vote_token_amount: 1000_000_000_000,

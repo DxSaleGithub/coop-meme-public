@@ -123,15 +123,17 @@ impl<'info> Trade<'info> {
             //     .try_into()
             //     .unwrap();
 
-            self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
-                .checked_mul(self.memecoin.virtual_token_reserves as u128)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_div(1_000_000_000u128)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .try_into()
-                .unwrap();
+            // self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
+            //     .checked_mul(self.memecoin.virtual_token_reserves as u128)
+            //     .ok_or(CoopMemeError::InvalidOperation)
+            //     .unwrap()
+            //     .checked_div(1_000_000_000u128)
+            //     .ok_or(CoopMemeError::InvalidOperation)
+            //     .unwrap()
+            //     .try_into()
+            //     .unwrap();
+
+            // self.memecoin.virtual_sol_reserves = self.memecoin.real_sol_reserves;
             emit!(BondingCurveStartedEvent {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
@@ -261,15 +263,18 @@ impl<'info> Trade<'info> {
             //     .unwrap()
             //     .try_into()
             //     .unwrap();
-            self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
-                .checked_mul(self.memecoin.virtual_token_reserves as u128)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_div(1_000_000_000u128)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .try_into()
-                .unwrap();
+            // self.memecoin.virtual_sol_reserves = (self.memecoin.token_share_price as u128)
+            //     .checked_mul(self.memecoin.virtual_token_reserves as u128)
+            //     .ok_or(CoopMemeError::InvalidOperation)
+            //     .unwrap()
+            //     .checked_div(1_000_000_000u128)
+            //     .ok_or(CoopMemeError::InvalidOperation)
+            //     .unwrap()
+            //     .try_into()
+            //     .unwrap();
+
+            // self.memecoin.virtual_sol_reserves = self.memecoin.real_sol_reserves;
+
             emit!(BondingCurveStartedEvent {
                 coop_token: self.coop_token.key(),
                 memecoin: self.memecoin.key(),
@@ -326,6 +331,8 @@ impl<'info> Trade<'info> {
             .checked_add(amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
+
+        msg!("sol amount for sell {}", sol_amount);
         self.memecoin.real_sol_reserves = self
             .memecoin
             .real_sol_reserves
@@ -519,7 +526,7 @@ impl<'info> Trade<'info> {
             // token_amount using fairlaunch
             // token_amount = amount / (self.memecoin.token_share_price as u64) * 1_000_000_000;
             token_amount = (amount as u128)
-                .checked_mul(1_000_000_000 as u128)
+                .checked_mul(1_000_000 as u128)
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
                 .checked_div(self.memecoin.token_share_price as u128)
@@ -565,7 +572,7 @@ impl<'info> Trade<'info> {
                 .checked_mul(self.memecoin.token_share_price as u128)
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap()
-                .checked_div(1_000_000_000u128)
+                .checked_div(1_000_000u128)
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap();
             return Some((sol_amount as u64));

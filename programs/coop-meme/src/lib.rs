@@ -119,6 +119,7 @@ pub mod coop_meme {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 
+    // only LISTING role can call
     pub fn list_token(ctx: Context<List>) -> Result<()> {
         ctx.accounts.list_token()
     }
@@ -163,7 +164,7 @@ pub mod coop_meme {
         ctx.accounts.unvote_all_tokens()
     }
 
-    pub fn finalize_vote(ctx: Context<FinalizeVote>) -> Result<()> {
-        ctx.accounts.finalize_vote()
+    pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
+        ctx.accounts.finalize_vote(final_uri)
     }
 }

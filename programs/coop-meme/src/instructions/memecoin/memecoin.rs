@@ -43,7 +43,7 @@ pub struct MemeCoin<'info> {
         seeds = [b"mint", creator.key().as_ref(), &(config.total_coop_created+1).to_le_bytes() ],
         bump,
         payer = creator,
-        mint::decimals = 9,
+        mint::decimals = 6,
         mint::authority = global_vault.key(),
         mint::freeze_authority=global_vault.key()
     )]
@@ -158,9 +158,9 @@ impl<'info> MemeCoin<'info> {
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap(),
             virtual_sol_reserves: self.config.init_virtual_sol,
-            virtual_token_reserves: total_supply,
+            virtual_token_reserves: self.config.init_virtual_token,
             real_sol_reserves: 0,
-            real_token_reserves: total_supply,
+            real_token_reserves: 793_100_000_000_000,
             is_bonding_curve_active: false,
             is_trading_active: true,
             is_token_listed: false,
@@ -251,7 +251,7 @@ impl<'info> MemeCoin<'info> {
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
             metadata: self.token_metadata_account.key(),
-            decimals: 9,
+            decimals: 6,
             token_supply: total_supply as u64,
             token_creation_time: self.memecoin.token_creation_time,
             token_fairlaunch_end_time: self.memecoin.token_fairlaunch_end_time,

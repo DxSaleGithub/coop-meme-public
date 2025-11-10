@@ -23,49 +23,38 @@ describe('coop-meme-2', () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-
   const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
+
   let teamWallet = new PublicKey(
-    'An7Lica1BAXqKuY5ScViHwBnQLqnUQt1eYmDvHgYdaMQ'
+    'CJjnV46fYanqkcReWwaPEiubT74EoBdLo4jVqaCXYUX8'
   );
   let affiliate = provider.wallet.publicKey;
-  // let cpSwapProgram = new PublicKey(
-  //   'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb'
-  // );
 
-  // let ammConfig = new PublicKey(
-  //   'HTVWgp8CbUsRNmRE1p9RBYqopxe2qiyApSkiTFLrfxaW'
-  // );
-
-  // let createPoolFee = new PublicKey(
-  //   '3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy'
-  // );
-
-  // const creator = Keypair.generate();
-
-  // const airdropSignature = await provider.connection.requestAirdrop(
-  //   creator.publicKey,
-  //   LAMPORTS_PER_SOL // 1 SOL = 1,000,000,000 lamports
-  // );
-  // await provider.connection.confirmTransaction(
-  //   airdropSignature,
-  //   'confirmed'
-  // );
-  // console.log(
-  //   `Funded account ${creator.publicKey.toBase58()} with 1 SOL`
-  // );
-
+  // Raydium Devnet addressess
   let cpSwapProgram = new PublicKey(
-    'CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'
+    'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb'
   );
 
   let ammConfig = new PublicKey(
-    'D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2'
+    'HTVWgp8CbUsRNmRE1p9RBYqopxe2qiyApSkiTFLrfxaW'
   );
 
   let createPoolFee = new PublicKey(
-    'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
+    '3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy'
   );
+
+  // Raydium Mainnet addressess
+  // let cpSwapProgram = new PublicKey(
+  //   'CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'
+  // );
+
+  // let ammConfig = new PublicKey(
+  //   'D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2'
+  // );
+
+  // let createPoolFee = new PublicKey(
+  //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
+  // );
 
   it('Is initialized!', async () => {
     // Add your test here.
@@ -123,14 +112,14 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(900);
-    const newFairlaunchPeriod = new anchor.BN(300);
-    const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
-    const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
+    const newCoopInterval = new anchor.BN(300);
+    const newFairlaunchPeriod = new anchor.BN(120);
+    const newInitVirtualSol = new anchor.BN(3_000_000_000); // 2 SOL in lamports
+    const newInitVirtualToken = new anchor.BN(1_073_000_000_000_000); // 1+ billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
     const newMinOptionToken = new anchor.BN(1000_000_000_000);
     const newTeamWallet = new PublicKey(
-      '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM'
+      'CJjnV46fYanqkcReWwaPEiubT74EoBdLo4jVqaCXYUX8'
     );
 
     const newMinPricePerToken = 1;
@@ -177,7 +166,7 @@ describe('coop-meme-2', () => {
   });
 
   it('provide roles', async () => {
-    const owner = provider.wallet.publicKey;
+    // const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
     // const owner = new PublicKey(
@@ -194,6 +183,10 @@ describe('coop-meme-2', () => {
     // const owner = new PublicKey(
     //   'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis
     // );
+
+    const owner = new PublicKey(
+      '6Ab87ynVzPCMr5zMJkBxRuHaY3Uh85B48m87Ght4zSm7' // Mark 2
+    );
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('roles')],
@@ -253,6 +246,331 @@ describe('coop-meme-2', () => {
     await sell_tokens();
   });
 
+  it('check price differences when trading, finalize and list', async () => {
+    const creator = provider.wallet.publicKey;
+
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId
+    );
+
+    // Fetch the config to get `total_coop_created`
+    let config = await program.account.configData.fetch(configPda);
+
+    const [globalVault] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global')],
+        program.programId
+      );
+
+    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    const seedBuffer = totalCoopCreated
+      .addn(1)
+      .toArrayLike(Buffer, 'le', 4); // u64 LE
+
+    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+      program.programId
+    );
+
+    const [memecoinPda] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('memecoin'), coopToken.toBuffer()],
+        program.programId
+      );
+
+    let memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+
+    console.log('No trade yet\n');
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await buy_tokens();
+
+    console.log('\nAfter first buy\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await sell_tokens();
+
+    console.log('\nAfter first sell\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await buy_tokens();
+    console.log('\nAfter second buy\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await sell_tokens();
+    console.log('\nAfter second sell\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    console.log('\nStarting wait for bonding curve to start...');
+
+    await delay(160 * 1000); // 2 minutes = 120000 ms
+
+    console.log('2 minutes passed.');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+
+    console.log(
+      '\nbonding curve started? ',
+      memecoinState.isBondingCurveActive
+    );
+
+    await buy_tokens();
+    console.log('\nBonding curve started, First buy\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await sell_tokens();
+    console.log('\nBonding curve started, First sell\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await buy_tokens();
+    console.log('\nBonding curve started, second buy\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await sell_tokens();
+    console.log('\nBonding curve started, second sell\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await buy_tokens();
+    await buy_tokens();
+    await buy_tokens();
+
+    await vote_with_option('name', 'Token1');
+    await vote_with_option('sym', 'TKN1');
+    await vote_with_option('uri', 'token-uri');
+
+    console.log('\nStarting wait to finalize...');
+
+    await delay(150 * 1000); // 2 minutes = 120000 ms
+
+    console.log('2 minutes passed.');
+
+    console.log('\nState before finalize\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+
+    await finalizeVote();
+
+    console.log('\nState after finalize\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+
+    console.log('Start to listing\n');
+
+    await listToken();
+
+    console.log('After listing\n');
+
+    memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log('Memecoin state data:', memecoinState);
+
+    await unvote_all_tokens();
+  });
+
   it('emergency withdraw SOL', async () => {
     await emergencyWithdrawSol();
   });
@@ -261,7 +579,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it.skip('tests buy/sell for price changes', async () => {
+  it('tests buy/sell for price changes', async () => {
     const creator = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -389,7 +707,7 @@ describe('coop-meme-2', () => {
     await unvote_all_tokens();
   });
 
-  it.skip('Is swapping SOL to memecoin!', async () => {
+  it('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -547,7 +865,7 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .swapTokenBaseInput(new BN(100000), new BN(0))
+      .swapTokenBaseInput(new BN(100_000_000), new BN(0))
       .accounts({
         payer, // fine
         cpSwapProgram,
@@ -593,7 +911,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.skip('Is swapping memecoin to SOL!', async () => {
+  it('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -756,7 +1074,7 @@ describe('coop-meme-2', () => {
     const txSig = await program.methods
       .swapTokenBaseOutput(
         new BN(userTokenBal.value.amount),
-        new BN(1_00_00_00)
+        new BN(100_00_00_00)
       )
       .accounts({
         payer, // fine
@@ -1335,7 +1653,13 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .sellTokens(new BN('1000000000000'), new BN(0))
+      .sellTokens(
+        // new BN(userTokenBal.value.amount),
+        new BN(userTokenBal.value.amount)
+          .mul(new BN(99))
+          .div(new BN(100)),
+        new BN(0)
+      )
       .accounts({
         trader,
         affiliate,
@@ -1892,21 +2216,21 @@ describe('coop-meme-2', () => {
 
     console.log('Memecoin state data:', memecoinData);
 
-    const nameOptionIndex = new BN(Number(5)); // e.g., 0
+    const nameOptionIndex = new BN(Number(1)); // e.g., 0
     const nameOptionSeedBuffer = nameOptionIndex.toArrayLike(
       Buffer,
       'le',
       4
     ); // u64 LE
 
-    const symbolOptionIndex = new BN(Number(1)); // e.g., 0
+    const symbolOptionIndex = new BN(Number(2)); // e.g., 0
     const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
       Buffer,
       'le',
       4
     ); // u64 LE
 
-    const uriOptionIndex = new BN(Number(8)); // e.g., 0
+    const uriOptionIndex = new BN(Number(3)); // e.g., 0
     const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
       Buffer,
       'le',
@@ -1957,8 +2281,11 @@ describe('coop-meme-2', () => {
         metadataProgramId
       );
 
+    let finalURI =
+      'https://black-bright-snake-211.mypinata.cloud/ipfs/bafkreifkoue4kekaunoi4eu4yzj3z2gwjvlswaamfrl7kf2bg6zohowg5a';
+
     const txSig = await program.methods
-      .finalizeVote()
+      .finalizeVote(finalURI)
       .accounts({
         user,
         creator,
