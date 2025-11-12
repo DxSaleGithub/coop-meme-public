@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("58Pbrmtb3Ai1S1vtafW8CrvrUZGhgtRGxDErzr4oVvcu");
+declare_id!("Ej8ztqF7HFXoxas5ug6yKeKgf5hcDt8qiKKT32f3bHiu");
 
 #[program]
 pub mod coop_meme {
@@ -163,7 +163,7 @@ pub mod coop_meme {
         ctx.accounts.unvote_all_tokens()
     }
 
-    pub fn finalize_vote(ctx: Context<FinalizeVote>) -> Result<()> {
-        ctx.accounts.finalize_vote()
+    pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
+        ctx.accounts.finalize_vote(final_uri)
     }
 }

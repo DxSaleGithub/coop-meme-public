@@ -358,6 +358,7 @@ impl<'info> List<'info> {
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         self.memecoin.is_token_listed = true;
+        self.config.current_coop_token_metadata.is_token_listed = true;
 
         emit!(ListEvent {
             coop_token: self.coop_token.key(),
@@ -375,6 +376,17 @@ impl<'info> List<'info> {
             memecoin: self.memecoin.key(),
             lp_mint: self.lp_mint.key()
         });
+
+        // // reset current memecoin data
+        // self.config.current_coop_token_metadata.token_id = 0;
+        // self.config.current_coop_token_metadata.token_mint = Pubkey::default();
+        // self.config.current_coop_token_metadata.creator = Pubkey::default();
+        // self.config.current_coop_token_metadata.is_trading_active = false;
+        // self.config
+        //     .current_coop_token_metadata
+        //     .is_bonding_curve_active = false;
+        // self.config.current_coop_token_metadata.is_voting_finalized = false;
+        // self.config.current_coop_token_metadata.is_token_listed = false;
 
         Ok(())
     }

@@ -82,8 +82,12 @@ pub struct FinalizeVote<'info> {
 }
 
 impl<'info> FinalizeVote<'info> {
-    pub fn finalize_vote(&mut self) -> Result<()> {
+    pub fn finalize_vote(&mut self, final_uri: String) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
+        require!(
+            final_uri.len() > 0 && final_uri.len() < 256,
+            CoopMemeError::InvalidTokenUri
+        );
 
         has_role(&self.rbac.roles, RoleType::VOTING, self.user.key())?;
         // require!(
@@ -177,7 +181,7 @@ impl<'info> FinalizeVote<'info> {
 
         let final_name = &self.name_option.option_value;
         let final_symbol = &self.symbol_option.option_value;
-        let final_uri = &self.uri_option.option_value;
+        // let final_uri = &self.uri_option.option_value;
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
@@ -214,6 +218,7 @@ impl<'info> FinalizeVote<'info> {
         });
 
         self.memecoin.is_voting_finalized = true;
+        self.config.current_coop_token_metadata.is_voting_finalized = true;
 
         Ok(())
     }

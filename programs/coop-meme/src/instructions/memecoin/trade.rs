@@ -113,6 +113,9 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
+            self.config
+                .current_coop_token_metadata
+                .is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
             // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
             // self.memecoin.virtual_token_reserves = (1_000_000_000u128)
@@ -252,6 +255,9 @@ impl<'info> Trade<'info> {
             && !self.memecoin.is_bonding_curve_active)
         {
             self.memecoin.is_bonding_curve_active = true;
+            self.config
+                .current_coop_token_metadata
+                .is_bonding_curve_active = true;
             // Set virtual reserves to preserve price and ensure curve continuity
             // self.memecoin.virtual_sol_reserves = 1_000_000_000; // 1 SOL (in lamports)
             // self.memecoin.virtual_token_reserves = (1_000_000_000u128)

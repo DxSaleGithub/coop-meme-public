@@ -4,7 +4,11 @@ use anchor_spl::{
     token::{self, Mint, Token, TokenAccount},
 };
 
-use crate::{error::*, state::ConfigData, RBAControlList};
+use crate::{
+    error::*,
+    state::{ConfigData, MemeCoinDataMetadata},
+    RBAControlList,
+};
 #[derive(Accounts)]
 pub struct Config<'info> {
     #[account[mut]]
@@ -71,6 +75,16 @@ impl<'info> Config<'info> {
             min_option_add_token_amount: 10000_000_000_000,
             config_bump: bumbs.config,
             global_vault_bump: bumbs.global_vault,
+            current_coop_token_metadata: MemeCoinDataMetadata {
+                token_id: 0,
+                token_mint: Pubkey::default(),
+                creator: Pubkey::default(),
+                is_bonding_curve_active: false,
+                is_trading_active: false,
+                is_voting_finalized: false,
+                is_token_listed: false,
+                total_options: 0,
+            },
         });
 
         self.rbac.set_inner(RBAControlList {
