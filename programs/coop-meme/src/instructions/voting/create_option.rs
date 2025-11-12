@@ -144,6 +144,7 @@ impl<'info> CreateOption<'info> {
         self.user_token_votes.total_votes += current_total_votes;
         self.user_token_option_votes.total_votes += current_total_votes;
         self.memecoin.total_options += 1;
+        self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed

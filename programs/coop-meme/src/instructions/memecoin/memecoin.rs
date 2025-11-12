@@ -171,6 +171,17 @@ impl<'info> MemeCoin<'info> {
             token_bump: bumps.coop_token,
         });
 
+        self.config.current_coop_token_metadata.token_id =
+            self.config.total_coop_created.checked_add(1).unwrap();
+        self.config.current_coop_token_metadata.token_mint = self.coop_token.key();
+        self.config.current_coop_token_metadata.creator = self.creator.key();
+        self.config
+            .current_coop_token_metadata
+            .is_bonding_curve_active = false;
+        self.config.current_coop_token_metadata.is_trading_active = true;
+        self.config.current_coop_token_metadata.is_voting_finalized = false;
+        self.config.current_coop_token_metadata.is_token_listed = false;
+        self.config.current_coop_token_metadata.total_options = 0;
         self.config.total_coop_created = self.config.total_coop_created + 1;
 
         // create global token account

@@ -23,6 +23,20 @@ pub struct ConfigData {
     pub total_coop_listed: u32,
     pub config_bump: u8,
     pub global_vault_bump: u8,
+    pub current_coop_token_metadata: MemeCoinDataMetadata,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct MemeCoinDataMetadata {
+    pub token_id: u32,
+    pub token_mint: Pubkey,
+    pub creator: Pubkey,
+    pub is_bonding_curve_active: bool,
+    pub is_trading_active: bool,
+    pub is_voting_finalized: bool,
+    pub is_token_listed: bool,
+    pub total_options: u32,
 }
 
 #[account]

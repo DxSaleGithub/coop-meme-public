@@ -26,7 +26,7 @@ describe('coop-meme-2', () => {
 
   const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
   let teamWallet = new PublicKey(
-    'An7Lica1BAXqKuY5ScViHwBnQLqnUQt1eYmDvHgYdaMQ'
+    '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM'
   );
   let affiliate = provider.wallet.publicKey;
   // let cpSwapProgram = new PublicKey(
@@ -106,7 +106,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it('updates the config', async () => {
+  it.only('updates the config', async () => {
     const owner = provider.wallet.publicKey;
 
     const [configPda] =
@@ -241,15 +241,15 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', roleList);
   });
 
-  it('Is creating memecoin!', async () => {
+  it.only('Is creating memecoin!', async () => {
     await create_tokens();
   });
 
-  it('first buying memecoin!', async () => {
+  it.only('first buying memecoin!', async () => {
     await buy_tokens();
   });
 
-  it('first selling memecoin!', async () => {
+  it.only('first selling memecoin!', async () => {
     await sell_tokens();
   });
 

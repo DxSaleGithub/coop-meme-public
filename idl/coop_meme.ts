@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/coop_meme.json`.
  */
 export type CoopMeme = {
-  "address": "58Pbrmtb3Ai1S1vtafW8CrvrUZGhgtRGxDErzr4oVvcu",
+  "address": "Ej8ztqF7HFXoxas5ug6yKeKgf5hcDt8qiKKT32f3bHiu",
   "metadata": {
     "name": "coopMeme",
     "version": "0.1.0",
@@ -1519,7 +1519,12 @@ export type CoopMeme = {
           "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "finalUri",
+          "type": "string"
+        }
+      ]
     },
     {
       "name": "grantRole",
@@ -5491,6 +5496,14 @@ export type CoopMeme = {
           {
             "name": "globalVaultBump",
             "type": "u8"
+          },
+          {
+            "name": "currentCoopTokenMetadata",
+            "type": {
+              "defined": {
+                "name": "memeCoinDataMetadata"
+              }
+            }
           }
         ]
       }
@@ -5679,6 +5692,46 @@ export type CoopMeme = {
           {
             "name": "tokenBump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "memeCoinDataMetadata",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenId",
+            "type": "u32"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "isBondingCurveActive",
+            "type": "bool"
+          },
+          {
+            "name": "isTradingActive",
+            "type": "bool"
+          },
+          {
+            "name": "isVotingFinalized",
+            "type": "bool"
+          },
+          {
+            "name": "isTokenListed",
+            "type": "bool"
+          },
+          {
+            "name": "totalOptions",
+            "type": "u32"
           }
         ]
       }
