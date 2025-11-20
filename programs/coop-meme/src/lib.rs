@@ -13,13 +13,14 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("Ej8ztqF7HFXoxas5ug6yKeKgf5hcDt8qiKKT32f3bHiu");
+declare_id!("v47XjNPkBpLt3nNWiErvmTmwguErUnDTJL8pTxNxvFG");
 
 #[program]
 pub mod coop_meme {
 
     use super::*;
 
+    // ADMIN METHODS
     pub fn initialize(ctx: Context<Config>, team_wallet: Pubkey) -> Result<()> {
         ctx.accounts.init(&ctx.bumps, team_wallet)
     }
@@ -37,6 +38,8 @@ pub mod coop_meme {
         new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
+        new_init_real_token: Option<u64>,
+        new_fairlaunch_limit: Option<u64>,
         new_min_vote_token_amount: Option<u64>,
         new_min_option_add_token_amount: Option<u64>,
     ) -> Result<()> {
@@ -52,6 +55,8 @@ pub mod coop_meme {
             new_max_price_per_token,
             new_init_virtual_sol,
             new_init_virtual_token,
+            new_init_real_token,
+            new_fairlaunch_limit,
             new_min_vote_token_amount,
             new_min_option_add_token_amount,
         )
@@ -93,6 +98,7 @@ pub mod coop_meme {
         ctx.accounts.withdraw_listed_coop_token()
     }
 
+    // TRADING METHODS
     pub fn create_token(
         ctx: Context<MemeCoin>,
         total_supply: u64,
@@ -111,20 +117,82 @@ pub mod coop_meme {
         )
     }
 
-    pub fn buy_tokens(ctx: Context<Trade>, amount: u64, min_tokens_receive: u64) -> Result<()> {
+    pub fn buy_tokens_fairlaunch(
+        ctx: Context<TradeFairlaunch>,
+        amount: u64,
+        min_tokens_receive: u64,
+    ) -> Result<()> {
+        ctx.accounts.buy_tokens(amount, min_tokens_receive)
+    }
+    pub fn buy_tokens_bondingcurve(
+        ctx: Context<Trade>,
+        amount: u64,
+        min_tokens_receive: u64,
+    ) -> Result<()> {
         ctx.accounts.buy_tokens(amount, min_tokens_receive)
     }
 
-    pub fn sell_tokens(ctx: Context<Trade>, amount: u64, min_sol_receive: u64) -> Result<()> {
+    pub fn sell_tokens_fairlaunch(
+        ctx: Context<TradeFairlaunch>,
+        amount: u64,
+        min_sol_receive: u64,
+    ) -> Result<()> {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 
+    pub fn sell_tokens_bondingcurve(
+        ctx: Context<Trade>,
+        amount: u64,
+        min_sol_receive: u64,
+    ) -> Result<()> {
+        ctx.accounts.sell_tokens(amount, min_sol_receive)
+    }
+
+    // VOTING METHODS
+    pub fn vote_fairlaunch(ctx: Context<UserVoteFairlaunch>, votes: u64) -> Result<()> {
+        ctx.accounts.user_votes(votes)
+    }
+
+    pub fn vote_bondingcurve(ctx: Context<UserVote>, votes: u64) -> Result<()> {
+        ctx.accounts.user_votes(votes)
+    }
+
+    pub fn vote_with_option_fairlaunch(
+        ctx: Context<CreateOptionFairlaunch>,
+        create_option: CreateOptionInfo,
+    ) -> Result<()> {
+        ctx.accounts.create_new_option(&ctx.bumps, create_option)
+    }
+
+    pub fn vote_with_option_bondingcurve(
+        ctx: Context<CreateOption>,
+        create_option: CreateOptionInfo,
+    ) -> Result<()> {
+        ctx.accounts.create_new_option(&ctx.bumps, create_option)
+    }
+
+    pub fn unvote_fairlaunch(ctx: Context<UserVoteFairlaunch>, votes: u64) -> Result<()> {
+        ctx.accounts.user_unvotes(votes)
+    }
+
+    pub fn unvote_bondingcurve(ctx: Context<UserVote>, votes: u64) -> Result<()> {
+        ctx.accounts.user_unvotes(votes)
+    }
+
+    pub fn unvote_all_tokens(ctx: Context<UnlockAll>) -> Result<()> {
+        ctx.accounts.unvote_all_tokens()
+    }
+
+    pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
+        ctx.accounts.finalize_vote(final_uri)
+    }
+
+    // RAYDIUM METHODS
     pub fn list_token(ctx: Context<List>) -> Result<()> {
         ctx.accounts.list_token()
     }
 
     pub fn burn_lp_token(ctx: Context<BurnLP>) -> Result<()> {
-        // only admin can call
         ctx.accounts.burn_lp_token()
     }
 
@@ -142,28 +210,5 @@ pub mod coop_meme {
         amount_out: u64,
     ) -> Result<()> {
         ctx.accounts.swap_base_output(max_amount_in, amount_out)
-    }
-
-    pub fn vote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
-        ctx.accounts.user_votes(votes)
-    }
-
-    pub fn vote_with_option(
-        ctx: Context<CreateOption>,
-        create_option: CreateOptionInfo,
-    ) -> Result<()> {
-        ctx.accounts.create_new_option(&ctx.bumps, create_option)
-    }
-
-    pub fn unvote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
-        ctx.accounts.user_unvotes(votes)
-    }
-
-    pub fn unvote_all_tokens(ctx: Context<UnlockAll>) -> Result<()> {
-        ctx.accounts.unvote_all_tokens()
-    }
-
-    pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
-        ctx.accounts.finalize_vote(final_uri)
     }
 }

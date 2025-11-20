@@ -15,7 +15,7 @@ use anchor_spl::{
 };
 
 #[derive(Accounts)]
-pub struct CreateOption<'info> {
+pub struct CreateOptionFairlaunch<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
@@ -39,13 +39,13 @@ pub struct CreateOption<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_bump
+      seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      bump = memecoin.token_fairlaunch_bump
     )]
     pub coop_token: Box<Account<'info, Mint>>,
     #[account[
       mut,
-      seeds = [b"memecoin", coop_token.key().as_ref()],
+      seeds = [b"memecoin", config.current_coop_token_metadata.token_mint.key().as_ref()],
       bump = memecoin.memecoin_bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
@@ -53,7 +53,7 @@ pub struct CreateOption<'info> {
       init,
       payer=user,
       space = 8 + TokenOption::INIT_SPACE,
-      seeds = [b"option", coop_token.key().as_ref(), &(memecoin.total_options+1).to_le_bytes()],
+      seeds = [b"option", config.current_coop_token_metadata.token_mint.key().as_ref(), &(memecoin.total_options+1).to_le_bytes()],
       bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,
@@ -61,7 +61,7 @@ pub struct CreateOption<'info> {
       init_if_needed,
       space = 8 + UserTokenVotes::INIT_SPACE,
       payer=user,
-      seeds = [b"votes", user.key().as_ref(), coop_token.key().as_ref()],
+      seeds = [b"votes", user.key().as_ref(), config.current_coop_token_metadata.token_mint.key().as_ref()],
       bump
     ]]
     pub user_token_votes: Box<Account<'info, UserTokenVotes>>,
@@ -98,10 +98,10 @@ pub struct CreateOption<'info> {
     associated_token_program: Program<'info, AssociatedToken>,
 }
 
-impl<'info> CreateOption<'info> {
+impl<'info> CreateOptionFairlaunch<'info> {
     pub fn create_new_option(
         &mut self,
-        bumps: &CreateOptionBumps,
+        bumps: &CreateOptionFairlaunchBumps,
         create_option: CreateOptionInfo,
     ) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
@@ -110,23 +110,12 @@ impl<'info> CreateOption<'info> {
             CoopMemeError::TradingNotActive
         );
         require!(
-            self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingFairlaunchNotOver
+            !self.memecoin.is_bonding_curve_active,
+            CoopMemeError::TradingFairlaunchOver
         );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
-
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
-            return Ok(());
-        }
 
         self.token_option.set_inner(TokenOption {
-            token: self.coop_token.key(),
+            token: self.config.current_coop_token_metadata.token_mint.key(),
             option_type: create_option.option_type,
             option_value: create_option.option_value,
             index: self.memecoin.total_options + 1,
@@ -145,9 +134,10 @@ impl<'info> CreateOption<'info> {
         self.memecoin.total_votes += current_total_votes;
         self.token_option.total_votes += current_total_votes;
         self.user_token_votes.total_votes += current_total_votes;
-        self.user_token_votes.bonding_curve_votes += current_total_votes;
+        self.user_token_votes.fairlaunch_votes += current_total_votes;
         self.user_token_option_votes.total_votes += current_total_votes;
-        self.user_token_option_votes.bonding_curve_votes += current_total_votes;
+        self.user_token_option_votes.fairlaunch_votes += current_total_votes;
+
         self.memecoin.total_options += 1;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 

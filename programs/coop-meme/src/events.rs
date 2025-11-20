@@ -6,6 +6,7 @@ pub struct CreatedEvent {
     pub token_id: u32,
     pub creator: Pubkey,
     pub coop_token: Pubkey,
+    pub fairlaunch_token: Pubkey,
     pub memecoin: Pubkey,
     pub metadata: Pubkey,
     pub decimals: u8,

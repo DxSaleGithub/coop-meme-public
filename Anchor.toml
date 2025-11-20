@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-coop_meme = "Ej8ztqF7HFXoxas5ug6yKeKgf5hcDt8qiKKT32f3bHiu"
+coop_meme = "v47XjNPkBpLt3nNWiErvmTmwguErUnDTJL8pTxNxvFG"
 
 [registry]
 url = "https://api.apr.dev"
@@ -16,3 +16,19 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+upgradeable = false
+
+[[test.genesis]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+program = "tests/meta_program.so"
+upgradeable = false
+
+
+[[test.genesis]]
+address = "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+program = "tests/cpmm.so"
+upgradeable = false

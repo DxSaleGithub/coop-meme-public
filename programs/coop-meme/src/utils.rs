@@ -153,3 +153,106 @@ pub fn unfreeze_user_token_account<'info>(
 
     Ok(())
 }
+
+pub fn calculate_token_amount_when_buy(
+    amount: u64,
+    is_bonding_curve_active: bool,
+    token_share_price: u32,
+    virtual_sol_reserves: u64,
+    virtual_token_reserves: u64,
+) -> Option<u64> {
+    let token_amount;
+    if (!is_bonding_curve_active) {
+        // token_amount using fairlaunch
+        // token_amount = amount / (self.memecoin.token_share_price as u64) * 1_000_000_000;
+        token_amount = (amount as u128)
+            .checked_mul(1_000_000_000 as u128)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(token_share_price as u128)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        return Some(token_amount as u64);
+    } else {
+        // token amount using bonding curve
+        return get_tokens_for_buy_sol(virtual_sol_reserves, virtual_token_reserves, amount as u64);
+    }
+}
+
+pub fn get_tokens_for_buy_sol(
+    virtual_sol_reserves: u64,
+    virtual_token_reserves: u64,
+    sol_amount: u64,
+) -> Option<u64> {
+    if sol_amount == 0 {
+        return None;
+    }
+
+    // Convert to common decimal basis (using 9 decimals as base)
+    let current_sol = virtual_sol_reserves;
+    let current_tokens = virtual_token_reserves;
+
+    // Calculate new reserves using constant product formula
+    let new_sol = current_sol.checked_add(sol_amount)?;
+    let new_tokens = ((current_sol as u128).checked_mul(current_tokens as u128)?)
+        .checked_div(new_sol as u128)?;
+
+    let tokens_out = current_tokens.checked_sub(new_tokens as u64)?;
+
+    // <u64 as TryInto<u64>>::try_into(tokens_out).ok()
+    return Some(tokens_out);
+}
+
+pub fn calculate_sol_amount_when_sell(
+    amount: u64,
+    is_bonding_curve_active: bool,
+    token_share_price: u32,
+    virtual_sol_reserves: u64,
+    virtual_token_reserves: u64,
+) -> Option<u64> {
+    let sol_amount;
+    if (!is_bonding_curve_active) {
+        // sol amount using fairlaunch
+        // sol_amount = amount * (self.memecoin.token_share_price as u64) / 1_000_000_000;
+        sol_amount = (amount as u128)
+            .checked_mul(token_share_price as u128)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap()
+            .checked_div(1_000_000_000u128)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        return Some((sol_amount as u64));
+    } else {
+        // token amount using bonding curve
+        return get_sol_for_sell_tokens(
+            amount as u64,
+            virtual_sol_reserves,
+            virtual_token_reserves,
+        );
+    }
+}
+
+pub fn get_sol_for_sell_tokens(
+    token_amount: u64,
+    virtual_sol_reserves: u64,
+    virtual_token_reserves: u64,
+) -> Option<u64> {
+    if token_amount == 0 {
+        return None;
+    }
+
+    // Convert to common decimal basis (using 9 decimals as base)
+    let current_sol = virtual_sol_reserves;
+    let current_tokens = virtual_token_reserves;
+
+    // Calculate new reserves using constant product formula
+    let new_tokens = current_tokens.checked_add(token_amount)?;
+
+    let new_sol = ((current_sol as u128).checked_mul(current_tokens as u128)?)
+        .checked_div(new_tokens as u128)?;
+
+    let sol_out = current_sol.checked_sub(new_sol as u64)?;
+
+    // <u64 as TryInto<u64>>::try_into(sol_out).ok()
+    Some(sol_out)
+}
