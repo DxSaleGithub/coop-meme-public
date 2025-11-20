@@ -237,16 +237,16 @@ impl<'info> List<'info> {
             owner_token_ata = self.owner_token_1.to_account_info();
 
             init_token_0 = sol_to_list;
-            // init_token_1 = self.memecoin.real_token_reserves;
-            init_token_1 = self._calc_final_token_for_listing(sol_to_list).unwrap();
+            init_token_1 = self.memecoin.real_token_reserves;
+            // init_token_1 = self._calc_final_token_for_listing(sol_to_list).unwrap();
         } else if (self.token_1_mint.key() == self.native_mint.key()
             && self.token_0_mint.key() == self.coop_token.key())
         {
             owner_wsol_ata = self.owner_token_1.to_account_info();
             owner_token_ata = self.owner_token_0.to_account_info();
 
-            // init_token_0 = self.memecoin.real_token_reserves;
-            init_token_0 = self._calc_final_token_for_listing(sol_to_list).unwrap();
+            init_token_0 = self.memecoin.real_token_reserves;
+            // init_token_0 = self._calc_final_token_for_listing(sol_to_list).unwrap();
             init_token_1 = sol_to_list;
         } else {
             return Err(CoopMemeError::InvalidListingInfo.into());

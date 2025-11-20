@@ -15,7 +15,7 @@ use anchor_spl::{
 };
 
 #[derive(Accounts)]
-pub struct UserVote<'info> {
+pub struct UserVoteFairlaunch<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
     /// CHECK: This is a system account so safe.
@@ -39,24 +39,19 @@ pub struct UserVote<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_bump
+      seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      bump = memecoin.token_fairlaunch_bump
     )]
     pub coop_token: Box<Account<'info, Mint>>,
-    #[account(
-      seeds = [b"mint", coop_token.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_bump
-    )]
-    pub fairlaunch_token: Box<Account<'info, Mint>>,
     #[account[
       mut,
-      seeds = [b"memecoin", coop_token.key().as_ref()],
+      seeds = [b"memecoin", config.current_coop_token_metadata.token_mint.key().as_ref()],
       bump = memecoin.memecoin_bump
     ]]
     pub memecoin: Box<Account<'info, MemeCoinData>>,
     #[account[
       mut,
-      seeds = [b"option", coop_token.key().as_ref(), &token_option.index.to_le_bytes()],
+      seeds = [b"option", config.current_coop_token_metadata.token_mint.key().as_ref(), &token_option.index.to_le_bytes()],
       bump = token_option.bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,
@@ -64,7 +59,7 @@ pub struct UserVote<'info> {
       init_if_needed,
       space = 8 + UserTokenVotes::INIT_SPACE,
       payer=user,
-      seeds = [b"votes", user.key().as_ref(), coop_token.key().as_ref()],
+      seeds = [b"votes", user.key().as_ref(), config.current_coop_token_metadata.token_mint.key().as_ref()],
       bump
     ]]
     pub user_token_votes: Box<Account<'info, UserTokenVotes>>,
@@ -84,14 +79,6 @@ pub struct UserVote<'info> {
       associated_token::token_program=token_program,
     )]
     pub user_token_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: This is an ata for coop token for user.
-    #[account(
-      mut,
-      associated_token::mint=fairlaunch_token,
-      associated_token::authority=user,
-      associated_token::token_program=token_program,
-    )]
-    pub user_fairlaunch_token_ata: Box<Account<'info, TokenAccount>>,
     #[account(
       mut,
       associated_token::mint=coop_token,
@@ -99,13 +86,6 @@ pub struct UserVote<'info> {
       associated_token::token_program=token_program,
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
-    #[account(
-      mut,
-      associated_token::mint=fairlaunch_token,
-      associated_token::authority=memecoin,
-      associated_token::token_program=token_program,
-    )]
-    pub vote_fairlaunch_token_ata: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
 
@@ -116,7 +96,7 @@ pub struct UserVote<'info> {
     associated_token_program: Program<'info, AssociatedToken>,
 }
 
-impl<'info> UserVote<'info> {
+impl<'info> UserVoteFairlaunch<'info> {
     pub fn user_votes(&mut self, votes: u64) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(
@@ -124,20 +104,20 @@ impl<'info> UserVote<'info> {
             CoopMemeError::TradingNotActive
         );
         require!(
-            self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingNotActive
+            !self.memecoin.is_bonding_curve_active,
+            CoopMemeError::TradingFairlaunchOver
         );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
+        // let clock = Clock::get()?; // Pull the clock sysvar
+        // let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
-            return Ok(());
-        }
+        // if (current_time as u64 > self.memecoin.token_market_end_time) {
+        //     self.memecoin.is_trading_active = false;
+        //     emit!(TradingOverEvent {
+        //         coop_token: self.coop_token.key(),
+        //         memecoin: self.memecoin.key(),
+        //     });
+        //     return Ok(());
+        // }
         require!(
             self.user_token_ata.amount >= self.config.min_vote_token_amount,
             CoopMemeError::NotEnoughToken
@@ -147,9 +127,9 @@ impl<'info> UserVote<'info> {
         self.memecoin.total_votes += votes;
         self.token_option.total_votes += votes;
         self.user_token_votes.total_votes += votes;
-        self.user_token_votes.bonding_curve_votes += votes;
+        self.user_token_votes.fairlaunch_votes += votes;
         self.user_token_option_votes.total_votes += votes;
-        self.user_token_option_votes.bonding_curve_votes += votes;
+        self.user_token_option_votes.fairlaunch_votes += votes;
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
@@ -215,48 +195,28 @@ impl<'info> UserVote<'info> {
             CoopMemeError::TradingNotActive
         );
         require!(
-            self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingNotActive
+            !self.memecoin.is_bonding_curve_active,
+            CoopMemeError::TradingFairlaunchOver
         );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
+        // let clock = Clock::get()?; // Pull the clock sysvar
+        // let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
-            return Ok(());
-        }
+        // if (current_time as u64 > self.memecoin.token_market_end_time) {
+        //     self.memecoin.is_trading_active = false;
+        //     emit!(TradingOverEvent {
+        //         coop_token: self.coop_token.key(),
+        //         memecoin: self.memecoin.key(),
+        //     });
+        //     return Ok(());
+        // }
         self._validate_unvote_info(votes)?;
-
-        let votes_from_fairlaunch;
-        let votes_from_bondingcurve;
 
         self.memecoin.total_votes -= votes;
         self.token_option.total_votes -= votes;
         self.user_token_votes.total_votes -= votes;
+        self.user_token_votes.fairlaunch_votes -= votes;
         self.user_token_option_votes.total_votes -= votes;
-
-        if self.user_token_option_votes.fairlaunch_votes > votes {
-            self.user_token_option_votes.fairlaunch_votes -= votes;
-            self.user_token_votes.fairlaunch_votes -= votes;
-            votes_from_fairlaunch = votes;
-            votes_from_bondingcurve = 0;
-        } else {
-            votes_from_fairlaunch = self.user_token_option_votes.fairlaunch_votes;
-            votes_from_bondingcurve = (votes - votes_from_fairlaunch);
-            self.user_token_option_votes.fairlaunch_votes = 0;
-            self.user_token_option_votes.bonding_curve_votes -= votes_from_bondingcurve;
-            self.user_token_votes.fairlaunch_votes = votes_from_fairlaunch;
-            self.user_token_votes.bonding_curve_votes -= votes_from_bondingcurve;
-        }
-
-        require!(
-            votes_from_bondingcurve + votes_from_fairlaunch == votes,
-            CoopMemeError::NotEnoughToken
-        );
+        self.user_token_option_votes.fairlaunch_votes -= votes;
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
@@ -276,13 +236,6 @@ impl<'info> UserVote<'info> {
             self.token_program.to_account_info(),
             &[seeds_for_unfreeze],
         )?;
-        unfreeze_user_token_account(
-            self.global_vault.to_account_info(),
-            self.fairlaunch_token.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
-            self.token_program.to_account_info(),
-            &[seeds_for_unfreeze],
-        )?;
 
         // transfer token from vote_ata to user
         token_transfer_with_signer(
@@ -291,17 +244,7 @@ impl<'info> UserVote<'info> {
             self.user_token_ata.to_account_info(),
             &self.token_program,
             &[seeds],
-            votes_from_bondingcurve,
-        )?;
-
-        // transfer fairlaunch token from vote_ata to user
-        token_transfer_with_signer(
-            self.vote_fairlaunch_token_ata.to_account_info(),
-            self.memecoin.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
-            &self.token_program,
-            &[seeds],
-            votes_from_fairlaunch,
+            votes,
         )?;
 
         let seeds_for_freeze: &[&[u8]] = &[
@@ -313,14 +256,6 @@ impl<'info> UserVote<'info> {
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
             self.user_token_ata.to_account_info(),
-            self.token_program.to_account_info(),
-            &[seeds_for_freeze],
-        )?;
-
-        freeze_user_token_account(
-            self.global_vault.to_account_info(),
-            self.fairlaunch_token.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
             self.token_program.to_account_info(),
             &[seeds_for_freeze],
         )?;
@@ -367,11 +302,19 @@ impl<'info> UserVote<'info> {
             CoopMemeError::NotEnoughToken
         );
         require!(
+            self.user_token_votes.fairlaunch_votes >= votes,
+            CoopMemeError::NotEnoughToken
+        );
+        require!(
             self.token_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidTokenVoteInfo
         );
         require!(
             self.user_token_option_votes.total_votes >= votes,
+            CoopMemeError::NotEnoughToken
+        );
+        require!(
+            self.user_token_option_votes.fairlaunch_votes >= votes,
             CoopMemeError::NotEnoughToken
         );
         Ok(())

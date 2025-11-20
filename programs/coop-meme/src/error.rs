@@ -28,6 +28,10 @@ pub enum CoopMemeError {
     InvalidTokenUri,
     #[msg("Invalid arithmetic operation")]
     InvalidOperation,
+    #[msg("Trading fairlaunch over")]
+    TradingFairlaunchOver,
+    #[msg("Trading fairlaunch not over")]
+    TradingFairlaunchNotOver,
     #[msg("Trading active")]
     TradingActive,
     #[msg("Not enough token")]

@@ -6,6 +6,7 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct MemeCoinData {
     pub token_id: u32,
+    pub token_fairlaunch_mint: Pubkey,
     pub token_mint: Pubkey,
     pub creator: Pubkey,
     pub token_share_price: u32,
@@ -17,6 +18,7 @@ pub struct MemeCoinData {
     pub virtual_token_reserves: u64,
     pub real_sol_reserves: u64,
     pub real_token_reserves: u64,
+    pub fairlaunch_sol_raised: u64,
     pub is_bonding_curve_active: bool,
     pub is_trading_active: bool,
     pub is_voting_finalized: bool,
@@ -25,6 +27,7 @@ pub struct MemeCoinData {
     pub total_options: u32,
     pub memecoin_bump: u8,
     pub token_bump: u8,
+    pub token_fairlaunch_bump: u8,
 }
 
 #[account]

@@ -21,13 +21,13 @@ pub struct MemeCoin<'info> {
       seeds = [b"config"],
       bump = config.config_bump
     ]]
-    pub config: Account<'info, ConfigData>,
+    pub config: Box<Account<'info, ConfigData>>,
     #[account[
       mut,
       seeds = [b"roles"],
       bump=rbac.bump
     ]]
-    pub rbac: Account<'info, RBAControlList>,
+    pub rbac: Box<Account<'info, RBAControlList>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
     /// It does not store any data and is used only for lamport/token transfers.
     /// PDA seeds = [b"global"], bump = config.global_vault_bump
@@ -48,6 +48,16 @@ pub struct MemeCoin<'info> {
         mint::freeze_authority=global_vault.key()
     )]
     pub coop_token: Box<Account<'info, Mint>>,
+    #[account(
+        init,
+        seeds = [b"mint", coop_token.key().as_ref(), &(config.total_coop_created+1).to_le_bytes() ],
+        bump,
+        payer = creator,
+        mint::decimals = 9,
+        mint::authority = global_vault.key(),
+        mint::freeze_authority=global_vault.key()
+    )]
+    pub fairlaunch_token: Box<Account<'info, Mint>>,
     #[account[
       init,
       space = 8 + MemeCoinData::INIT_SPACE,
@@ -68,7 +78,6 @@ pub struct MemeCoin<'info> {
       seeds::program = metadata::ID
     )]
     token_metadata_account: UncheckedAccount<'info>,
-
     /// CHECK: This is an ATA for coop token with global vault as authority.
     #[account(
     mut,
@@ -81,7 +90,30 @@ pub struct MemeCoin<'info> {
     seeds::program = associated_token::ID        // Associated Token Program
     )]
     pub global_token_ata: AccountInfo<'info>,
-
+    /// CHECK: This is a PDA for coop token metadata account
+    #[account(
+      mut,
+      seeds = [
+          b"metadata",
+          metadata::ID.as_ref(),
+          fairlaunch_token.key().as_ref(),
+      ],
+      bump,
+      seeds::program = metadata::ID
+    )]
+    token_fairlaunch_metadata_account: UncheckedAccount<'info>,
+    /// CHECK: This is an ATA for coop token with global vault as authority.
+    #[account(
+    mut,
+    seeds = [
+        global_vault.key().as_ref(),             // authority
+        token::ID.as_ref(),                      // SPL Token Program
+        fairlaunch_token.key().as_ref(),                    // mint
+    ],
+    bump,
+    seeds::program = associated_token::ID        // Associated Token Program
+    )]
+    pub global_fairlaunch_token_ata: AccountInfo<'info>,
     /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
     #[account(
       init_if_needed,
@@ -91,6 +123,15 @@ pub struct MemeCoin<'info> {
       payer=creator
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(
+      init_if_needed,
+      associated_token::mint=fairlaunch_token,
+      associated_token::authority=memecoin,
+      associated_token::token_program=token_program,
+      payer=creator
+    )]
+    pub vote_fairlaunch_token_ata: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
@@ -135,7 +176,7 @@ impl<'info> MemeCoin<'info> {
             CoopMemeError::InvalidTokenSymbol
         );
         require!(
-            !uri.is_empty() && uri.len() < 200,
+            !uri.is_empty() && uri.len() < 256,
             CoopMemeError::InvalidTokenUri
         );
 
@@ -145,6 +186,7 @@ impl<'info> MemeCoin<'info> {
         self.memecoin.set_inner(MemeCoinData {
             token_id: self.config.total_coop_created.checked_add(1).unwrap(),
             token_mint: self.coop_token.key(),
+            token_fairlaunch_mint: self.fairlaunch_token.key(),
             creator: self.creator.key(),
             token_share_price: token_share_price,
             token_total_supply: total_supply,
@@ -158,9 +200,10 @@ impl<'info> MemeCoin<'info> {
                 .ok_or(CoopMemeError::InvalidOperation)
                 .unwrap(),
             virtual_sol_reserves: self.config.init_virtual_sol,
-            virtual_token_reserves: total_supply,
+            virtual_token_reserves: self.config.init_virtual_token,
             real_sol_reserves: 0,
-            real_token_reserves: total_supply,
+            real_token_reserves: self.config.init_real_token,
+            fairlaunch_sol_raised: 0,
             is_bonding_curve_active: false,
             is_trading_active: true,
             is_token_listed: false,
@@ -169,11 +212,15 @@ impl<'info> MemeCoin<'info> {
             total_votes: 0,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
+            token_fairlaunch_bump: bumps.fairlaunch_token,
         });
 
         self.config.current_coop_token_metadata.token_id =
             self.config.total_coop_created.checked_add(1).unwrap();
         self.config.current_coop_token_metadata.token_mint = self.coop_token.key();
+        self.config
+            .current_coop_token_metadata
+            .token_fairlaunch_mint = self.fairlaunch_token.key();
         self.config.current_coop_token_metadata.creator = self.creator.key();
         self.config
             .current_coop_token_metadata
@@ -197,6 +244,19 @@ impl<'info> MemeCoin<'info> {
             },
         ))?;
 
+        // create global token account for fairlaunch token
+        associated_token::create(CpiContext::new(
+            self.associated_token_program.to_account_info(),
+            associated_token::Create {
+                payer: self.creator.to_account_info(),
+                associated_token: self.global_fairlaunch_token_ata.to_account_info(),
+                authority: self.global_vault.to_account_info(),
+                mint: self.fairlaunch_token.to_account_info(),
+                token_program: self.token_program.to_account_info(),
+                system_program: self.system_program.to_account_info(),
+            },
+        ))?;
+
         let signer_seeds: &[&[&[u8]]] = &[&[b"global", &[self.config.global_vault_bump]]];
 
         // mint tokens to global vault ata for token
@@ -212,6 +272,26 @@ impl<'info> MemeCoin<'info> {
             ),
             total_supply as u64,
         )?;
+
+        // mint tokens to global vault ata for fairlaunch token
+        token::mint_to(
+            CpiContext::new_with_signer(
+                self.token_program.to_account_info(),
+                token::MintTo {
+                    mint: self.fairlaunch_token.to_account_info(),
+                    to: self.global_fairlaunch_token_ata.to_account_info(),
+                    authority: self.global_vault.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            total_supply as u64,
+        )?;
+
+        let mut fairlaunch_name = name.clone();
+        let mut fairlaunch_symbol = symbol.clone();
+        let fairlaunch_uri = uri.clone();
+        fairlaunch_name.push_str("_fairlaunch");
+        fairlaunch_symbol.push_str("_FL");
 
         // create metadata
         metadata::create_metadata_accounts_v3(
@@ -242,6 +322,35 @@ impl<'info> MemeCoin<'info> {
             None,
         )?;
 
+        // create metadata for fairlaunch
+        metadata::create_metadata_accounts_v3(
+            CpiContext::new_with_signer(
+                self.mpl_token_metadata_program.to_account_info(),
+                metadata::CreateMetadataAccountsV3 {
+                    metadata: self.token_fairlaunch_metadata_account.to_account_info(),
+                    mint: self.fairlaunch_token.to_account_info(),
+                    mint_authority: self.global_vault.to_account_info(),
+                    payer: self.creator.to_account_info(),
+                    update_authority: self.global_vault.to_account_info(),
+                    system_program: self.system_program.to_account_info(),
+                    rent: self.rent.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            DataV2 {
+                name: fairlaunch_name,
+                symbol: fairlaunch_symbol,
+                uri: fairlaunch_uri,
+                seller_fee_basis_points: 0,
+                creators: None,
+                collection: None,
+                uses: None,
+            },
+            true,
+            true,
+            None,
+        )?;
+
         //  revoke mint authority
         token::set_authority(
             CpiContext::new_with_signer(
@@ -256,10 +365,25 @@ impl<'info> MemeCoin<'info> {
             None,
         )?;
 
+        //  revoke mint authority
+        token::set_authority(
+            CpiContext::new_with_signer(
+                self.token_program.to_account_info(),
+                token::SetAuthority {
+                    current_authority: self.global_vault.to_account_info(),
+                    account_or_mint: self.fairlaunch_token.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            AuthorityType::MintTokens,
+            None,
+        )?;
+
         emit!(CreatedEvent {
             token_id: self.memecoin.token_id,
             creator: self.creator.key(),
             coop_token: self.coop_token.key(),
+            fairlaunch_token: self.fairlaunch_token.key(),
             memecoin: self.memecoin.key(),
             metadata: self.token_metadata_account.key(),
             decimals: 9,

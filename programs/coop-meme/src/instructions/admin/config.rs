@@ -66,9 +66,11 @@ impl<'info> Config<'info> {
             coop_interval: 600,
             fairlaunch_period: 300,
             min_price_per_token: 100,                      //  0.0000001 sol
-            max_price_per_token: 1_000_000_0,              // 0.01 sol
-            init_virtual_sol: 10_000_000_000_000_000,      // 10 million sol
-            init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token => init price = 0.01 sol per token
+            max_price_per_token: 1_000_000_000,            // 0.01 sol
+            init_virtual_sol: 30_000_000_000,              // 30 sol
+            init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token
+            init_real_token: 800_000_000_000_000_000,
+            fairlaunch_token_limit: 600_000_000_000_000_000,
             total_coop_created: 0,
             total_coop_listed: 0,
             min_vote_token_amount: 1000_000_000_000,
@@ -78,6 +80,7 @@ impl<'info> Config<'info> {
             current_coop_token_metadata: MemeCoinDataMetadata {
                 token_id: 0,
                 token_mint: Pubkey::default(),
+                token_fairlaunch_mint: Pubkey::default(),
                 creator: Pubkey::default(),
                 is_bonding_curve_active: false,
                 is_trading_active: false,
@@ -127,6 +130,8 @@ impl<'info> UpdateConfig<'info> {
         new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
+        new_init_real_token: Option<u64>,
+        new_fairlaunch_token_limit: Option<u64>,
         new_min_vote_token_amount: Option<u64>,
         new_min_option_add_token_amount: Option<u64>,
     ) -> Result<()> {
@@ -177,6 +182,14 @@ impl<'info> UpdateConfig<'info> {
 
         if let Some(token) = new_init_virtual_token {
             self.config.init_virtual_token = token;
+        }
+
+        if let Some(token) = new_init_real_token {
+            self.config.init_real_token = token;
+        }
+
+        if let Some(token) = new_fairlaunch_token_limit {
+            self.config.fairlaunch_token_limit = token;
         }
 
         if let Some(token_amount) = new_min_vote_token_amount {
