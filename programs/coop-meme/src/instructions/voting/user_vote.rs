@@ -44,8 +44,9 @@ pub struct UserVote<'info> {
     )]
     pub coop_token: Box<Account<'info, Mint>>,
     #[account(
-      seeds = [b"mint", coop_token.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_bump
+      mut,
+      seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      bump = memecoin.token_fairlaunch_bump
     )]
     pub fairlaunch_token: Box<Account<'info, Mint>>,
     #[account[

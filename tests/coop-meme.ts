@@ -211,7 +211,7 @@ describe('coop-meme-2', () => {
     };
   }
 
-  it.only('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -261,8 +261,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(180);
-    const newFairlaunchPeriod = new anchor.BN(90);
+    const newCoopInterval = new anchor.BN(900);
+    const newFairlaunchPeriod = new anchor.BN(200);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -318,7 +318,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it.only('provide roles', async () => {
+  it('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -383,37 +383,37 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', roleList);
   });
 
-  it.only('Is creating memecoin!', async () => {
+  it('Is creating memecoin!', async () => {
     await create_tokens();
   });
 
-  it.only('first buying memecoin in fairlaunch!', async () => {
+  it('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch();
   });
 
-  it.only('first selling memecoin in fairlaunch!', async () => {
+  it('first selling memecoin in fairlaunch!', async () => {
     await sell_tokens_fairlaunch();
   });
 
-  it.only('first voting with option with fairlaunch', async () => {
+  it('first voting with option with fairlaunch', async () => {
     await vote_with_option_fairlaunch('name', 'Token1');
     await vote_with_option_fairlaunch('sym', 'TKN1');
     await vote_with_option_fairlaunch('uri', 'uri1');
   });
 
-  it.only('first voting for fairlaunch', async () => {
+  it('first voting for fairlaunch', async () => {
     await vote_fairlaunch(1);
     await vote_fairlaunch(2);
     await vote_fairlaunch(3);
   });
 
-  it.only('first unvoting for fairlaunch', async () => {
+  it('first unvoting for fairlaunch', async () => {
     await unvote_fairlaunch(1);
     await unvote_fairlaunch(2);
     await unvote_fairlaunch(3);
   });
 
-  it.only('first buying memecoin!', async () => {
+  it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(90 * 1000); // 2 minutes = 120000 ms
@@ -422,23 +422,27 @@ describe('coop-meme-2', () => {
     await buy_tokens();
   });
 
-  it.only('first selling memecoin!', async () => {
+  it('first selling memecoin!', async () => {
     await sell_tokens();
   });
 
-  it.only('first voting with option', async () => {
+  it('swap fairlaunch to bonding curve', async () => {
+    await swap();
+  });
+
+  it('first voting with option', async () => {
     await vote_with_option('name', 'Token1');
     await vote_with_option('sym', 'TKN1');
     await vote_with_option('uri', 'uri1');
   });
 
-  it.only('first voting', async () => {
+  it('first voting', async () => {
     await vote(1);
     await vote(2);
     await vote(3);
   });
 
-  it.only('first unvoting', async () => {
+  it('first unvoting', async () => {
     await unvote(1);
     await unvote(2);
     await unvote(3);
@@ -545,7 +549,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it.only('Is finalizing voting', async () => {
+  it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(90 * 1000); // 2 minutes = 120000 ms
@@ -554,15 +558,15 @@ describe('coop-meme-2', () => {
     await finalizeVote();
   });
 
-  it.only('Is listing memecoin!', async () => {
+  it('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it.skip('unvoting all tokens', async () => {
+  it('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it.only('Is swapping SOL to memecoin!', async () => {
+  it('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -766,7 +770,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.only('Is swapping memecoin to SOL!', async () => {
+  it('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -2538,6 +2542,54 @@ describe('coop-meme-2', () => {
     console.log('user tokens vote state data:', userVotesState);
   }
 
+  async function swap() {
+    const {
+      user,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      fairlaunchToken,
+      memecoinPda,
+      globalTokenAta,
+      globalFairlaunchTokenAta,
+      userTokenAta,
+      userFairlaunchTokenAta,
+    } = await setup(false);
+
+    const txSig = await program.methods
+      .swap()
+      .accounts({
+        user,
+        creator,
+        config: configPda,
+        globalVault,
+        coopToken,
+        fairlaunchToken,
+        memecoin: memecoinPda,
+        globalTokenAta,
+        globalFairlaunchTokenAta,
+        userTokenAta,
+        userFairlaunchTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        // associatedTokenProgram:
+        //   anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
+  }
+
   async function finalizeVote() {
     const user = provider.wallet.publicKey;
 
@@ -2918,68 +2970,83 @@ describe('coop-meme-2', () => {
   }
 
   async function unvote_all_tokens() {
-    const user = provider.wallet.publicKey;
+    const {
+      user,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+      fairlaunchToken,
+      globalTokenAta,
+      userTokenVotes,
+      userTokenAta,
+      userFairlaunchTokenAta,
+      voteTokenAta,
+      voteFairlaunchTokenAta,
+    } = await setup(false);
+    // const user = provider.wallet.publicKey;
 
-    const creator = provider.wallet.publicKey;
+    // const creator = provider.wallet.publicKey;
 
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId
-    );
+    // const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+    //   [Buffer.from('config')],
+    //   program.programId
+    // );
 
-    // Fetch the config to get `total_coop_created`
-    const config = await program.account.configData.fetch(configPda);
+    // // Fetch the config to get `total_coop_created`
+    // const config = await program.account.configData.fetch(configPda);
 
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId
-      );
-
-    console.log('global vault', globalVault);
-
-    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-    const seedBuffer = totalCoopCreated
-      .addn(1)
-      .toArrayLike(Buffer, 'le', 4); // u64 LE
-
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId
-    );
-
-    const [memecoinPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('memecoin'), coopToken.toBuffer()],
-        program.programId
-      );
-    const memecoinData = await program.account.memeCoinData.fetch(
-      memecoinPda
-    );
-
-    // const [tokenVotesPda] =
+    // const [globalVault] =
     //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [Buffer.from('votes'), coopToken.toBuffer()],
+    //     [Buffer.from('global')],
     //     program.programId
     //   );
 
-    const [userTokenVotes] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
-        program.programId
-      );
+    // console.log('global vault', globalVault);
 
-    const userTokenAta = await getAssociatedTokenAddress(
-      coopToken,
-      user,
-      false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
+    // const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
+    // const seedBuffer = totalCoopCreated
+    //   .addn(1)
+    //   .toArrayLike(Buffer, 'le', 4); // u64 LE
 
-    const voteTokenAta = await getAssociatedTokenAddress(
-      coopToken,
-      memecoinPda,
-      true // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
+    // const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+    //   [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+    //   program.programId
+    // );
+
+    // const [memecoinPda] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('memecoin'), coopToken.toBuffer()],
+    //     program.programId
+    //   );
+    // const memecoinData = await program.account.memeCoinData.fetch(
+    //   memecoinPda
+    // );
+
+    // // const [tokenVotesPda] =
+    // //   anchor.web3.PublicKey.findProgramAddressSync(
+    // //     [Buffer.from('votes'), coopToken.toBuffer()],
+    // //     program.programId
+    // //   );
+
+    // const [userTokenVotes] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
+    //     program.programId
+    //   );
+
+    // const userTokenAta = await getAssociatedTokenAddress(
+    //   coopToken,
+    //   user,
+    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    // );
+
+    // const voteTokenAta = await getAssociatedTokenAddress(
+    //   coopToken,
+    //   memecoinPda,
+    //   true // allowOwnerOffCurve = false (always false unless you know it's needed)
+    // );
 
     let userTokenBal =
       await provider.connection.getTokenAccountBalance(userTokenAta);
@@ -2994,11 +3061,14 @@ describe('coop-meme-2', () => {
         config: configPda,
         globalVault,
         coopToken,
+        fairlaunchToken,
         memecoin: memecoinPda,
-        // tokenVotes: tokenVotesPda,
+        globalTokenAta,
         userTokenVotes,
         userTokenAta,
+        userFairlaunchTokenAta,
         voteTokenAta,
+        voteFairlaunchTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram:
           anchor.utils.token.ASSOCIATED_PROGRAM_ID,

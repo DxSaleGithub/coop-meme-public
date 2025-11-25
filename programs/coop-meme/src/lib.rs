@@ -148,6 +148,10 @@ pub mod coop_meme {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 
+    pub fn swap(ctx: Context<Swap>) -> Result<()> {
+        ctx.accounts.swap_fairlaunch_to_bonding_curve()
+    }
+
     // VOTING METHODS
     pub fn vote_fairlaunch(ctx: Context<UserVoteFairlaunch>, votes: u64) -> Result<()> {
         ctx.accounts.user_votes(votes)

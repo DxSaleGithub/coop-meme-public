@@ -27,10 +27,6 @@ pub struct List<'info> {
     ]]
     pub owner: Signer<'info>,
     /// CHECK: This is a system account so safe.
-    #[account[
-      // mut
-    ]]
-    pub creator: AccountInfo<'info>,
     /// CHECK: This is a system account so safe.
     #[account[
       mut,
@@ -72,7 +68,7 @@ pub struct List<'info> {
     )]
     pub token_1_mint: Box<Account<'info, Mint>>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      seeds = [b"mint", config.current_coop_token_metadata.creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_bump
     )]
     pub coop_token: Box<Account<'info, Mint>>, // token 1
@@ -273,10 +269,6 @@ impl<'info> List<'info> {
         //     self.config.admin.key() == self.owner.key(),
         //     CoopMemeError::Unauthorized
         // );
-        require!(
-            self.memecoin.creator == self.creator.key(),
-            CoopMemeError::Unauthorized
-        );
 
         // transfer listing fee from gloval vault to team wallet
         let seeds: &[&[u8]] = &[

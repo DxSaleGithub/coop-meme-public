@@ -40,7 +40,8 @@ pub struct UnlockAll<'info> {
     )]
     pub coop_token: Box<Account<'info, Mint>>,
     #[account(
-      seeds = [b"fairlaunch", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      mut,
+      seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_fairlaunch_bump
     )]
     pub fairlaunch_token: Box<Account<'info, Mint>>,
@@ -144,32 +145,29 @@ impl<'info> UnlockAll<'info> {
         )?;
 
         if (fairlaunch_token_amount + fairlaunch_votes) > 0 {
+            let seeds: &[&[u8]] = &[
+                b"memecoin",
+                coop_token_key.as_ref(),        // your static seed
+                &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
+            ];
+
+            // transfer token from vote_ata to user
+            token_transfer_with_signer(
+                self.vote_fairlaunch_token_ata.to_account_info(),
+                self.memecoin.to_account_info(),
+                self.user_fairlaunch_token_ata.to_account_info(),
+                &self.token_program,
+                &[seeds],
+                fairlaunch_votes,
+            )?;
+
             // burn fairlaunch tokens from user
             let burn_accounts = Burn {
                 mint: self.fairlaunch_token.to_account_info(),
                 from: self.user_fairlaunch_token_ata.to_account_info(),
-                authority: self.memecoin.to_account_info(),
+                authority: self.user.to_account_info(),
             };
             let burn_ctx = CpiContext::new(self.token_program.to_account_info(), burn_accounts);
-            burn(burn_ctx, fairlaunch_token_amount)?;
-
-            // burn fairlaunch tokens that has been  voted
-            let seeds: &[&[u8]] = &[
-                b"memecoin",
-                fairlaunch_token_key.as_ref(),  // your static seed
-                &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
-            ];
-            let signer_seeds = &[seeds];
-            let burn_accounts = Burn {
-                mint: self.fairlaunch_token.to_account_info(),
-                from: self.vote_fairlaunch_token_ata.to_account_info(),
-                authority: self.memecoin.to_account_info(),
-            };
-            let burn_ctx = CpiContext::new_with_signer(
-                self.token_program.to_account_info(),
-                burn_accounts,
-                signer_seeds,
-            );
             burn(burn_ctx, fairlaunch_token_amount)?;
 
             // transfer user 1:1 bonding curve tokens for burning fairlaunch token

@@ -39,6 +39,7 @@ pub struct UserVoteFairlaunch<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
+      mut,
       seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
       bump = memecoin.token_fairlaunch_bump
     )]
@@ -221,8 +222,8 @@ impl<'info> UserVoteFairlaunch<'info> {
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
             b"memecoin",
-            coop_token_key.as_ref(),        // your static seed
-            &[self.memecoin.memecoin_bump], // your bump, wrapped as byte slice
+            self.memecoin.token_mint.as_ref(), // your static seed
+            &[self.memecoin.memecoin_bump],    // your bump, wrapped as byte slice
         ];
 
         let seeds_for_unfreeze: &[&[u8]] = &[
