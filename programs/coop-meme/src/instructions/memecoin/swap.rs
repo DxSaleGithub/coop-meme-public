@@ -170,6 +170,19 @@ impl<'info> Swap<'info> {
         let burn_ctx = CpiContext::new(self.token_program.to_account_info(), burn_accounts);
         burn(burn_ctx, self.user_fairlaunch_token_ata.amount)?;
 
+        let seeds_for_freeze: &[&[u8]] = &[
+            b"global",                        // your static seed
+            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+        ];
+
+        freeze_user_token_account(
+            self.global_vault.to_account_info(),
+            self.coop_token.to_account_info(),
+            self.user_token_ata.to_account_info(),
+            self.token_program.to_account_info(),
+            &[seeds_for_freeze],
+        )?;
+
         Ok(())
     }
 }

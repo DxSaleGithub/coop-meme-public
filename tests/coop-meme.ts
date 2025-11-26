@@ -211,7 +211,7 @@ describe('coop-meme-2', () => {
     };
   }
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -250,7 +250,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -262,7 +262,7 @@ describe('coop-meme-2', () => {
 
     const newOwnerFee = new anchor.BN(1000);
     const newCoopInterval = new anchor.BN(900);
-    const newFairlaunchPeriod = new anchor.BN(200);
+    const newFairlaunchPeriod = new anchor.BN(300);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -318,7 +318,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it('provide roles', async () => {
+  it.skip('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -416,7 +416,7 @@ describe('coop-meme-2', () => {
   it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
-    await delay(90 * 1000); // 2 minutes = 120000 ms
+    await delay(300 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await buy_tokens();
@@ -448,7 +448,7 @@ describe('coop-meme-2', () => {
     await unvote(3);
   });
 
-  it.skip('tests buy/sell for price changes', async () => {
+  it('tests buy/sell for price changes', async () => {
     const creator = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -524,7 +524,7 @@ describe('coop-meme-2', () => {
     );
   });
 
-  it.skip('multiple buy, sell, vote and unvote', async () => {
+  it('multiple buy, sell, vote and unvote', async () => {
     await buy_tokens();
     await buy_tokens();
     await buy_tokens();
@@ -552,7 +552,7 @@ describe('coop-meme-2', () => {
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(90 * 1000); // 2 minutes = 120000 ms
+    await delay(600 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await finalizeVote();

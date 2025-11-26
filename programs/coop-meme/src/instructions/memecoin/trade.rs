@@ -332,6 +332,10 @@ impl<'info> Trade<'info> {
             sol_amount > min_sol_receive,
             CoopMemeError::InsufficientAmount
         );
+        require!(
+            (self.global_vault.lamports() - self.memecoin.fairlaunch_sol_raised) > sol_amount,
+            CoopMemeError::NotEnoughSol
+        );
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
