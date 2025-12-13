@@ -117,11 +117,11 @@ impl<'info> TradeFairlaunch<'info> {
         }
 
         let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
-        let amount_to_buy = amount
+        let mut amount_to_buy = amount
             .checked_sub(team_fees)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
-        let token_amount = calculate_token_amount_when_buy(
+        let mut token_amount = calculate_token_amount_when_buy(
             amount_to_buy,
             self.memecoin.is_bonding_curve_active,
             self.memecoin.token_share_price,
@@ -129,6 +129,43 @@ impl<'info> TradeFairlaunch<'info> {
             self.memecoin.virtual_token_reserves,
         )
         .unwrap();
+
+        // check if 600 million fairlaunch tokens has been sold, if yes, start bonding curve
+        if token_amount > self.memecoin.fairlaunch_token_reserves {
+            let refund_token = token_amount - self.memecoin.fairlaunch_token_reserves;
+            let refund_sol = calculate_sol_amount_when_sell(
+                refund_token,
+                false,
+                self.memecoin.token_share_price,
+                self.memecoin.virtual_sol_reserves,
+                self.memecoin.virtual_token_reserves,
+            )
+            .unwrap();
+            token_amount = self.memecoin.fairlaunch_token_reserves;
+            amount_to_buy = amount_to_buy - refund_sol;
+
+            let seeds: &[&[u8]] = &[
+                b"global",                        // your static seed
+                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            ];
+
+            sol_transfer_with_signer(
+                self.global_vault.to_account_info(),
+                self.trader.to_account_info(),
+                &self.system_program,
+                &[seeds],
+                refund_sol,
+            )?;
+
+            self.memecoin.is_bonding_curve_active = true;
+            self.config
+                .current_coop_token_metadata
+                .is_bonding_curve_active = true;
+            emit!(BondingCurveStartedEvent {
+                coop_token: self.config.current_coop_token_metadata.token_mint.key(),
+                memecoin: self.memecoin.key(),
+            });
+        }
 
         self.memecoin.fairlaunch_sol_raised = self
             .memecoin
@@ -139,6 +176,12 @@ impl<'info> TradeFairlaunch<'info> {
         self.memecoin.real_token_reserves = self
             .memecoin
             .real_token_reserves
+            .checked_sub(token_amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        self.memecoin.fairlaunch_token_reserves = self
+            .memecoin
+            .fairlaunch_token_reserves
             .checked_sub(token_amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
@@ -267,18 +310,6 @@ impl<'info> TradeFairlaunch<'info> {
             .unwrap()
             .unwrap();
 
-        // self.memecoin.virtual_sol_reserves = self
-        //     .memecoin
-        //     .virtual_sol_reserves
-        //     .checked_sub(sol_amount)
-        //     .ok_or(CoopMemeError::InvalidOperation)
-        //     .unwrap();
-        // self.memecoin.virtual_token_reserves = self
-        //     .memecoin
-        //     .virtual_token_reserves
-        //     .checked_add(amount)
-        //     .ok_or(CoopMemeError::InvalidOperation)
-        //     .unwrap();
         self.memecoin.fairlaunch_sol_raised = self
             .memecoin
             .fairlaunch_sol_raised
@@ -288,6 +319,12 @@ impl<'info> TradeFairlaunch<'info> {
         self.memecoin.real_token_reserves = self
             .memecoin
             .real_token_reserves
+            .checked_add(amount)
+            .ok_or(CoopMemeError::InvalidOperation)
+            .unwrap();
+        self.memecoin.fairlaunch_token_reserves = self
+            .memecoin
+            .fairlaunch_token_reserves
             .checked_add(amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();

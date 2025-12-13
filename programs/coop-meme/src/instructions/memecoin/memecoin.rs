@@ -203,6 +203,7 @@ impl<'info> MemeCoin<'info> {
             virtual_token_reserves: self.config.init_virtual_token,
             real_sol_reserves: 0,
             real_token_reserves: self.config.init_real_token,
+            fairlaunch_token_reserves: self.config.fairlaunch_token_limit,
             fairlaunch_sol_raised: 0,
             is_bonding_curve_active: false,
             is_trading_active: true,

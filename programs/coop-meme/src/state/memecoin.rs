@@ -18,6 +18,7 @@ pub struct MemeCoinData {
     pub virtual_token_reserves: u64,
     pub real_sol_reserves: u64,
     pub real_token_reserves: u64,
+    pub fairlaunch_token_reserves: u64,
     pub fairlaunch_sol_raised: u64,
     pub is_bonding_curve_active: bool,
     pub is_trading_active: bool,
