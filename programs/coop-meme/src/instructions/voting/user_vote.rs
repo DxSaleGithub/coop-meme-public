@@ -43,12 +43,6 @@ pub struct UserVote<'info> {
       bump = memecoin.token_bump
     )]
     pub coop_token: Box<Account<'info, Mint>>,
-    #[account(
-      mut,
-      seeds = [b"mint", config.current_coop_token_metadata.token_mint.key().as_ref(), &memecoin.token_id.to_le_bytes()],
-      bump = memecoin.token_fairlaunch_bump
-    )]
-    pub fairlaunch_token: Box<Account<'info, Mint>>,
     #[account[
       mut,
       seeds = [b"memecoin", coop_token.key().as_ref()],
@@ -85,14 +79,7 @@ pub struct UserVote<'info> {
       associated_token::token_program=token_program,
     )]
     pub user_token_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: This is an ata for coop token for user.
-    #[account(
-      mut,
-      associated_token::mint=fairlaunch_token,
-      associated_token::authority=user,
-      associated_token::token_program=token_program,
-    )]
-    pub user_fairlaunch_token_ata: Box<Account<'info, TokenAccount>>,
+
     #[account(
       mut,
       associated_token::mint=coop_token,
@@ -100,13 +87,6 @@ pub struct UserVote<'info> {
       associated_token::token_program=token_program,
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
-    #[account(
-      mut,
-      associated_token::mint=fairlaunch_token,
-      associated_token::authority=memecoin,
-      associated_token::token_program=token_program,
-    )]
-    pub vote_fairlaunch_token_ata: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
 
@@ -148,9 +128,7 @@ impl<'info> UserVote<'info> {
         self.memecoin.total_votes += votes;
         self.token_option.total_votes += votes;
         self.user_token_votes.total_votes += votes;
-        self.user_token_votes.bonding_curve_votes += votes;
         self.user_token_option_votes.total_votes += votes;
-        self.user_token_option_votes.bonding_curve_votes += votes;
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
@@ -232,32 +210,10 @@ impl<'info> UserVote<'info> {
         }
         self._validate_unvote_info(votes)?;
 
-        let votes_from_fairlaunch;
-        let votes_from_bondingcurve;
-
         self.memecoin.total_votes -= votes;
         self.token_option.total_votes -= votes;
         self.user_token_votes.total_votes -= votes;
         self.user_token_option_votes.total_votes -= votes;
-
-        if self.user_token_option_votes.fairlaunch_votes > votes {
-            self.user_token_option_votes.fairlaunch_votes -= votes;
-            self.user_token_votes.fairlaunch_votes -= votes;
-            votes_from_fairlaunch = votes;
-            votes_from_bondingcurve = 0;
-        } else {
-            votes_from_fairlaunch = self.user_token_option_votes.fairlaunch_votes;
-            votes_from_bondingcurve = (votes - votes_from_fairlaunch);
-            self.user_token_option_votes.fairlaunch_votes = 0;
-            self.user_token_option_votes.bonding_curve_votes -= votes_from_bondingcurve;
-            self.user_token_votes.fairlaunch_votes = votes_from_fairlaunch;
-            self.user_token_votes.bonding_curve_votes -= votes_from_bondingcurve;
-        }
-
-        require!(
-            votes_from_bondingcurve + votes_from_fairlaunch == votes,
-            CoopMemeError::NotEnoughToken
-        );
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
@@ -277,13 +233,6 @@ impl<'info> UserVote<'info> {
             self.token_program.to_account_info(),
             &[seeds_for_unfreeze],
         )?;
-        unfreeze_user_token_account(
-            self.global_vault.to_account_info(),
-            self.fairlaunch_token.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
-            self.token_program.to_account_info(),
-            &[seeds_for_unfreeze],
-        )?;
 
         // transfer token from vote_ata to user
         token_transfer_with_signer(
@@ -292,17 +241,7 @@ impl<'info> UserVote<'info> {
             self.user_token_ata.to_account_info(),
             &self.token_program,
             &[seeds],
-            votes_from_bondingcurve,
-        )?;
-
-        // transfer fairlaunch token from vote_ata to user
-        token_transfer_with_signer(
-            self.vote_fairlaunch_token_ata.to_account_info(),
-            self.memecoin.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
-            &self.token_program,
-            &[seeds],
-            votes_from_fairlaunch,
+            votes,
         )?;
 
         let seeds_for_freeze: &[&[u8]] = &[
@@ -314,14 +253,6 @@ impl<'info> UserVote<'info> {
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
             self.user_token_ata.to_account_info(),
-            self.token_program.to_account_info(),
-            &[seeds_for_freeze],
-        )?;
-
-        freeze_user_token_account(
-            self.global_vault.to_account_info(),
-            self.fairlaunch_token.to_account_info(),
-            self.user_fairlaunch_token_ata.to_account_info(),
             self.token_program.to_account_info(),
             &[seeds_for_freeze],
         )?;

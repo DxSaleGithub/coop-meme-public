@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-coop_meme = "v47XjNPkBpLt3nNWiErvmTmwguErUnDTJL8pTxNxvFG"
+coop_meme = "8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW"
 
 [registry]
 url = "https://api.apr.dev"
@@ -26,7 +26,6 @@ upgradeable = false
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 program = "tests/meta_program.so"
 upgradeable = false
-
 
 [[test.genesis]]
 address = "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"

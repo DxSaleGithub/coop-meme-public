@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("v47XjNPkBpLt3nNWiErvmTmwguErUnDTJL8pTxNxvFG");
+declare_id!("8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW");
 
 #[program]
 pub mod coop_meme {
@@ -34,12 +34,12 @@ pub mod coop_meme {
         new_team_wallet: Option<Pubkey>,
         new_coop_interval: Option<u64>,
         new_fairlaunch_period: Option<u32>,
-        new_min_price_per_token: Option<u32>,
-        new_max_price_per_token: Option<u32>,
+        // new_min_price_per_token: Option<u32>,
+        // new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
         new_init_real_token: Option<u64>,
-        new_fairlaunch_limit: Option<u64>,
+        new_fairlaunch_cap: Option<u64>,
         new_min_vote_token_amount: Option<u64>,
         new_min_option_add_token_amount: Option<u64>,
     ) -> Result<()> {
@@ -51,12 +51,12 @@ pub mod coop_meme {
             new_team_wallet,
             new_coop_interval,
             new_fairlaunch_period,
-            new_min_price_per_token,
-            new_max_price_per_token,
+            // new_min_price_per_token,
+            // new_max_price_per_token,
             new_init_virtual_sol,
             new_init_virtual_token,
             new_init_real_token,
-            new_fairlaunch_limit,
+            new_fairlaunch_cap,
             new_min_vote_token_amount,
             new_min_option_add_token_amount,
         )
@@ -102,7 +102,7 @@ pub mod coop_meme {
     pub fn create_token(
         ctx: Context<MemeCoin>,
         total_supply: u64,
-        token_share_price: u32,
+        // token_share_price: u32,
         name: String,
         symbol: String,
         uri: String,
@@ -110,19 +110,15 @@ pub mod coop_meme {
         ctx.accounts.create_memecoin(
             &ctx.bumps,
             total_supply,
-            token_share_price,
+            // token_share_price,
             name,
             symbol,
             uri,
         )
     }
 
-    pub fn buy_tokens_fairlaunch(
-        ctx: Context<TradeFairlaunch>,
-        amount: u64,
-        min_tokens_receive: u64,
-    ) -> Result<()> {
-        ctx.accounts.buy_tokens(amount, min_tokens_receive)
+    pub fn buy_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
+        ctx.accounts.buy_tokens(amount)
     }
     pub fn buy_tokens_bondingcurve(
         ctx: Context<Trade>,
@@ -132,12 +128,12 @@ pub mod coop_meme {
         ctx.accounts.buy_tokens(amount, min_tokens_receive)
     }
 
-    pub fn sell_tokens_fairlaunch(
-        ctx: Context<TradeFairlaunch>,
-        amount: u64,
-        min_sol_receive: u64,
-    ) -> Result<()> {
-        ctx.accounts.sell_tokens(amount, min_sol_receive)
+    pub fn sell_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
+        ctx.accounts.sell_tokens(amount)
+    }
+
+    pub fn refund_sol(ctx: Context<TradeFairlaunch>) -> Result<()> {
+        ctx.accounts.refund()
     }
 
     pub fn sell_tokens_bondingcurve(
@@ -148,38 +144,23 @@ pub mod coop_meme {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 
-    pub fn swap(ctx: Context<Swap>) -> Result<()> {
-        ctx.accounts.swap_fairlaunch_to_bonding_curve()
+    pub fn claim_tokens(ctx: Context<Trade>) -> Result<()> {
+        ctx.accounts.claim_tokens()
     }
 
     // VOTING METHODS
-    pub fn vote_fairlaunch(ctx: Context<UserVoteFairlaunch>, votes: u64) -> Result<()> {
+    pub fn vote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
         ctx.accounts.user_votes(votes)
     }
 
-    pub fn vote_bondingcurve(ctx: Context<UserVote>, votes: u64) -> Result<()> {
-        ctx.accounts.user_votes(votes)
-    }
-
-    pub fn vote_with_option_fairlaunch(
-        ctx: Context<CreateOptionFairlaunch>,
-        create_option: CreateOptionInfo,
-    ) -> Result<()> {
-        ctx.accounts.create_new_option(&ctx.bumps, create_option)
-    }
-
-    pub fn vote_with_option_bondingcurve(
+    pub fn vote_with_option(
         ctx: Context<CreateOption>,
         create_option: CreateOptionInfo,
     ) -> Result<()> {
         ctx.accounts.create_new_option(&ctx.bumps, create_option)
     }
 
-    pub fn unvote_fairlaunch(ctx: Context<UserVoteFairlaunch>, votes: u64) -> Result<()> {
-        ctx.accounts.user_unvotes(votes)
-    }
-
-    pub fn unvote_bondingcurve(ctx: Context<UserVote>, votes: u64) -> Result<()> {
+    pub fn unvote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
         ctx.accounts.user_unvotes(votes)
     }
 
