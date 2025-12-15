@@ -13,12 +13,12 @@ pub struct ConfigData {
     pub listing_fee: u16,
     pub coop_interval: u64,
     pub fairlaunch_period: u32,
-    pub min_price_per_token: u32,
-    pub max_price_per_token: u32,
+    // pub min_price_per_token: u32,
+    // pub max_price_per_token: u32,
     pub init_virtual_sol: u64,
     pub init_virtual_token: u64,
     pub init_real_token: u64,
-    pub fairlaunch_token_limit: u64,
+    pub fairlaunch_cap: u64,
     pub min_vote_token_amount: u64, // minimum tokens to stake for voting an option
     pub min_option_add_token_amount: u64, // minimum tokens to state for adding a new option
     pub total_coop_created: u32,
@@ -33,7 +33,7 @@ pub struct ConfigData {
 pub struct MemeCoinDataMetadata {
     pub token_id: u32,
     pub token_mint: Pubkey,
-    pub token_fairlaunch_mint: Pubkey,
+    // pub token_fairlaunch_mint: Pubkey,
     pub creator: Pubkey,
     pub is_bonding_curve_active: bool,
     pub is_trading_active: bool,

@@ -145,9 +145,7 @@ impl<'info> CreateOption<'info> {
         self.memecoin.total_votes += current_total_votes;
         self.token_option.total_votes += current_total_votes;
         self.user_token_votes.total_votes += current_total_votes;
-        self.user_token_votes.bonding_curve_votes += current_total_votes;
         self.user_token_option_votes.total_votes += current_total_votes;
-        self.user_token_option_votes.bonding_curve_votes += current_total_votes;
         self.memecoin.total_options += 1;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 

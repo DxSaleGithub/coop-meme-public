@@ -4,8 +4,8 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct UserTokenVotes {
     pub total_votes: u64,
-    pub fairlaunch_votes: u64,
-    pub bonding_curve_votes: u64,
+    // pub fairlaunch_votes: u64,
+    // pub bonding_curve_votes: u64,
     pub all_unlocked: bool,
     pub bump: u8,
 }
@@ -14,8 +14,8 @@ pub struct UserTokenVotes {
 #[derive(InitSpace)]
 pub struct UserTokenOptionVotes {
     pub total_votes: u64,
-    pub fairlaunch_votes: u64,
-    pub bonding_curve_votes: u64,
+    // pub fairlaunch_votes: u64,
+    // pub bonding_curve_votes: u64,
     pub bump: u8,
 }
 

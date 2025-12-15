@@ -6,10 +6,10 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct MemeCoinData {
     pub token_id: u32,
-    pub token_fairlaunch_mint: Pubkey,
+    // pub token_fairlaunch_mint: Pubkey,
     pub token_mint: Pubkey,
     pub creator: Pubkey,
-    pub token_share_price: u32,
+    // pub token_share_price: u32,
     pub token_total_supply: u64,
     pub token_creation_time: u64,
     pub token_fairlaunch_end_time: u64,
@@ -19,7 +19,9 @@ pub struct MemeCoinData {
     pub real_sol_reserves: u64,
     pub real_token_reserves: u64,
     pub fairlaunch_token_reserves: u64,
+    pub fairlaunch_cap: u64,
     pub fairlaunch_sol_raised: u64,
+    pub initial_sale: bool,
     pub is_bonding_curve_active: bool,
     pub is_trading_active: bool,
     pub is_voting_finalized: bool,
@@ -28,7 +30,7 @@ pub struct MemeCoinData {
     pub total_options: u32,
     pub memecoin_bump: u8,
     pub token_bump: u8,
-    pub token_fairlaunch_bump: u8,
+    // pub token_fairlaunch_bump: u8,
 }
 
 #[account]
@@ -48,4 +50,12 @@ pub enum OptionType {
     NAME,
     SYM,
     URI,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct UserData {
+    pub sol_deposit: u64,
+    pub tokens_claimed: bool,
+    pub refund: bool,
 }

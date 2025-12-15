@@ -70,4 +70,6 @@ pub enum CoopMemeError {
     InEmergency,
     #[msg("Operation is not in emergency mode")]
     NotInEmergency,
+    #[msg("Fairlaunch cap not exceeded")]
+    CapNotExceeded,
 }
