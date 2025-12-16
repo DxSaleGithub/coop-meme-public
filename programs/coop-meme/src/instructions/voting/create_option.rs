@@ -1,11 +1,8 @@
 use crate::{
     error::*,
-    events::{TradingOverEvent, UnlockAllTokens, VoteEvent},
+    events::{TradingOverEvent, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
-    utils::{
-        freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
-        unfreeze_user_token_account,
-    },
+    utils::{freeze_user_token_account, token_transfer_user, unfreeze_user_token_account},
     CreateOptionInfo, OptionType,
 };
 use anchor_lang::prelude::*;

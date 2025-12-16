@@ -90,10 +90,6 @@ impl<'info> FinalizeVote<'info> {
         );
 
         has_role(&self.rbac.roles, RoleType::VOTING, self.user.key())?;
-        // require!(
-        //     self.config.admin.key() == self.user.key(),
-        //     CoopMemeError::Unauthorized
-        // );
         require!(
             !self.memecoin.is_voting_finalized,
             CoopMemeError::VotingFinalized

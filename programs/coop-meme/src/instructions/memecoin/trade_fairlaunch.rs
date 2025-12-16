@@ -5,11 +5,7 @@ use crate::{
     utils::*,
 };
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::{self, AssociatedToken},
-    metadata::{self, Metadata},
-    token::{self, Mint, Token, TokenAccount},
-};
+use anchor_spl::token::{self, Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct TradeFairlaunch<'info> {
@@ -79,11 +75,6 @@ pub struct TradeFairlaunch<'info> {
 
     #[account(address = token::ID)]
     token_program: Program<'info, Token>,
-    // #[account(address = associated_token::ID)]
-    // associated_token_program: Program<'info, AssociatedToken>,
-
-    // #[account(address = metadata::ID)]
-    // mpl_token_metadata_program: Program<'info, Metadata>,
 }
 
 impl<'info> TradeFairlaunch<'info> {
@@ -115,55 +106,10 @@ impl<'info> TradeFairlaunch<'info> {
         }
 
         let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
-        let mut amount_to_buy = amount
+        let amount_to_buy = amount
             .checked_sub(team_fees)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
-        // let mut token_amount = calculate_token_amount_when_buy(
-        //     amount_to_buy,
-        //     self.memecoin.is_bonding_curve_active,
-        //     self.memecoin.token_share_price,
-        //     self.memecoin.virtual_sol_reserves,
-        //     self.memecoin.virtual_token_reserves,
-        // )
-        // .unwrap();
-
-        // // check if 600 million fairlaunch tokens has been sold, if yes, start bonding curve
-        // if token_amount > self.memecoin.fairlaunch_token_reserves {
-        //     let refund_token = token_amount - self.memecoin.fairlaunch_token_reserves;
-        //     let refund_sol = calculate_sol_amount_when_sell(
-        //         refund_token,
-        //         false,
-        //         self.memecoin.token_share_price,
-        //         self.memecoin.virtual_sol_reserves,
-        //         self.memecoin.virtual_token_reserves,
-        //     )
-        //     .unwrap();
-        //     token_amount = self.memecoin.fairlaunch_token_reserves;
-        //     amount_to_buy = amount_to_buy - refund_sol;
-
-        //     let seeds: &[&[u8]] = &[
-        //         b"global",                        // your static seed
-        //         &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        //     ];
-
-        //     sol_transfer_with_signer(
-        //         self.global_vault.to_account_info(),
-        //         self.trader.to_account_info(),
-        //         &self.system_program,
-        //         &[seeds],
-        //         refund_sol,
-        //     )?;
-
-        //     self.memecoin.is_bonding_curve_active = true;
-        //     self.config
-        //         .current_coop_token_metadata
-        //         .is_bonding_curve_active = true;
-        //     emit!(BondingCurveStartedEvent {
-        //         coop_token: self.config.current_coop_token_metadata.token_mint.key(),
-        //         memecoin: self.memecoin.key(),
-        //     });
-        // }
 
         self.memecoin.fairlaunch_sol_raised = self
             .memecoin
@@ -177,61 +123,6 @@ impl<'info> TradeFairlaunch<'info> {
             .checked_add(amount_to_buy)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
-        // self.memecoin.real_token_reserves = self
-        //     .memecoin
-        //     .real_token_reserves
-        //     .checked_sub(token_amount)
-        //     .ok_or(CoopMemeError::InvalidOperation)
-        //     .unwrap();
-        // self.memecoin.fairlaunch_token_reserves = self
-        //     .memecoin
-        //     .fairlaunch_token_reserves
-        //     .checked_sub(token_amount)
-        //     .ok_or(CoopMemeError::InvalidOperation)
-        //     .unwrap();
-
-        // let seeds: &[&[u8]] = &[
-        //     b"global",                        // your static seed
-        //     &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        // ];
-        // require!(
-        //     token_amount > min_tokens_receive,
-        //     CoopMemeError::InsufficientAmount
-        // );
-
-        // let seeds_for_unfreeze: &[&[u8]] = &[
-        //     b"global",                        // your static seed
-        //     &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        // ];
-        // unfreeze_user_token_account(
-        //     self.global_vault.to_account_info(),
-        //     self.coop_token.to_account_info(),
-        //     self.trader_token_ata.to_account_info(),
-        //     self.token_program.to_account_info(),
-        //     &[seeds_for_unfreeze],
-        // )?;
-
-        // token_transfer_with_signer(
-        //     self.global_token_ata.to_account_info(),
-        //     self.global_vault.to_account_info(),
-        //     self.trader_token_ata.to_account_info(),
-        //     &self.token_program,
-        //     &[seeds],
-        //     token_amount as u64,
-        // )?;
-
-        // let seeds_for_freeze: &[&[u8]] = &[
-        //     b"global",                        // your static seed
-        //     &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        // ];
-
-        // freeze_user_token_account(
-        //     self.global_vault.to_account_info(),
-        //     self.coop_token.to_account_info(),
-        //     self.trader_token_ata.to_account_info(),
-        //     self.token_program.to_account_info(),
-        //     &[seeds_for_freeze],
-        // )?;
 
         emit!(TradeEvent {
             trader: self.trader.key(),
@@ -280,49 +171,10 @@ impl<'info> TradeFairlaunch<'info> {
             CoopMemeError::NotEnoughSol
         );
 
-        // let sol_amount = calculate_sol_amount_when_sell(
-        //     amount,
-        //     self.memecoin.is_bonding_curve_active,
-        //     self.memecoin.token_share_price,
-        //     self.memecoin.virtual_sol_reserves,
-        //     self.memecoin.virtual_token_reserves,
-        // )
-        // .unwrap();
-        // require!(
-        //     sol_amount > min_sol_receive,
-        //     CoopMemeError::InsufficientAmount
-        // );
-
-        // let seeds_for_unfreeze: &[&[u8]] = &[
-        //     b"global",                        // your static seed
-        //     &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        // ];
-
-        // unfreeze_user_token_account(
-        //     self.global_vault.to_account_info(),
-        //     self.coop_token.to_account_info(),
-        //     self.trader_token_ata.to_account_info(),
-        //     self.token_program.to_account_info(),
-        //     &[seeds_for_unfreeze],
-        // )?;
-
-        // token_transfer_user(
-        //     self.trader_token_ata.to_account_info(),
-        //     &self.trader,
-        //     self.global_token_ata.to_account_info(),
-        //     &self.token_program,
-        //     amount as u64,
-        // )?;
-
         let team_fees = self
             ._calculate_and_send_fees_with_signer(amount)
             .unwrap()
             .unwrap();
-
-        // let mut sol_amount = amount
-        //     .checked_sub(team_fees)
-        //     .ok_or(CoopMemeError::InvalidOperation)
-        //     .unwrap();
 
         self.memecoin.fairlaunch_sol_raised = self
             .memecoin
@@ -337,24 +189,13 @@ impl<'info> TradeFairlaunch<'info> {
             .checked_sub(amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
-        // let seeds_for_freeze: &[&[u8]] = &[
-        //     b"global",                        // your static seed
-        //     &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        // ];
 
-        // freeze_user_token_account(
-        //     self.global_vault.to_account_info(),
-        //     self.coop_token.to_account_info(),
-        //     self.trader_token_ata.to_account_info(),
-        //     self.token_program.to_account_info(),
-        //     &[seeds_for_freeze],
-        // )?;
         emit!(TradeEvent {
             trader: self.trader.key(),
             coop_token: self.config.current_coop_token_metadata.token_mint.key(),
             memecoin: self.memecoin.key(),
             amount_in: amount as u64,
-            direction: 2, // from tokens to SOL
+            direction: 2, // SOL withdraw to user
             minimum_receive_amount: 0,
             amount_out: 0,
             timestamp: Clock::get()?.unix_timestamp as u64
@@ -365,22 +206,32 @@ impl<'info> TradeFairlaunch<'info> {
 
     pub fn refund(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
-        require!(
-            self.memecoin.is_trading_active,
-            CoopMemeError::TradingNotActive
-        );
-        require!(
-            self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingFairlaunchNotOver
-        );
+
+        if self.memecoin.is_trading_active {
+            require!(
+                self.memecoin.is_bonding_curve_active,
+                CoopMemeError::TradingFairlaunchNotOver
+            );
+        } else {
+            require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+        }
         require!(
             self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap,
             CoopMemeError::CapNotExceeded
         );
-        require!(!self.user_data.refund, CoopMemeError::NotEnoughSol);
+        require!(!self.user_data.refund, CoopMemeError::AlreadyRefunded);
 
-        let user_real_sol = (self.user_data.sol_deposit / self.memecoin.fairlaunch_sol_raised)
-            * (self.memecoin.fairlaunch_cap);
+        // Safe proportional token calculation (divide-first order)
+        let ratio = self
+            .user_data
+            .sol_deposit
+            .checked_div(self.memecoin.fairlaunch_sol_raised)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+        let user_real_sol = ratio
+            .checked_mul(self.memecoin.fairlaunch_cap)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
         require!(
             user_real_sol <= self.memecoin.fairlaunch_cap,
             CoopMemeError::InvalidFairSharePrice

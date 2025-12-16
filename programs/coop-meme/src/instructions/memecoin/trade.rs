@@ -2,13 +2,11 @@ use crate::{
     error::*,
     events::{BondingCurveStartedEvent, TradeEvent, TradingOverEvent},
     state::{ConfigData, MemeCoinData, UserData},
-    user_vote,
     utils::*,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    metadata::{self, Metadata},
     token::{self, Mint, Token, TokenAccount},
 };
 
@@ -315,10 +313,6 @@ impl<'info> Trade<'info> {
             sol_amount > min_sol_receive,
             CoopMemeError::InsufficientAmount
         );
-        // require!(
-        //     (self.global_vault.lamports() - self.memecoin.fairlaunch_sol_raised) > sol_amount,
-        //     CoopMemeError::NotEnoughSol
-        // );
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
@@ -403,18 +397,31 @@ impl<'info> Trade<'info> {
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
         );
-        require!(
-            self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingNotActive
-        );
+        if self.memecoin.is_trading_active {
+            require!(
+                self.memecoin.is_bonding_curve_active,
+                CoopMemeError::TradingFairlaunchNotOver
+            );
+        } else {
+            require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+        }
         require!(self.memecoin.initial_sale, CoopMemeError::TradingNotActive);
         require!(
             !self.user_data.tokens_claimed,
             CoopMemeError::NotEnoughToken
         );
 
-        let user_tokens = (self.user_data.sol_deposit / self.memecoin.fairlaunch_sol_raised)
-            * self.memecoin.fairlaunch_token_reserves;
+        // Safe proportional token calculation (divide-first order)
+        let ratio = self
+            .user_data
+            .sol_deposit
+            .checked_div(self.memecoin.fairlaunch_sol_raised)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+        let user_tokens = ratio
+            .checked_mul(self.memecoin.fairlaunch_token_reserves)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
         self.user_data.tokens_claimed = true;
 
         let seeds: &[&[u8]] = &[
@@ -425,6 +432,7 @@ impl<'info> Trade<'info> {
             b"global",                        // your static seed
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
+
         unfreeze_user_token_account(
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
@@ -447,13 +455,15 @@ impl<'info> Trade<'info> {
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
 
-        freeze_user_token_account(
-            self.global_vault.to_account_info(),
-            self.coop_token.to_account_info(),
-            self.trader_token_ata.to_account_info(),
-            self.token_program.to_account_info(),
-            &[seeds_for_freeze],
-        )?;
+        if !self.memecoin.is_token_listed {
+            freeze_user_token_account(
+                self.global_vault.to_account_info(),
+                self.coop_token.to_account_info(),
+                self.trader_token_ata.to_account_info(),
+                self.token_program.to_account_info(),
+                &[seeds_for_freeze],
+            )?;
+        }
 
         Ok(())
     }

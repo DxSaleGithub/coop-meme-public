@@ -72,4 +72,6 @@ pub enum CoopMemeError {
     NotInEmergency,
     #[msg("Fairlaunch cap not exceeded")]
     CapNotExceeded,
+    #[msg("Sol is refunded already")]
+    AlreadyRefunded,
 }
