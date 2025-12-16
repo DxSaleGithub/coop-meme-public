@@ -6477,6 +6477,11 @@
       "code": 6030,
       "name": "CapNotExceeded",
       "msg": "Fairlaunch cap not exceeded"
+    },
+    {
+      "code": 6031,
+      "name": "AlreadyRefunded",
+      "msg": "Sol is refunded already"
     }
   ],
   "types": [

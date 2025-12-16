@@ -6483,6 +6483,11 @@ export type CoopMeme = {
       "code": 6030,
       "name": "capNotExceeded",
       "msg": "Fairlaunch cap not exceeded"
+    },
+    {
+      "code": 6031,
+      "name": "alreadyRefunded",
+      "msg": "Sol is refunded already"
     }
   ],
   "types": [
