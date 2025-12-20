@@ -1091,6 +1091,311 @@ export type CoopMeme = {
       "args": []
     },
     {
+      "name": "claimTokensAndRefundSol",
+      "discriminator": [
+        107,
+        229,
+        207,
+        119,
+        26,
+        124,
+        92,
+        166
+      ],
+      "accounts": [
+        {
+          "name": "trader",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "affiliate",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "teamWallet",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "globalVault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "traderTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "trader"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "userData",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createToken",
       "discriminator": [
         84,
@@ -6237,6 +6542,19 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "claimedTokens",
+      "discriminator": [
+        239,
+        73,
+        237,
+        28,
+        239,
+        245,
+        75,
+        255
+      ]
+    },
+    {
       "name": "createdEvent",
       "discriminator": [
         231,
@@ -6259,6 +6577,19 @@ export type CoopMeme = {
         113,
         195,
         210,
+        18
+      ]
+    },
+    {
+      "name": "refundSol",
+      "discriminator": [
+        217,
+        74,
+        251,
+        210,
+        14,
+        134,
+        133,
         18
       ]
     },
@@ -6488,6 +6819,11 @@ export type CoopMeme = {
       "code": 6031,
       "name": "alreadyRefunded",
       "msg": "Sol is refunded already"
+    },
+    {
+      "code": 6032,
+      "name": "alreadyClaimed",
+      "msg": "Fairlaunch tokens already claimed"
     }
   ],
   "types": [
@@ -6609,6 +6945,38 @@ export type CoopMeme = {
           {
             "name": "lpMint",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "claimedTokens",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributedSol",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
           }
         ]
       }
@@ -7242,6 +7610,38 @@ export type CoopMeme = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "refundSol",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "memecoin",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributedSol",
+            "type": "u64"
+          },
+          {
+            "name": "refundSol",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "u64"
           }
         ]
       }

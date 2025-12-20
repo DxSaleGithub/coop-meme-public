@@ -1,6 +1,6 @@
 use crate::{
     error::*,
-    events::{BondingCurveStartedEvent, TradeEvent},
+    events::{BondingCurveStartedEvent, RefundSol, TradeEvent},
     state::{ConfigData, MemeCoinData, UserData},
     utils::*,
 };
@@ -238,20 +238,31 @@ impl<'info> TradeFairlaunch<'info> {
         );
         let sol_to_refund = self.user_data.sol_deposit - user_real_sol;
 
-        let seeds: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        ];
+        if sol_to_refund > 0 {
+            let seeds: &[&[u8]] = &[
+                b"global",                        // your static seed
+                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            ];
 
-        self.user_data.refund = true;
+            self.user_data.refund = true;
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.creator.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            sol_to_refund as u64,
-        )?;
+            sol_transfer_with_signer(
+                self.global_vault.to_account_info(),
+                self.creator.to_account_info(),
+                &self.system_program,
+                &[seeds],
+                sol_to_refund as u64,
+            )?;
+        }
+
+        emit!(RefundSol {
+            trader: self.trader.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            contributed_sol: self.user_data.sol_deposit,
+            refund_sol: sol_to_refund,
+            timestamp: Clock::get()?.unix_timestamp as u64
+        });
 
         Ok(())
     }

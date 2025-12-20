@@ -148,6 +148,10 @@ pub mod coop_meme {
         ctx.accounts.claim_tokens()
     }
 
+    pub fn claim_tokens_and_refund_sol(ctx: Context<Trade>) -> Result<()> {
+        ctx.accounts.claim_tokens_and_refund_sol()
+    }
+
     // VOTING METHODS
     pub fn vote(ctx: Context<UserVote>, votes: u64) -> Result<()> {
         ctx.accounts.user_votes(votes)

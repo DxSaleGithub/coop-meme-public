@@ -1,6 +1,7 @@
 use crate::{
     error::*,
-    events::{BondingCurveStartedEvent, TradeEvent, TradingOverEvent},
+    events::{BondingCurveStartedEvent, ClaimedTokens, RefundSol, TradeEvent, TradingOverEvent},
+    instruction::ClaimTokens,
     state::{ConfigData, MemeCoinData, UserData},
     utils::*,
 };
@@ -408,7 +409,7 @@ impl<'info> Trade<'info> {
         require!(self.memecoin.initial_sale, CoopMemeError::TradingNotActive);
         require!(
             !self.user_data.tokens_claimed,
-            CoopMemeError::NotEnoughToken
+            CoopMemeError::AlreadyClaimed
         );
 
         // Safe proportional token calculation (divide-first order)
@@ -464,6 +465,149 @@ impl<'info> Trade<'info> {
                 &[seeds_for_freeze],
             )?;
         }
+
+        emit!(ClaimedTokens {
+            trader: self.trader.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            contributed_sol: self.user_data.sol_deposit,
+            amount: user_tokens,
+            timestamp: Clock::get()?.unix_timestamp as u64
+        });
+
+        Ok(())
+    }
+
+    pub fn claim_tokens_and_refund_sol(&mut self) -> Result<()> {
+        require!(!self.config.is_paused, CoopMemeError::Paused);
+        require!(
+            self.memecoin.is_trading_active,
+            CoopMemeError::TradingNotActive
+        );
+        if self.memecoin.is_trading_active {
+            require!(
+                self.memecoin.is_bonding_curve_active,
+                CoopMemeError::TradingFairlaunchNotOver
+            );
+        } else {
+            require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+        }
+        require!(!self.user_data.refund, CoopMemeError::AlreadyRefunded);
+        require!(
+            !self.user_data.tokens_claimed,
+            CoopMemeError::AlreadyClaimed
+        );
+        require!(self.memecoin.initial_sale, CoopMemeError::TradingNotActive);
+
+        let mut is_refund = false;
+
+        if self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap {
+            is_refund = true;
+        }
+
+        // Safe proportional token calculation (divide-first order)
+        let ratio = self
+            .user_data
+            .sol_deposit
+            .checked_div(self.memecoin.fairlaunch_sol_raised)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+        if is_refund {
+            let user_real_sol = ratio
+                .checked_mul(self.memecoin.fairlaunch_cap)
+                .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+            require!(
+                user_real_sol <= self.memecoin.fairlaunch_cap,
+                CoopMemeError::InvalidFairSharePrice
+            );
+            let sol_to_refund = self.user_data.sol_deposit - user_real_sol;
+
+            if sol_to_refund > 0 {
+                let seeds: &[&[u8]] = &[
+                    b"global",                        // your static seed
+                    &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+                ];
+
+                self.user_data.refund = true;
+
+                sol_transfer_with_signer(
+                    self.global_vault.to_account_info(),
+                    self.creator.to_account_info(),
+                    &self.system_program,
+                    &[seeds],
+                    sol_to_refund as u64,
+                )?;
+            }
+
+            emit!(RefundSol {
+                trader: self.trader.key(),
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+                contributed_sol: self.user_data.sol_deposit,
+                refund_sol: sol_to_refund,
+                timestamp: Clock::get()?.unix_timestamp as u64
+            });
+        }
+
+        // claim tokens
+        let user_tokens = ratio
+            .checked_mul(self.memecoin.fairlaunch_token_reserves)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+        if user_tokens > 0 {
+            self.user_data.tokens_claimed = true;
+
+            let seeds: &[&[u8]] = &[
+                b"global",                        // your static seed
+                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            ];
+            let seeds_for_unfreeze: &[&[u8]] = &[
+                b"global",                        // your static seed
+                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            ];
+
+            unfreeze_user_token_account(
+                self.global_vault.to_account_info(),
+                self.coop_token.to_account_info(),
+                self.trader_token_ata.to_account_info(),
+                self.token_program.to_account_info(),
+                &[seeds_for_unfreeze],
+            )?;
+
+            token_transfer_with_signer(
+                self.global_token_ata.to_account_info(),
+                self.global_vault.to_account_info(),
+                self.trader_token_ata.to_account_info(),
+                &self.token_program,
+                &[seeds],
+                user_tokens as u64,
+            )?;
+
+            let seeds_for_freeze: &[&[u8]] = &[
+                b"global",                        // your static seed
+                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            ];
+
+            if !self.memecoin.is_token_listed {
+                freeze_user_token_account(
+                    self.global_vault.to_account_info(),
+                    self.coop_token.to_account_info(),
+                    self.trader_token_ata.to_account_info(),
+                    self.token_program.to_account_info(),
+                    &[seeds_for_freeze],
+                )?;
+            }
+        }
+
+        emit!(ClaimedTokens {
+            trader: self.trader.key(),
+            coop_token: self.coop_token.key(),
+            memecoin: self.memecoin.key(),
+            contributed_sol: self.user_data.sol_deposit,
+            amount: user_tokens,
+            timestamp: Clock::get()?.unix_timestamp as u64
+        });
 
         Ok(())
     }

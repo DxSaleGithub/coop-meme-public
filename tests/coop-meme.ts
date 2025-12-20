@@ -256,7 +256,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it('updates the config', async () => {
+  it.only('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -267,12 +267,14 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(300);
-    const newFairlaunchPeriod = new anchor.BN(150);
+    const newCoopInterval = new anchor.BN(900);
+    const newFairlaunchPeriod = new anchor.BN(300);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
     const newMinOptionToken = new anchor.BN(1000_000_000_000);
+    const newFairlaunchCap = new anchor.BN(1_000_000_000);
+
     const newTeamWallet = new PublicKey(
       '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM'
     );
@@ -291,7 +293,7 @@ describe('coop-meme-2', () => {
         null,
         null,
         null,
-        null,
+        newFairlaunchCap,
         newMinVoteToken,
         newMinOptionToken
       )
@@ -390,7 +392,7 @@ describe('coop-meme-2', () => {
   });
 
   it('first buying memecoin in fairlaunch!', async () => {
-    await buy_tokens_fairlaunch('100000000'); // 10 sol == 10000000000
+    await buy_tokens_fairlaunch('500000000'); // 10 sol == 10000000000
   });
 
   it('first selling memecoin in fairlaunch!', async () => {
@@ -417,9 +419,9 @@ describe('coop-meme-2', () => {
 
   it('multiple buy, sell', async () => {
     await buy_tokens_fairlaunch('100000000'); // 10 sol
-    await buy_tokens_fairlaunch('100000000'); // 5 sol
-    await buy_tokens_fairlaunch('100000000'); // 3 sol
-    await buy_tokens_fairlaunch('100000000'); // 2 sol
+    await buy_tokens_fairlaunch('200000000'); // 5 sol
+    await buy_tokens_fairlaunch('300000000'); // 3 sol
+    await buy_tokens_fairlaunch('400000000'); // 2 sol
 
     await sell_tokens_fairlaunch('50000000'); // 5 sol
     await sell_tokens_fairlaunch('50000000');
@@ -433,6 +435,10 @@ describe('coop-meme-2', () => {
 
     console.log('3 minutes passed.');
     await buy_tokens('100000000'); // 10 SOL
+  });
+
+  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
+    await claim_and_refund();
   });
 
   it('refund sol after first buy in bonding-curve', async () => {
@@ -455,25 +461,25 @@ describe('coop-meme-2', () => {
   //   await swap();
   // });
 
-  it.skip('first voting with option', async () => {
+  it('first voting with option', async () => {
     await vote_with_option('name', 'Token1');
     await vote_with_option('sym', 'TKN1');
     await vote_with_option('uri', 'uri1');
   });
 
-  it.skip('first voting', async () => {
+  it('first voting', async () => {
     await vote(1);
     await vote(2);
     await vote(3);
   });
 
-  it.skip('first unvoting', async () => {
+  it('first unvoting', async () => {
     await unvote(1);
     await unvote(2);
     await unvote(3);
   });
 
-  it.skip('multiple buy, sell, vote and unvote', async () => {
+  it('multiple buy, sell, vote and unvote', async () => {
     await buy_tokens('100000000');
     await buy_tokens('100000000');
     // await buy_tokens('10000000000');
@@ -493,7 +499,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it.skip('Is finalizing voting', async () => {
+  it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(150 * 1000); // 2 minutes = 120000 ms
@@ -502,15 +508,15 @@ describe('coop-meme-2', () => {
     await finalizeVote();
   });
 
-  it.skip('Is listing memecoin!', async () => {
+  it('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it.skip('unvoting all tokens', async () => {
+  it('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it.skip('Is swapping SOL to memecoin!', async () => {
+  it('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -668,7 +674,7 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .swapTokenBaseInput(new BN(100000), new BN(0))
+      .swapTokenBaseInput(new BN(100000000), new BN(0))
       .accounts({
         payer, // fine
         cpSwapProgram,
@@ -714,7 +720,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.skip('Is swapping memecoin to SOL!', async () => {
+  it('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -1795,6 +1801,129 @@ describe('coop-meme-2', () => {
     console.log(
       'user balance after claim',
       userTokenBal.value.uiAmountString
+    );
+
+    const memecoinState = await program.account.memeCoinData.fetch(
+      memecoinPda
+    );
+    console.log(
+      'Memecoin state data: virtual sol reserves',
+      memecoinState.virtualSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: virtual token reserves',
+      memecoinState.virtualTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real sol reserves',
+      memecoinState.realSolReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: real token reserves',
+      memecoinState.realTokenReserves.toString()
+    );
+    console.log(
+      'Memecoin state data: fairlaunch token reserves',
+      memecoinState.fairlaunchTokenReserves.toString()
+    );
+
+    console.log(
+      'Memecoin state data: fairlaunch sol raised',
+      memecoinState.fairlaunchSolRaised.toString()
+    );
+
+    console.log(
+      'Memecoin state data: fairlaunch cap',
+      memecoinState.fairlaunchCap.toString()
+    );
+
+    console.log(
+      'Memecoin state data: total votes',
+      memecoinState.totalVotes.toString()
+    );
+
+    console.log(
+      'Memecoin state data: total options',
+      memecoinState.totalOptions.toString()
+    );
+  }
+
+  async function claim_and_refund() {
+    const {
+      trader,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+      userData,
+      globalTokenAta,
+      traderTokenAta,
+    } = await setup(false);
+
+    let userTokenBal =
+      await provider.connection.getTokenAccountBalance(
+        traderTokenAta
+      );
+
+    console.log(
+      'user balance before claim',
+      userTokenBal.value.uiAmountString
+    );
+
+    let userSolBalancebeforeRefund =
+      await provider.connection.getBalance(trader);
+    console.log(
+      'user sol balance before refund',
+      userSolBalancebeforeRefund.toString()
+    );
+
+    const txSig = await program.methods
+      .claimTokensAndRefundSol()
+      .accounts({
+        trader,
+        affiliate,
+        creator,
+        teamWallet,
+        config: configPda,
+        globalVault,
+        coopToken,
+        memecoin: memecoinPda,
+        globalTokenAta,
+        traderTokenAta,
+        userData,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram:
+          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
+
+    userTokenBal = await provider.connection.getTokenAccountBalance(
+      traderTokenAta
+    );
+
+    console.log(
+      'user balance after claim',
+      userTokenBal.value.uiAmountString
+    );
+
+    let userSolBalanceAfterRefund =
+      await provider.connection.getBalance(trader);
+    console.log(
+      'user sol balance after refund',
+      userSolBalanceAfterRefund.toString()
     );
 
     const memecoinState = await program.account.memeCoinData.fetch(

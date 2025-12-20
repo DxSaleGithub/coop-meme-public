@@ -31,6 +31,26 @@ pub struct TradeEvent {
 }
 
 #[event]
+pub struct ClaimedTokens {
+    pub trader: Pubkey,
+    pub coop_token: Pubkey,
+    pub memecoin: Pubkey,
+    pub contributed_sol: u64,
+    pub amount: u64,
+    pub timestamp: u64,
+}
+
+#[event]
+pub struct RefundSol {
+    pub trader: Pubkey,
+    pub coop_token: Pubkey,
+    pub memecoin: Pubkey,
+    pub contributed_sol: u64,
+    pub refund_sol: u64,
+    pub timestamp: u64,
+}
+
+#[event]
 pub struct BondingCurveStartedEvent {
     pub coop_token: Pubkey,
     pub memecoin: Pubkey,

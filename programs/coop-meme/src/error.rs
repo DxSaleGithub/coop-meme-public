@@ -74,4 +74,6 @@ pub enum CoopMemeError {
     CapNotExceeded,
     #[msg("Sol is refunded already")]
     AlreadyRefunded,
+    #[msg("Fairlaunch tokens already claimed")]
+    AlreadyClaimed,
 }
