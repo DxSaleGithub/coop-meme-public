@@ -95,7 +95,7 @@ describe('coop-meme-2', () => {
       );
 
     const [userData] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('user'), coopToken.toBuffer()],
+      [Buffer.from('user'), trader.toBuffer(), coopToken.toBuffer()],
       program.programId
     );
 
@@ -256,7 +256,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -267,8 +267,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(900);
-    const newFairlaunchPeriod = new anchor.BN(300);
+    const newCoopInterval = new anchor.BN(200);
+    const newFairlaunchPeriod = new anchor.BN(100);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -431,7 +431,7 @@ describe('coop-meme-2', () => {
   it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
-    await delay(150 * 1000); // 2 minutes = 120000 ms
+    await delay(100 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await buy_tokens('100000000'); // 10 SOL
@@ -502,7 +502,7 @@ describe('coop-meme-2', () => {
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(150 * 1000); // 2 minutes = 120000 ms
+    await delay(100 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await finalizeVote();
@@ -1345,6 +1345,25 @@ describe('coop-meme-2', () => {
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
     );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
+    );
   }
 
   async function refund() {
@@ -1450,6 +1469,25 @@ describe('coop-meme-2', () => {
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
     );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
+    );
   }
 
   async function buy_tokens(sol_amount) {
@@ -1551,6 +1589,25 @@ describe('coop-meme-2', () => {
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
     );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
+    );
   }
 
   async function sell_tokens_fairlaunch(sol_amount) {
@@ -1637,6 +1694,24 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
+    );
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
     );
   }
 
@@ -1736,6 +1811,25 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
+    );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
     );
   }
 
@@ -1845,6 +1939,25 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
+    );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
     );
   }
 
@@ -1968,6 +2081,25 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString()
+    );
+
+    const userDataState = await program.account.userData.fetch(
+      userData
+    );
+
+    console.log(
+      'User state data: totat sol deposit',
+      userDataState.solDeposit.toString()
+    );
+
+    console.log(
+      'User state data: claimed tokens?',
+      userDataState.tokensClaimed.toString()
+    );
+
+    console.log(
+      'User state data: claimed refund?',
+      userDataState.refund.toString()
     );
   }
 

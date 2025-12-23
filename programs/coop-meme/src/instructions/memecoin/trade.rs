@@ -78,7 +78,7 @@ pub struct Trade<'info> {
     /// CHECK: This is an ATA for coop token for trader.
     #[account(
       mut,
-      seeds = [b"user", coop_token.key().as_ref()],
+      seeds = [b"user", trader.key().as_ref(), coop_token.key().as_ref()],
       bump
     )]
     pub user_data: Box<Account<'info, UserData>>,

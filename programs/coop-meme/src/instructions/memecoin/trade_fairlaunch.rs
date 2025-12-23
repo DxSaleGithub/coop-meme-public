@@ -67,7 +67,7 @@ pub struct TradeFairlaunch<'info> {
       init_if_needed,
       payer=trader,
       space= 8 + UserData::INIT_SPACE,
-      seeds = [b"user", coop_token.key().as_ref()],
+      seeds = [b"user", trader.key().as_ref(), coop_token.key().as_ref()],
       bump
     )]
     pub user_data: Box<Account<'info, UserData>>,

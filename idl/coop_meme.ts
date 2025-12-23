@@ -506,6 +506,10 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
+                "path": "trader"
+              },
+              {
+                "kind": "account",
                 "path": "coopToken"
               }
             ]
@@ -761,6 +765,10 @@ export type CoopMeme = {
                   101,
                   114
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "trader"
               },
               {
                 "kind": "account",
@@ -1070,6 +1078,10 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
+                "path": "trader"
+              },
+              {
+                "kind": "account",
                 "path": "coopToken"
               }
             ]
@@ -1372,6 +1384,10 @@ export type CoopMeme = {
                   101,
                   114
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "trader"
               },
               {
                 "kind": "account",
@@ -3587,6 +3603,10 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
+                "path": "trader"
+              },
+              {
+                "kind": "account",
                 "path": "coopToken"
               }
             ]
@@ -3944,6 +3964,10 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
+                "path": "trader"
+              },
+              {
+                "kind": "account",
                 "path": "coopToken"
               }
             ]
@@ -4199,6 +4223,10 @@ export type CoopMeme = {
                   101,
                   114
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "trader"
               },
               {
                 "kind": "account",
