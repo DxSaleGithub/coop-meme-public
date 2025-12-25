@@ -1,8 +1,8 @@
 use crate::{
     error::*,
-    events::UnlockAllTokens,
-    state::{ConfigData, MemeCoinData, UserTokenVotes},
-    utils::{token_transfer_with_signer, unfreeze_user_token_account},
+    events::{ClaimedTokens, RefundSol, UnlockAllTokens},
+    state::{ConfigData, MemeCoinData, UserData, UserTokenVotes},
+    utils::{sol_transfer_with_signer, token_transfer_with_signer, unfreeze_user_token_account},
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -69,7 +69,13 @@ pub struct UnlockAll<'info> {
       associated_token::token_program=token_program,
     )]
     pub user_token_ata: Box<Account<'info, TokenAccount>>,
-
+    /// CHECK: This is an ATA for coop token for trader.
+    #[account(
+      mut,
+      seeds = [b"user", user.key().as_ref(), coop_token.key().as_ref()],
+      bump
+    )]
+    pub user_data: Box<Account<'info, UserData>>,
     #[account(
       mut,
       associated_token::mint=coop_token,
@@ -91,6 +97,10 @@ impl<'info> UnlockAll<'info> {
     pub fn unvote_all_tokens(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+        require!(
+            self.memecoin.initial_sale,
+            CoopMemeError::TradingFairlaunchNotOver
+        );
         require!(
             !self.user_token_votes.all_unlocked,
             CoopMemeError::NotEnoughToken
@@ -129,6 +139,86 @@ impl<'info> UnlockAll<'info> {
                 &[seeds],
                 current_total_votes as u64,
             )?;
+        }
+
+        // Safe proportional token calculation (divide-first order)
+        let ratio = self
+            .user_data
+            .sol_deposit
+            .checked_div(self.memecoin.fairlaunch_sol_raised)
+            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+        if !self.user_data.refund {
+            if self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap {
+                let user_real_sol = ratio
+                    .checked_mul(self.memecoin.fairlaunch_cap)
+                    .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+                if user_real_sol <= self.memecoin.fairlaunch_cap
+                    && self.user_data.sol_deposit > user_real_sol
+                {
+                    let sol_to_refund = self.user_data.sol_deposit - user_real_sol;
+
+                    if sol_to_refund > 0 {
+                        let seeds: &[&[u8]] = &[
+                            b"global",                        // your static seed
+                            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+                        ];
+
+                        self.user_data.refund = true;
+
+                        sol_transfer_with_signer(
+                            self.global_vault.to_account_info(),
+                            self.creator.to_account_info(),
+                            &self.system_program,
+                            &[seeds],
+                            sol_to_refund as u64,
+                        )?;
+                    }
+
+                    emit!(RefundSol {
+                        trader: self.user.key(),
+                        coop_token: self.coop_token.key(),
+                        memecoin: self.memecoin.key(),
+                        contributed_sol: self.user_data.sol_deposit,
+                        refund_sol: sol_to_refund,
+                        timestamp: Clock::get()?.unix_timestamp as u64
+                    });
+                }
+            }
+        }
+
+        if !self.user_data.tokens_claimed {
+            let user_tokens = ratio
+                .checked_mul(self.memecoin.fairlaunch_token_reserves)
+                .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+            if user_tokens > 0 {
+                self.user_data.tokens_claimed = true;
+
+                let seeds: &[&[u8]] = &[
+                    b"global",                        // your static seed
+                    &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+                ];
+
+                token_transfer_with_signer(
+                    self.global_token_ata.to_account_info(),
+                    self.global_vault.to_account_info(),
+                    self.user_token_ata.to_account_info(),
+                    &self.token_program,
+                    &[seeds],
+                    user_tokens as u64,
+                )?;
+
+                emit!(ClaimedTokens {
+                    trader: self.user.key(),
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                    contributed_sol: self.user_data.sol_deposit,
+                    amount: user_tokens,
+                    timestamp: Clock::get()?.unix_timestamp as u64
+                });
+            }
         }
 
         emit!(UnlockAllTokens {

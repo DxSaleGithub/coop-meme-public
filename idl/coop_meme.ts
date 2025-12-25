@@ -5297,6 +5297,31 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "userData",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
           "name": "voteTokenAta",
           "writable": true,
           "pda": {
@@ -6690,168 +6715,8 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
-      "name": "unauthorized",
-      "msg": "Only the admin is authorized to perform this action."
-    },
-    {
-      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
-    },
-    {
-      "code": 6002,
-      "name": "tradingNotActive",
-      "msg": "Trading not active"
-    },
-    {
-      "code": 6003,
-      "name": "insufficientAmount",
-      "msg": "Insufficient Amount"
-    },
-    {
-      "code": 6004,
-      "name": "invalidFairSharePrice",
-      "msg": "Invalid fairshare token price"
-    },
-    {
-      "code": 6005,
-      "name": "invalidTokenName",
-      "msg": "Invalid coop token name"
-    },
-    {
-      "code": 6006,
-      "name": "invalidTokenSymbol",
-      "msg": "Invalid coop token symbol"
-    },
-    {
-      "code": 6007,
-      "name": "invalidTokenUri",
-      "msg": "Invalid coop token uri"
-    },
-    {
-      "code": 6008,
-      "name": "invalidOperation",
-      "msg": "Invalid arithmetic operation"
-    },
-    {
-      "code": 6009,
-      "name": "tradingFairlaunchOver",
-      "msg": "Trading fairlaunch over"
-    },
-    {
-      "code": 6010,
-      "name": "tradingFairlaunchNotOver",
-      "msg": "Trading fairlaunch not over"
-    },
-    {
-      "code": 6011,
-      "name": "tradingActive",
-      "msg": "Trading active"
-    },
-    {
-      "code": 6012,
-      "name": "notEnoughToken",
-      "msg": "Not enough token"
-    },
-    {
-      "code": 6013,
-      "name": "notEnoughSol",
-      "msg": "Not enough sol"
-    },
-    {
-      "code": 6014,
-      "name": "invalidTokenVoteInfo",
-      "msg": "Invalid token vote info"
-    },
-    {
-      "code": 6015,
-      "name": "votingNotFinalized",
-      "msg": "Token voting is not finalized"
-    },
-    {
-      "code": 6016,
-      "name": "votingFinalized",
-      "msg": "Token voting is finalized"
-    },
-    {
-      "code": 6017,
-      "name": "tokenAlreadyListed",
-      "msg": "Token is already listed"
-    },
-    {
-      "code": 6018,
-      "name": "tokenNotListed",
-      "msg": "Token not listed"
-    },
-    {
-      "code": 6019,
-      "name": "invalidListingInfo",
-      "msg": "Listing info not valid"
-    },
-    {
-      "code": 6020,
-      "name": "optionLimitExceeded",
-      "msg": "Option limit exceeded"
-    },
-    {
-      "code": 6021,
-      "name": "tokenOptionAlreadyExist",
-      "msg": "Token Option already exist"
-    },
-    {
-      "code": 6022,
-      "name": "invalidOption",
-      "msg": "Token Option invalid"
-    },
-    {
-      "code": 6023,
-      "name": "roleExist",
-      "msg": "Role already exists"
-    },
-    {
-      "code": 6024,
-      "name": "roleDoesNotExist",
-      "msg": "Role does not exist"
-    },
-    {
-      "code": 6025,
-      "name": "inSufficientRole",
-      "msg": "Signer does not have sufficient role"
-    },
-    {
-      "code": 6026,
-      "name": "paused",
-      "msg": "Operation is paused currently"
-    },
-    {
-      "code": 6027,
-      "name": "notPaused",
-      "msg": "Operation is not paused currently"
-    },
-    {
-      "code": 6028,
-      "name": "inEmergency",
-      "msg": "Operation is in emergency mode"
-    },
-    {
-      "code": 6029,
-      "name": "notInEmergency",
-      "msg": "Operation is not in emergency mode"
-    },
-    {
-      "code": 6030,
-      "name": "capNotExceeded",
-      "msg": "Fairlaunch cap not exceeded"
-    },
-    {
-      "code": 6031,
-      "name": "alreadyRefunded",
-      "msg": "Sol is refunded already"
-    },
-    {
-      "code": 6032,
-      "name": "alreadyClaimed",
-      "msg": "Fairlaunch tokens already claimed"
     }
   ],
   "types": [

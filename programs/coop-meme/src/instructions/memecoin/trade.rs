@@ -394,10 +394,6 @@ impl<'info> Trade<'info> {
 
     pub fn claim_tokens(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
-        require!(
-            self.memecoin.is_trading_active,
-            CoopMemeError::TradingNotActive
-        );
         if self.memecoin.is_trading_active {
             require!(
                 self.memecoin.is_bonding_curve_active,
@@ -480,10 +476,6 @@ impl<'info> Trade<'info> {
 
     pub fn claim_tokens_and_refund_sol(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
-        require!(
-            self.memecoin.is_trading_active,
-            CoopMemeError::TradingNotActive
-        );
         if self.memecoin.is_trading_active {
             require!(
                 self.memecoin.is_bonding_curve_active,
