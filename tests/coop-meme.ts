@@ -2,7 +2,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program, BN } from '@coral-xyz/anchor';
 import { CoopMeme } from '../target/types/coop_meme';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
   NATIVE_MINT,
@@ -47,6 +47,22 @@ describe('coop-meme-2', () => {
   //   'DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'
   // );
 
+  const trader2Keypair = Keypair.generate();
+
+  async function airdropSol() {
+    const sig = await program.provider.connection.requestAirdrop(
+      trader2Keypair.publicKey,
+      100000 * anchor.web3.LAMPORTS_PER_SOL
+    );
+
+    const latestBlockhash =
+      await program.provider.connection.getLatestBlockhash();
+    await program.provider.connection.confirmTransaction({
+      signature: sig,
+      blockhash: latestBlockhash.blockhash,
+      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+    });
+  }
   async function setup(create) {
     const owner = provider.wallet.publicKey;
 
@@ -54,7 +70,13 @@ describe('coop-meme-2', () => {
 
     const trader = provider.wallet.publicKey;
 
+    const trader2 = trader2Keypair.publicKey;
+
+    await airdropSol();
+
     const user = provider.wallet.publicKey;
+
+    const user2 = trader2Keypair.publicKey;
 
     const [configPda] =
       await anchor.web3.PublicKey.findProgramAddress(
@@ -88,14 +110,19 @@ describe('coop-meme-2', () => {
       program.programId
     );
 
-    const [fairlaunchToken] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('mint'), coopToken.toBuffer(), seedBuffer],
-        program.programId
-      );
+    // const [fairlaunchToken] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [Buffer.from('mint'), coopToken.toBuffer(), seedBuffer],
+    //     program.programId
+    //   );
 
     const [userData] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('user'), trader.toBuffer(), coopToken.toBuffer()],
+      program.programId
+    );
+
+    const [user2Data] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('user'), trader2.toBuffer(), coopToken.toBuffer()],
       program.programId
     );
 
@@ -119,25 +146,25 @@ describe('coop-meme-2', () => {
         metadataProgramId
       );
 
-    const [fairlaunchMetadataPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          Buffer.from('metadata'),
-          metadataProgramId.toBuffer(),
-          fairlaunchToken.toBuffer(),
-        ],
-        metadataProgramId
-      );
+    // const [fairlaunchMetadataPda] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [
+    //       Buffer.from('metadata'),
+    //       metadataProgramId.toBuffer(),
+    //       fairlaunchToken.toBuffer(),
+    //     ],
+    //     metadataProgramId
+    //   );
 
-    const [globalFairlaunchTokenAta] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          globalVault.toBuffer(),
-          anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-          fairlaunchToken.toBuffer(),
-        ],
-        anchor.utils.token.ASSOCIATED_PROGRAM_ID
-      );
+    // const [globalFairlaunchTokenAta] =
+    //   anchor.web3.PublicKey.findProgramAddressSync(
+    //     [
+    //       globalVault.toBuffer(),
+    //       anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
+    //       fairlaunchToken.toBuffer(),
+    //     ],
+    //     anchor.utils.token.ASSOCIATED_PROGRAM_ID
+    //   );
 
     const [globalTokenAta] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -155,11 +182,11 @@ describe('coop-meme-2', () => {
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
-    const voteFairlaunchTokenAta = await getAssociatedTokenAddress(
-      fairlaunchToken,
-      memecoinPda,
-      true // allowOwnerOffCurve = false (always false unless you know it's needed)
-    );
+    // const voteFairlaunchTokenAta = await getAssociatedTokenAddress(
+    //   fairlaunchToken,
+    //   memecoinPda,
+    //   true // allowOwnerOffCurve = false (always false unless you know it's needed)
+    // );
 
     const traderTokenAta = await getAssociatedTokenAddress(
       coopToken,
@@ -167,15 +194,31 @@ describe('coop-meme-2', () => {
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
-    const traderFairlaunchTokenAta = await getAssociatedTokenAddress(
-      fairlaunchToken,
-      trader,
+    const trader2TokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      trader2,
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
+
+    // const traderFairlaunchTokenAta = await getAssociatedTokenAddress(
+    //   fairlaunchToken,
+    //   trader,
+    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    // );
 
     const [userTokenVotes] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [Buffer.from('votes'), user.toBuffer(), coopToken.toBuffer()],
+        program.programId
+      );
+
+    const [user2TokenVotes] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('votes'),
+          user2.toBuffer(),
+          coopToken.toBuffer(),
+        ],
         program.programId
       );
 
@@ -185,39 +228,46 @@ describe('coop-meme-2', () => {
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
-    const userFairlaunchTokenAta = await getAssociatedTokenAddress(
-      fairlaunchToken,
-      user,
+    const userToken2Ata = await getAssociatedTokenAddress(
+      coopToken,
+      user2,
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
+
+    // const userFairlaunchTokenAta = await getAssociatedTokenAddress(
+    //   fairlaunchToken,
+    //   user,
+    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
+    // );
 
     return {
       owner,
       creator,
       trader,
+      trader2Keypair,
+      trader2,
       user,
+      user2,
       configPda,
       rbac,
       globalVault,
       coopToken,
-      fairlaunchToken,
       memecoinPda,
       metadataPda,
-      fairlaunchMetadataPda,
-      globalFairlaunchTokenAta,
       globalTokenAta,
       voteTokenAta,
-      voteFairlaunchTokenAta,
       traderTokenAta,
-      traderFairlaunchTokenAta,
+      trader2TokenAta,
       userTokenVotes,
+      user2TokenVotes,
       userTokenAta,
-      userFairlaunchTokenAta,
+      userToken2Ata,
       userData,
+      user2Data,
     };
   }
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -322,7 +372,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it.skip('provide roles', async () => {
+  it('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -391,12 +441,12 @@ describe('coop-meme-2', () => {
     await create_tokens();
   });
 
-  it('first buying memecoin in fairlaunch!', async () => {
-    await buy_tokens_fairlaunch('500000000'); // 10 sol == 10000000000
+  it.skip('first buying memecoin in fairlaunch!', async () => {
+    await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
   });
 
-  it('first selling memecoin in fairlaunch!', async () => {
-    await sell_tokens_fairlaunch('50000000'); // 5 sol
+  it.skip('first selling memecoin in fairlaunch!', async () => {
+    await sell_tokens_fairlaunch(1, '50000000'); // 5 sol
   });
 
   // it.skip('first voting with option with fairlaunch', async () => {
@@ -417,18 +467,18 @@ describe('coop-meme-2', () => {
   //   await unvote_fairlaunch(3);
   // });
 
-  it('multiple buy, sell', async () => {
-    await buy_tokens_fairlaunch('100000000'); // 10 sol
-    await buy_tokens_fairlaunch('200000000'); // 5 sol
-    await buy_tokens_fairlaunch('300000000'); // 3 sol
-    await buy_tokens_fairlaunch('400000000'); // 2 sol
+  it.skip('multiple buy, sell', async () => {
+    await buy_tokens_fairlaunch(1, '100000000'); // 10 sol
+    await buy_tokens_fairlaunch(1, '200000000'); // 5 sol
+    await buy_tokens_fairlaunch(1, '300000000'); // 3 sol
+    await buy_tokens_fairlaunch(1, '400000000'); // 2 sol
 
-    await sell_tokens_fairlaunch('50000000'); // 5 sol
-    await sell_tokens_fairlaunch('50000000');
-    await sell_tokens_fairlaunch('50000000');
+    await sell_tokens_fairlaunch(1, '50000000'); // 5 sol
+    await sell_tokens_fairlaunch(1, '50000000');
+    await sell_tokens_fairlaunch(1, '50000000');
   });
 
-  it('first buying memecoin!', async () => {
+  it.skip('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(100 * 1000); // 2 minutes = 120000 ms
@@ -437,8 +487,8 @@ describe('coop-meme-2', () => {
     await buy_tokens('100000000'); // 10 SOL
   });
 
-  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
-    await claim_and_refund();
+  it.skip('refund sol and claim tokens after first buy in bonding-curve', async () => {
+    await claim_and_refund(1);
   });
 
   // it('refund sol after first buy in bonding-curve', async () => {
@@ -453,7 +503,7 @@ describe('coop-meme-2', () => {
   //   await buy_tokens('100000000');
   // });
 
-  it('first selling memecoin!', async () => {
+  it.skip('first selling memecoin!', async () => {
     await sell_tokens('1000000000000');
   });
 
@@ -461,25 +511,149 @@ describe('coop-meme-2', () => {
   //   await swap();
   // });
 
-  it('first voting with option', async () => {
+  it.skip('2 users buy but no one sell -> mcap is not reached -> both call claim-n-refund', async () => {
+    await buy_tokens_fairlaunch(1, '1000000000');
+    await buy_tokens_fairlaunch(1, '2000000000');
+    await buy_tokens_fairlaunch(1, '3000000000');
+    await buy_tokens_fairlaunch(2, '1000000000');
+    await buy_tokens_fairlaunch(2, '2000000000');
+    await buy_tokens_fairlaunch(2, '3000000000');
+
+    console.log('Starting wait for fairlaunch to be over...');
+    await delay(100 * 1000); // 2 minutes = 120000 ms
+    console.log('Bonding curve started...');
+
+    await buy_tokens('100000000'); // 10 SOL
+
+    await claim_and_refund(1);
+    await claim_and_refund(2);
+    // await claim(1);
+    // await claim(2);
+
+    // await refund(1);
+    // await refund(2);
+  });
+
+  it.skip('2 users buy but one sells -> mcap is not reached -> both call claim-n-refund', async () => {
+    await buy_tokens_fairlaunch(1, '1000000000');
+    await buy_tokens_fairlaunch(1, '2000000000');
+    await buy_tokens_fairlaunch(1, '3000000000');
+    await buy_tokens_fairlaunch(2, '1000000000');
+    await buy_tokens_fairlaunch(2, '2000000000');
+    await buy_tokens_fairlaunch(2, '3000000000');
+
+    await sell_tokens_fairlaunch(1, '5400000000');
+
+    console.log('Starting wait for fairlaunch to be over...');
+    await delay(100 * 1000); // 2 minutes = 120000 ms
+    console.log('Bonding curve started...');
+
+    await buy_tokens('100000000'); // 10 SOL
+
+    await claim_and_refund(1);
+    await claim_and_refund(2);
+    // await claim(1);
+    // await claim(2);
+
+    // await refund(1);
+    // await refund(2);
+  });
+
+  it.skip('2 users buy but one sells -> mcap is reached -> both call claim-n-refund', async () => {
+    await buy_tokens_fairlaunch(1, '1000000000');
+    await buy_tokens_fairlaunch(1, '5000000000');
+    await buy_tokens_fairlaunch(1, '9000000000');
+    await buy_tokens_fairlaunch(2, '1000000000');
+    await buy_tokens_fairlaunch(2, '5000000000');
+    await buy_tokens_fairlaunch(2, '9000000000');
+
+    await sell_tokens_fairlaunch(1, '5400000000');
+
+    console.log('Starting wait for fairlaunch to be over...');
+    await delay(100 * 1000); // 2 minutes = 120000 ms
+    console.log('Bonding curve started...');
+
+    await buy_tokens('100000000'); // 10 SOL
+
+    await claim_and_refund(1);
+    await claim_and_refund(2);
+    // await claim(1);
+    // await claim(2);
+
+    // await refund(1);
+    // await refund(2);
+  });
+
+  it.skip('2 users buy but one sells all -> mcap is reached -> both call claim-n-refund', async () => {
+    await buy_tokens_fairlaunch(1, '1000000000');
+    await buy_tokens_fairlaunch(1, '5000000000');
+    await buy_tokens_fairlaunch(1, '9000000000');
+    await buy_tokens_fairlaunch(2, '1000000000');
+    await buy_tokens_fairlaunch(2, '10000000000');
+    await buy_tokens_fairlaunch(2, '20000000000');
+
+    await sell_tokens_fairlaunch(1, '13500000000');
+
+    console.log('Starting wait for fairlaunch to be over...');
+    await delay(100 * 1000); // 2 minutes = 120000 ms
+    console.log('Bonding curve started...');
+
+    await buy_tokens('100000000'); // 10 SOL
+
+    // await claim(1);
+    // await refund(1);
+
+    // await claim_and_refund(1);
+    await claim_and_refund(2);
+    // await claim(2);
+
+    // await refund(2);
+
+    await unvote_all_tokens();
+  });
+
+  it.skip('2 users buy but no one sell -> greater than mcap reached -> both call claim-n-refund', async () => {
+    await buy_tokens_fairlaunch(1, '1000000000');
+    await buy_tokens_fairlaunch(1, '6000000000');
+    await buy_tokens_fairlaunch(1, '9000000000');
+    await buy_tokens_fairlaunch(2, '1000000000');
+    await buy_tokens_fairlaunch(2, '5000000000');
+    await buy_tokens_fairlaunch(2, '5000000000');
+
+    console.log('Starting wait for fairlaunch to be over...');
+    await delay(100 * 1000); // 2 minutes = 120000 ms
+    console.log('Bonding curve started...');
+
+    await buy_tokens('100000000'); // 10 SOL
+
+    await claim_and_refund(1);
+    await claim_and_refund(2);
+    // await claim(1);
+    // await claim(2);
+
+    // await refund(1);
+    // await refund(2);
+  });
+
+  it.skip('first voting with option', async () => {
     await vote_with_option('name', 'Token1');
     await vote_with_option('sym', 'TKN1');
     await vote_with_option('uri', 'uri1');
   });
 
-  it('first voting', async () => {
+  it.skip('first voting', async () => {
     await vote(1);
     await vote(2);
     await vote(3);
   });
 
-  it('first unvoting', async () => {
+  it.skip('first unvoting', async () => {
     await unvote(1);
     await unvote(2);
     await unvote(3);
   });
 
-  it('multiple buy, sell, vote and unvote', async () => {
+  it.skip('multiple buy, sell, vote and unvote', async () => {
     await buy_tokens('100000000');
     await buy_tokens('100000000');
     // await buy_tokens('10000000000');
@@ -499,7 +673,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it('Is finalizing voting', async () => {
+  it.skip('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(100 * 1000); // 2 minutes = 120000 ms
@@ -508,15 +682,15 @@ describe('coop-meme-2', () => {
     await finalizeVote();
   });
 
-  it('Is listing memecoin!', async () => {
+  it.skip('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it('unvoting all tokens', async () => {
+  it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it('Is swapping SOL to memecoin!', async () => {
+  it.skip('Is swapping SOL to memecoin!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -663,7 +837,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping memecoin to SOL!', async () => {
+  it.skip('Is swapping memecoin to SOL!', async () => {
     const payer = provider.wallet.publicKey;
 
     const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -1198,23 +1372,35 @@ describe('coop-meme-2', () => {
     assert.strictEqual(memecoinState.isTokenListed, false);
   }
 
-  async function buy_tokens_fairlaunch(sol_amount) {
+  async function buy_tokens_fairlaunch(keypair, sol_amount) {
     const {
       trader,
+      trader2Keypair,
+      trader2,
       creator,
       configPda,
       globalVault,
       coopToken,
       memecoinPda,
       globalTokenAta,
-      traderTokenAta,
       userData,
+      user2Data,
     } = await setup(false);
+
+    let finalTrader = trader;
+    let finalUserData = userData;
+    let signers = [];
+
+    if (keypair == 2) {
+      finalTrader = trader2;
+      finalUserData = user2Data;
+      signers.push(trader2Keypair);
+    }
 
     const txSig = await program.methods
       .buyTokensFairlaunch(new BN(sol_amount))
       .accounts({
-        trader,
+        trader: finalTrader,
         affiliate,
         creator,
         teamWallet,
@@ -1223,10 +1409,11 @@ describe('coop-meme-2', () => {
         coopToken,
         memecoin: memecoinPda,
         globalTokenAta,
-        userData,
+        userData: finalUserData,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers(signers) // keypair here
       .rpc();
 
     console.log('Tx hash:', txSig);
@@ -1290,28 +1477,32 @@ describe('coop-meme-2', () => {
     );
 
     const userDataState = await program.account.userData.fetch(
-      userData
+      finalUserData
     );
 
     console.log(
-      'User state data: totat sol deposit',
+      'User  state data: ' +
+        keypair.toString() +
+        ' totat sol deposit',
       userDataState.solDeposit.toString()
     );
 
     console.log(
-      'User state data: claimed tokens?',
+      'User  state data: ' + keypair.toString() + ' claimed tokens?',
       userDataState.tokensClaimed.toString()
     );
 
     console.log(
-      'User state data: claimed refund?',
+      'User  state data: ' + keypair.toString() + ' claimed refund?',
       userDataState.refund.toString()
     );
   }
 
-  async function refund() {
+  async function refund(keypair) {
     const {
       trader,
+      trader2,
+      trader2Keypair,
       creator,
       configPda,
       globalVault,
@@ -1319,11 +1510,25 @@ describe('coop-meme-2', () => {
       memecoinPda,
       globalTokenAta,
       traderTokenAta,
+      trader2TokenAta,
       userData,
+      user2Data,
     } = await setup(false);
 
+    let finalTrader = trader;
+    let finalUserData = userData;
+    let finalTraderTokenAta = traderTokenAta;
+    let signers = [];
+
+    if (keypair == 2) {
+      finalTrader = trader2;
+      finalUserData = user2Data;
+      finalTraderTokenAta = trader2TokenAta;
+      signers.push(trader2Keypair);
+    }
+
     let userSolBalancebeforeRefund =
-      await provider.connection.getBalance(trader);
+      await provider.connection.getBalance(finalTrader);
     console.log(
       'user sol balance before refund',
       userSolBalancebeforeRefund.toString()
@@ -1331,7 +1536,7 @@ describe('coop-meme-2', () => {
     const txSig = await program.methods
       .refundSol()
       .accounts({
-        trader,
+        trader: finalTrader,
         affiliate,
         creator,
         teamWallet,
@@ -1340,10 +1545,11 @@ describe('coop-meme-2', () => {
         coopToken,
         memecoin: memecoinPda,
         globalTokenAta,
-        userData,
+        userData: finalUserData,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers(signers)
       .rpc();
 
     console.log('Tx hash:', txSig);
@@ -1359,7 +1565,7 @@ describe('coop-meme-2', () => {
     }
 
     let userSolBalanceAfterRefund =
-      await provider.connection.getBalance(trader);
+      await provider.connection.getBalance(finalTrader);
     console.log(
       'user sol balance after refund',
       userSolBalanceAfterRefund.toString()
@@ -1414,7 +1620,7 @@ describe('coop-meme-2', () => {
     );
 
     const userDataState = await program.account.userData.fetch(
-      userData
+      finalUserData
     );
 
     console.log(
@@ -1553,23 +1759,35 @@ describe('coop-meme-2', () => {
     );
   }
 
-  async function sell_tokens_fairlaunch(sol_amount) {
+  async function sell_tokens_fairlaunch(keypair, sol_amount) {
     const {
       trader,
+      trader2,
+      trader2Keypair,
       creator,
       configPda,
       globalVault,
       coopToken,
       memecoinPda,
       globalTokenAta,
-      traderTokenAta,
       userData,
+      user2Data,
     } = await setup(false);
+
+    let finalTrader = trader;
+    let finalUserData = userData;
+    let signers = [];
+
+    if (keypair == 2) {
+      finalTrader = trader2;
+      finalUserData = user2Data;
+      signers.push(trader2Keypair);
+    }
 
     const txSig = await program.methods
       .sellTokensFairlaunch(new BN(sol_amount))
       .accounts({
-        trader,
+        trader: finalTrader,
         affiliate,
         creator,
         teamWallet,
@@ -1578,7 +1796,7 @@ describe('coop-meme-2', () => {
         coopToken,
         memecoin: memecoinPda,
         globalTokenAta,
-        userData,
+        userData: finalUserData,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
@@ -1639,7 +1857,7 @@ describe('coop-meme-2', () => {
       memecoinState.totalOptions.toString()
     );
     const userDataState = await program.account.userData.fetch(
-      userData
+      finalUserData
     );
 
     console.log(
@@ -1776,33 +1994,51 @@ describe('coop-meme-2', () => {
     );
   }
 
-  async function claim() {
+  async function claim(keypair) {
     const {
       trader,
+      trader2,
+      trader2Keypair,
       creator,
       configPda,
       globalVault,
       coopToken,
       memecoinPda,
       userData,
+      user2Data,
       globalTokenAta,
       traderTokenAta,
+      trader2TokenAta,
     } = await setup(false);
 
-    let userTokenBal =
-      await provider.connection.getTokenAccountBalance(
-        traderTokenAta
-      );
+    let finalTrader = trader;
+    let finalUserData = userData;
+    let finalTraderTokenAta = traderTokenAta;
+    let signers = [];
 
-    console.log(
-      'user balance before claim',
-      userTokenBal.value.uiAmountString
-    );
+    if (keypair == 2) {
+      finalTrader = trader2;
+      finalUserData = user2Data;
+      finalTraderTokenAta = trader2TokenAta;
+      signers.push(trader2Keypair);
+    }
+
+    let userTokenBal;
+
+    // let userTokenBal =
+    //   await provider.connection.getTokenAccountBalance(
+    //     finalTraderTokenAta
+    //   );
+
+    // console.log(
+    //   'user balance before claim',
+    //   userTokenBal.value.uiAmountString
+    // );
 
     const txSig = await program.methods
       .claimTokens()
       .accounts({
-        trader,
+        trader: finalTrader,
         affiliate,
         creator,
         teamWallet,
@@ -1811,13 +2047,14 @@ describe('coop-meme-2', () => {
         coopToken,
         memecoin: memecoinPda,
         globalTokenAta,
-        traderTokenAta,
-        userData,
+        traderTokenAta: finalTraderTokenAta,
+        userData: finalUserData,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram:
           anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers(signers)
       .rpc();
 
     console.log('Tx hash:', txSig);
@@ -1832,7 +2069,7 @@ describe('coop-meme-2', () => {
     }
 
     userTokenBal = await provider.connection.getTokenAccountBalance(
-      traderTokenAta
+      finalTraderTokenAta
     );
 
     console.log(
@@ -1885,7 +2122,7 @@ describe('coop-meme-2', () => {
     );
 
     const userDataState = await program.account.userData.fetch(
-      userData
+      finalUserData
     );
 
     console.log(
@@ -1904,31 +2141,49 @@ describe('coop-meme-2', () => {
     );
   }
 
-  async function claim_and_refund() {
+  async function claim_and_refund(keypair) {
     const {
       trader,
+      trader2,
+      trader2Keypair,
       creator,
       configPda,
       globalVault,
       coopToken,
       memecoinPda,
       userData,
+      user2Data,
       globalTokenAta,
       traderTokenAta,
+      trader2TokenAta,
     } = await setup(false);
 
-    let userTokenBal =
-      await provider.connection.getTokenAccountBalance(
-        traderTokenAta
-      );
+    let finalTrader = trader;
+    let finalUserData = userData;
+    let finalTraderTokenAta = traderTokenAta;
+    let signers = [];
 
-    console.log(
-      'user balance before claim',
-      userTokenBal.value.uiAmountString
-    );
+    if (keypair == 2) {
+      finalTrader = trader2;
+      finalUserData = user2Data;
+      finalTraderTokenAta = trader2TokenAta;
+      signers.push(trader2Keypair);
+    }
+
+    let userTokenBal;
+
+    //   =
+    //   await provider.connection.getTokenAccountBalance(
+    //     finalTraderTokenAta
+    //   );
+
+    // console.log(
+    //   'user balance before claim',
+    //   userTokenBal.value.uiAmountString
+    // );
 
     let userSolBalancebeforeRefund =
-      await provider.connection.getBalance(trader);
+      await provider.connection.getBalance(finalTrader);
     console.log(
       'user sol balance before refund',
       userSolBalancebeforeRefund.toString()
@@ -1937,7 +2192,7 @@ describe('coop-meme-2', () => {
     const txSig = await program.methods
       .claimTokensAndRefundSol()
       .accounts({
-        trader,
+        trader: finalTrader,
         affiliate,
         creator,
         teamWallet,
@@ -1946,13 +2201,14 @@ describe('coop-meme-2', () => {
         coopToken,
         memecoin: memecoinPda,
         globalTokenAta,
-        traderTokenAta,
-        userData,
+        traderTokenAta: finalTraderTokenAta,
+        userData: finalUserData,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram:
           anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers(signers) // keypair here
       .rpc();
 
     console.log('Tx hash:', txSig);
@@ -1967,7 +2223,7 @@ describe('coop-meme-2', () => {
     }
 
     userTokenBal = await provider.connection.getTokenAccountBalance(
-      traderTokenAta
+      finalTraderTokenAta
     );
 
     console.log(
@@ -1976,7 +2232,7 @@ describe('coop-meme-2', () => {
     );
 
     let userSolBalanceAfterRefund =
-      await provider.connection.getBalance(trader);
+      await provider.connection.getBalance(finalTrader);
     console.log(
       'user sol balance after refund',
       userSolBalanceAfterRefund.toString()
@@ -2027,21 +2283,23 @@ describe('coop-meme-2', () => {
     );
 
     const userDataState = await program.account.userData.fetch(
-      userData
+      finalUserData
     );
 
     console.log(
-      'User state data: totat sol deposit',
+      'User  state data: ' +
+        keypair.toString() +
+        ' totat sol deposit',
       userDataState.solDeposit.toString()
     );
 
     console.log(
-      'User state data: claimed tokens?',
+      'User  state data: ' + keypair.toString() + ' claimed tokens?',
       userDataState.tokensClaimed.toString()
     );
 
     console.log(
-      'User state data: claimed refund?',
+      'User  state data: ' + keypair.toString() + ' claimed refund?',
       userDataState.refund.toString()
     );
   }
@@ -2721,8 +2979,6 @@ describe('coop-meme-2', () => {
 
     console.log('user balance before voting', userTokenBal);
 
-    const { fairlaunchToken } = await setup(false);
-
     const txSig = await program.methods
       .unvote(new BN(1000000000000))
       .accounts({
@@ -3207,7 +3463,6 @@ describe('coop-meme-2', () => {
       globalVault,
       coopToken,
       memecoinPda,
-      fairlaunchToken,
       globalTokenAta,
       userTokenVotes,
       userTokenAta,
@@ -3228,7 +3483,6 @@ describe('coop-meme-2', () => {
         config: configPda,
         globalVault,
         coopToken,
-        fairlaunchToken,
         memecoin: memecoinPda,
         globalTokenAta,
         userTokenVotes,

@@ -11,7 +11,7 @@ coop_meme = "8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

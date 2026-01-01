@@ -141,18 +141,22 @@ impl<'info> UnlockAll<'info> {
             )?;
         }
 
-        // Safe proportional token calculation (divide-first order)
-        let ratio = self
-            .user_data
-            .sol_deposit
-            .checked_div(self.memecoin.fairlaunch_sol_raised)
-            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
-
         if !self.user_data.refund {
             if self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap {
-                let user_real_sol = ratio
-                    .checked_mul(self.memecoin.fairlaunch_cap)
+                // Safe proportional token calculation (divide-first order)
+                let numerator = (self.user_data.sol_deposit as u128)
+                    .checked_mul(self.memecoin.fairlaunch_cap as u128)
                     .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+                let user_real_sol_u128 = numerator
+                    .checked_div(self.memecoin.fairlaunch_sol_raised as u128)
+                    .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+                require!(
+                    user_real_sol_u128 < u64::MAX as u128,
+                    CoopMemeError::InvalidOperation
+                );
+                let user_real_sol = user_real_sol_u128 as u64;
 
                 if user_real_sol <= self.memecoin.fairlaunch_cap
                     && self.user_data.sol_deposit > user_real_sol
@@ -169,7 +173,7 @@ impl<'info> UnlockAll<'info> {
 
                         sol_transfer_with_signer(
                             self.global_vault.to_account_info(),
-                            self.creator.to_account_info(),
+                            self.user.to_account_info(),
                             &self.system_program,
                             &[seeds],
                             sol_to_refund as u64,
@@ -189,9 +193,20 @@ impl<'info> UnlockAll<'info> {
         }
 
         if !self.user_data.tokens_claimed {
-            let user_tokens = ratio
-                .checked_mul(self.memecoin.fairlaunch_token_reserves)
+            // Safe proportional token calculation (divide-first order)
+            let numerator = (self.user_data.sol_deposit as u128)
+                .checked_mul(self.memecoin.fairlaunch_token_reserves as u128)
                 .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+            let user_tokens_u128 = numerator
+                .checked_div(self.memecoin.fairlaunch_sol_raised as u128)
+                .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+
+            require!(
+                user_tokens_u128 < u64::MAX as u128,
+                CoopMemeError::InvalidOperation
+            );
+            let user_tokens = user_tokens_u128 as u64;
 
             if user_tokens > 0 {
                 self.user_data.tokens_claimed = true;
