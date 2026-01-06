@@ -159,6 +159,7 @@ pub mod coop_meme {
 
     pub fn vote_with_option(
         ctx: Context<CreateOption>,
+        option_value: String,
         create_option: CreateOptionInfo,
     ) -> Result<()> {
         ctx.accounts.create_new_option(&ctx.bumps, create_option)

@@ -12,6 +12,7 @@ use anchor_spl::{
 };
 
 #[derive(Accounts)]
+#[instruction(option_value: String)] // References FIRST instr param for seeds
 pub struct CreateOption<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
@@ -50,7 +51,7 @@ pub struct CreateOption<'info> {
       init,
       payer=user,
       space = 8 + TokenOption::INIT_SPACE,
-      seeds = [b"option", coop_token.key().as_ref(), &(memecoin.total_options+1).to_le_bytes()],
+      seeds = [b"option", coop_token.key().as_ref(), option_value.as_ref()],
       bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,

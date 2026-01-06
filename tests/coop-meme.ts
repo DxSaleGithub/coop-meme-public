@@ -267,7 +267,7 @@ describe('coop-meme-2', () => {
     };
   }
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -306,7 +306,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it.skip('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -317,8 +317,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(900);
-    const newFairlaunchPeriod = new anchor.BN(300);
+    const newCoopInterval = new anchor.BN(200);
+    const newFairlaunchPeriod = new anchor.BN(100);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -372,7 +372,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it('provide roles', async () => {
+  it.skip('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -388,7 +388,11 @@ describe('coop-meme-2', () => {
     // );
 
     // const owner = new PublicKey(
-    //   'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis
+    //   'AAc5Ks2N4aqTPCyQqkmTyxZwKYLWBfrksNz5JErDSdnY' // Dennis 1
+    // );
+
+    // const owner = new PublicKey(
+    //   'uabpfJPMqUdGZF6PoySKpNUx7tENy6Q9NpaeGeETrzd' // Dennis 2
     // );
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -441,11 +445,11 @@ describe('coop-meme-2', () => {
     await create_tokens();
   });
 
-  it.skip('first buying memecoin in fairlaunch!', async () => {
+  it('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
   });
 
-  it.skip('first selling memecoin in fairlaunch!', async () => {
+  it('first selling memecoin in fairlaunch!', async () => {
     await sell_tokens_fairlaunch(1, '50000000'); // 5 sol
   });
 
@@ -478,7 +482,7 @@ describe('coop-meme-2', () => {
     await sell_tokens_fairlaunch(1, '50000000');
   });
 
-  it.skip('first buying memecoin!', async () => {
+  it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(100 * 1000); // 2 minutes = 120000 ms
@@ -487,7 +491,7 @@ describe('coop-meme-2', () => {
     await buy_tokens('100000000'); // 10 SOL
   });
 
-  it.skip('refund sol and claim tokens after first buy in bonding-curve', async () => {
+  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
     await claim_and_refund(1);
   });
 
@@ -503,7 +507,7 @@ describe('coop-meme-2', () => {
   //   await buy_tokens('100000000');
   // });
 
-  it.skip('first selling memecoin!', async () => {
+  it('first selling memecoin!', async () => {
     await sell_tokens('1000000000000');
   });
 
@@ -635,22 +639,22 @@ describe('coop-meme-2', () => {
     // await refund(2);
   });
 
-  it.skip('first voting with option', async () => {
+  it('first voting with option', async () => {
     await vote_with_option('name', 'Token1');
     await vote_with_option('sym', 'TKN1');
     await vote_with_option('uri', 'uri1');
   });
 
-  it.skip('first voting', async () => {
-    await vote(1);
-    await vote(2);
-    await vote(3);
+  it('first voting', async () => {
+    await vote(1, 'Token1');
+    await vote(2, 'TKN1');
+    await vote(3, 'uri1');
   });
 
-  it.skip('first unvoting', async () => {
-    await unvote(1);
-    await unvote(2);
-    await unvote(3);
+  it('first unvoting', async () => {
+    await unvote(1, 'Token1');
+    await unvote(2, 'TKN1');
+    await unvote(3, 'uri1');
   });
 
   it.skip('multiple buy, sell, vote and unvote', async () => {
@@ -673,13 +677,13 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it.skip('Is finalizing voting', async () => {
+  it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(100 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
-    await finalizeVote();
+    await finalizeVote('Token1', 'TKN1', 'uri1');
   });
 
   it.skip('Is listing memecoin!', async () => {
@@ -2414,7 +2418,7 @@ describe('coop-meme-2', () => {
   //   console.log('user tokens vote state data:', userVotesState);
   // }
 
-  async function vote(option_index) {
+  async function vote(option_index, option_value) {
     const {
       user,
       creator,
@@ -2434,12 +2438,15 @@ describe('coop-meme-2', () => {
       4
     ); // u64 LE
 
+    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
+
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionSeedBuffer,
+          optionValueBuffer,
+          // optionSeedBuffer,
         ],
         program.programId
       );
@@ -2667,12 +2674,14 @@ describe('coop-meme-2', () => {
       .addn(1)
       .toArrayLike(Buffer, 'le', 4); // u64 LE
 
+    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionSeedBuffer,
+          optionValueBuffer,
+          // optionSeedBuffer,
         ],
         program.programId
       );
@@ -2707,7 +2716,7 @@ describe('coop-meme-2', () => {
     };
 
     const txSig = await program.methods
-      .voteWithOption(createOption)
+      .voteWithOption(option_value, createOption)
       .accounts({
         user,
         creator,
@@ -2928,7 +2937,7 @@ describe('coop-meme-2', () => {
   //   console.log('user tokens vote state data:', userVotesState);
   // }
 
-  async function unvote(option_index) {
+  async function unvote(option_index, option_value) {
     const {
       user,
       creator,
@@ -2947,13 +2956,15 @@ describe('coop-meme-2', () => {
       'le',
       4
     ); // u64 LE
+    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
 
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionSeedBuffer,
+          optionValueBuffer,
+          // optionSeedBuffer,
         ],
         program.programId
       );
@@ -3076,7 +3087,7 @@ describe('coop-meme-2', () => {
   //   }
   // }
 
-  async function finalizeVote() {
+  async function finalizeVote(name_value, symbol_value, uri_value) {
     const user = provider.wallet.publicKey;
 
     const creator = provider.wallet.publicKey;
@@ -3132,7 +3143,8 @@ describe('coop-meme-2', () => {
       Buffer,
       'le',
       4
-    ); // u64 LE
+    );
+    const nameValueBuffer = Buffer.from(name_value); // e.g., "my_option_value"// u64 LE
 
     const symbolOptionIndex = new BN(Number(2)); // e.g., 0
     const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
@@ -3140,6 +3152,7 @@ describe('coop-meme-2', () => {
       'le',
       4
     ); // u64 LE
+    const symbolValueBuffer = Buffer.from(symbol_value); // e.g., "my_option_value"// u64 LE
 
     const uriOptionIndex = new BN(Number(3)); // e.g., 0
     const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
@@ -3147,13 +3160,15 @@ describe('coop-meme-2', () => {
       'le',
       4
     ); // u64 LE
+    const uriValueBuffer = Buffer.from(uri_value); // e.g., "my_option_value"// u64 LE
 
     const [nameTokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          nameOptionSeedBuffer,
+          nameValueBuffer,
+          // nameOptionSeedBuffer,
         ],
         program.programId
       );
@@ -3163,7 +3178,8 @@ describe('coop-meme-2', () => {
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          symbolOptionSeedBuffer,
+          symbolValueBuffer,
+          // symbolOptionSeedBuffer,
         ],
         program.programId
       );
@@ -3173,7 +3189,8 @@ describe('coop-meme-2', () => {
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          uriOptionSeedBuffer,
+          uriValueBuffer,
+          // uriOptionSeedBuffer,
         ],
         program.programId
       );
