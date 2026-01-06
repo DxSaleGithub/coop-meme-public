@@ -149,7 +149,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -3176,7 +3176,7 @@ export type CoopMeme = {
         {
           "name": "createPoolFee",
           "writable": true,
-          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observationState",
@@ -3212,7 +3212,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -4352,7 +4352,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -4503,7 +4503,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -4817,7 +4817,7 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "token_option.index",
+                "path": "token_option.option_value",
                 "account": "tokenOption"
               }
             ]
@@ -5650,7 +5650,7 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "token_option.index",
+                "path": "token_option.option_value",
                 "account": "tokenOption"
               }
             ]
@@ -5958,7 +5958,30 @@ export type CoopMeme = {
         },
         {
           "name": "tokenOption",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              },
+              {
+                "kind": "arg",
+                "path": "optionValue"
+              }
+            ]
+          }
         },
         {
           "name": "userTokenVotes",
@@ -6141,6 +6164,10 @@ export type CoopMeme = {
         }
       ],
       "args": [
+        {
+          "name": "optionValue",
+          "type": "string"
+        },
         {
           "name": "createOption",
           "type": {

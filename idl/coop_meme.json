@@ -143,7 +143,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -3170,7 +3170,7 @@
         {
           "name": "create_pool_fee",
           "writable": true,
-          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observation_state",
@@ -3206,7 +3206,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -4346,7 +4346,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -4497,7 +4497,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -4811,7 +4811,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_option.index",
+                "path": "token_option.option_value",
                 "account": "TokenOption"
               }
             ]
@@ -5644,7 +5644,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_option.index",
+                "path": "token_option.option_value",
                 "account": "TokenOption"
               }
             ]
@@ -5952,7 +5952,30 @@
         },
         {
           "name": "token_option",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coop_token"
+              },
+              {
+                "kind": "arg",
+                "path": "option_value"
+              }
+            ]
+          }
         },
         {
           "name": "user_token_votes",
@@ -6135,6 +6158,10 @@
         }
       ],
       "args": [
+        {
+          "name": "option_value",
+          "type": "string"
+        },
         {
           "name": "create_option",
           "type": {

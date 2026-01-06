@@ -306,7 +306,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.skip('updates the config', async () => {
+  it.only('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -317,8 +317,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(200);
-    const newFairlaunchPeriod = new anchor.BN(100);
+    const newCoopInterval = new anchor.BN(900);
+    const newFairlaunchPeriod = new anchor.BN(300);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
