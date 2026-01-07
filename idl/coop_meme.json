@@ -4811,7 +4811,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_option.option_value",
+                "path": "token_option.hashed_option_value",
                 "account": "TokenOption"
               }
             ]
@@ -5644,7 +5644,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_option.option_value",
+                "path": "token_option.hashed_option_value",
                 "account": "TokenOption"
               }
             ]
@@ -5972,7 +5972,7 @@
               },
               {
                 "kind": "arg",
-                "path": "option_value"
+                "path": "hashed_option_value"
               }
             ]
           }
@@ -6159,8 +6159,13 @@
       ],
       "args": [
         {
-          "name": "option_value",
-          "type": "string"
+          "name": "hashed_option_value",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "create_option",
@@ -7781,6 +7786,15 @@
           {
             "name": "option_value",
             "type": "string"
+          },
+          {
+            "name": "hashed_option_value",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
             "name": "index",

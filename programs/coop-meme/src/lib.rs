@@ -159,10 +159,11 @@ pub mod coop_meme {
 
     pub fn vote_with_option(
         ctx: Context<CreateOption>,
-        option_value: String,
+        hashed_option_value: [u8; 32],
         create_option: CreateOptionInfo,
     ) -> Result<()> {
-        ctx.accounts.create_new_option(&ctx.bumps, create_option)
+        ctx.accounts
+            .create_new_option(&ctx.bumps, create_option, hashed_option_value)
     }
 
     pub fn unvote(ctx: Context<UserVote>, votes: u64) -> Result<()> {

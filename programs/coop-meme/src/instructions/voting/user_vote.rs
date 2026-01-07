@@ -51,7 +51,7 @@ pub struct UserVote<'info> {
     pub memecoin: Box<Account<'info, MemeCoinData>>,
     #[account[
       mut,
-      seeds = [b"option", coop_token.key().as_ref(), token_option.option_value.as_ref()],
+      seeds = [b"option", coop_token.key().as_ref(), token_option.hashed_option_value.as_ref()],
       bump = token_option.bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,

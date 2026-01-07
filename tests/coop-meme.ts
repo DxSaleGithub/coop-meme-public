@@ -7,8 +7,9 @@ import {
   getAssociatedTokenAddress,
   NATIVE_MINT,
 } from '@solana/spl-token';
-import { token } from '@coral-xyz/anchor/dist/cjs/utils';
+// import { sha256, token } from '@coral-xyz/anchor/dist/cjs/utils';
 import { assert } from 'chai';
+import { sha256 } from '@noble/hashes/sha2';
 
 import { ComputeBudgetProgram } from '@solana/web3.js';
 import { tokenAmount } from '@metaplex-foundation/umi';
@@ -485,7 +486,7 @@ describe('coop-meme-2', () => {
   it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
-    await delay(100 * 1000); // 2 minutes = 120000 ms
+    await delay(150 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await buy_tokens('100000000'); // 10 SOL
@@ -680,7 +681,7 @@ describe('coop-meme-2', () => {
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(100 * 1000); // 2 minutes = 120000 ms
+    await delay(150 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await finalizeVote('Token1', 'TKN1', 'uri1');
@@ -2438,14 +2439,16 @@ describe('coop-meme-2', () => {
       4
     ); // u64 LE
 
-    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
+    let hashed_option_value = sha256(option_value);
+
+    // const optionValueBuffer = Buffer.from(sha256(option_value)); // e.g., "my_option_value"
 
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionValueBuffer,
+          hashed_option_value,
           // optionSeedBuffer,
         ],
         program.programId
@@ -2674,13 +2677,14 @@ describe('coop-meme-2', () => {
       .addn(1)
       .toArrayLike(Buffer, 'le', 4); // u64 LE
 
-    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
+    let hashed_option_value = sha256(option_value);
+    const optionValueBuffer = Buffer.from(hashed_option_value); // e.g., "my_option_value"
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionValueBuffer,
+          hashed_option_value,
           // optionSeedBuffer,
         ],
         program.programId
@@ -2716,7 +2720,10 @@ describe('coop-meme-2', () => {
     };
 
     const txSig = await program.methods
-      .voteWithOption(option_value, createOption)
+      .voteWithOption(
+        new Uint8Array(hashed_option_value),
+        createOption
+      )
       .accounts({
         user,
         creator,
@@ -2956,14 +2963,17 @@ describe('coop-meme-2', () => {
       'le',
       4
     ); // u64 LE
-    const optionValueBuffer = Buffer.from(option_value); // e.g., "my_option_value"
+
+    let hashed_option_value = sha256(option_value);
+
+    const optionValueBuffer = Buffer.from(hashed_option_value); // e.g., "my_option_value"
 
     const [tokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          optionValueBuffer,
+          hashed_option_value,
           // optionSeedBuffer,
         ],
         program.programId
@@ -3146,6 +3156,8 @@ describe('coop-meme-2', () => {
     );
     const nameValueBuffer = Buffer.from(name_value); // e.g., "my_option_value"// u64 LE
 
+    let hashed_name_value = sha256(name_value);
+
     const symbolOptionIndex = new BN(Number(2)); // e.g., 0
     const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
       Buffer,
@@ -3153,6 +3165,7 @@ describe('coop-meme-2', () => {
       4
     ); // u64 LE
     const symbolValueBuffer = Buffer.from(symbol_value); // e.g., "my_option_value"// u64 LE
+    let hashed_symbol_value = sha256(symbol_value);
 
     const uriOptionIndex = new BN(Number(3)); // e.g., 0
     const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
@@ -3161,13 +3174,14 @@ describe('coop-meme-2', () => {
       4
     ); // u64 LE
     const uriValueBuffer = Buffer.from(uri_value); // e.g., "my_option_value"// u64 LE
+    let hashed_uri_value = sha256(uri_value);
 
     const [nameTokenOption] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          nameValueBuffer,
+          hashed_name_value,
           // nameOptionSeedBuffer,
         ],
         program.programId
@@ -3178,7 +3192,7 @@ describe('coop-meme-2', () => {
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          symbolValueBuffer,
+          hashed_symbol_value,
           // symbolOptionSeedBuffer,
         ],
         program.programId
@@ -3189,7 +3203,7 @@ describe('coop-meme-2', () => {
         [
           Buffer.from('option'),
           coopToken.toBuffer(),
-          uriValueBuffer,
+          hashed_uri_value,
           // uriOptionSeedBuffer,
         ],
         program.programId

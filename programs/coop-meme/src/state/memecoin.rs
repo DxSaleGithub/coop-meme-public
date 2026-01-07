@@ -40,6 +40,7 @@ pub struct TokenOption {
     pub option_type: OptionType,
     #[max_len(256)]
     pub option_value: String,
+    pub hashed_option_value: [u8; 32],
     pub index: u32,
     pub total_votes: u64,
     pub bump: u8,

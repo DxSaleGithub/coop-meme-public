@@ -4817,7 +4817,7 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "token_option.option_value",
+                "path": "token_option.hashed_option_value",
                 "account": "tokenOption"
               }
             ]
@@ -5650,7 +5650,7 @@ export type CoopMeme = {
               },
               {
                 "kind": "account",
-                "path": "token_option.option_value",
+                "path": "token_option.hashed_option_value",
                 "account": "tokenOption"
               }
             ]
@@ -5978,7 +5978,7 @@ export type CoopMeme = {
               },
               {
                 "kind": "arg",
-                "path": "optionValue"
+                "path": "hashedOptionValue"
               }
             ]
           }
@@ -6165,8 +6165,13 @@ export type CoopMeme = {
       ],
       "args": [
         {
-          "name": "optionValue",
-          "type": "string"
+          "name": "hashedOptionValue",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         },
         {
           "name": "createOption",
@@ -7787,6 +7792,15 @@ export type CoopMeme = {
           {
             "name": "optionValue",
             "type": "string"
+          },
+          {
+            "name": "hashedOptionValue",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
             "name": "index",

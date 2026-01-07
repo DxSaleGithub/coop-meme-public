@@ -536,6 +536,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
+ "hash",
  "raydium-cpmm-cpi",
  "solana-program",
  "spl-token 4.0.2",
@@ -718,6 +719,12 @@ dependencies = [
  "wasi 0.11.1+wasi-snapshot-preview1",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "hash"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd7c49bdb7afdaaa64b46da1b344452ff3f2e29a3e0efa09538c262f096de990"
 
 [[package]]
 name = "hashbrown"

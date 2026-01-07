@@ -10,9 +10,8 @@ use anchor_spl::{
     associated_token::{self, AssociatedToken},
     token::{self, Mint, Token, TokenAccount},
 };
-
 #[derive(Accounts)]
-#[instruction(option_value: String)] // References FIRST instr param for seeds
+#[instruction(hashed_option_value:[u8;32])] // References FIRST instr param for seeds
 pub struct CreateOption<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
@@ -51,7 +50,7 @@ pub struct CreateOption<'info> {
       init,
       payer=user,
       space = 8 + TokenOption::INIT_SPACE,
-      seeds = [b"option", coop_token.key().as_ref(), option_value.as_ref()],
+      seeds = [b"option", coop_token.key().as_ref(), &hashed_option_value],
       bump
     ]]
     pub token_option: Box<Account<'info, TokenOption>>,
@@ -101,6 +100,7 @@ impl<'info> CreateOption<'info> {
         &mut self,
         bumps: &CreateOptionBumps,
         create_option: CreateOptionInfo,
+        hashed_option_value: [u8; 32],
     ) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(
@@ -127,6 +127,7 @@ impl<'info> CreateOption<'info> {
             token: self.coop_token.key(),
             option_type: create_option.option_type,
             option_value: create_option.option_value,
+            hashed_option_value: hashed_option_value,
             index: self.memecoin.total_options + 1,
             total_votes: 0,
             bump: bumps.token_option,
