@@ -1765,6 +1765,30 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "voteOptionsRegistry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  116,
+                  105,
+                  111,
+                  110,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
@@ -6151,6 +6175,30 @@ export type CoopMeme = {
           }
         },
         {
+          "name": "voteOptionsRegistry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  116,
+                  105,
+                  111,
+                  110,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
@@ -6518,6 +6566,19 @@ export type CoopMeme = {
         9,
         165,
         132
+      ]
+    },
+    {
+      "name": "optionsRegistry",
+      "discriminator": [
+        76,
+        223,
+        224,
+        240,
+        38,
+        4,
+        223,
+        101
       ]
     },
     {
@@ -7511,6 +7572,28 @@ export type CoopMeme = {
           },
           {
             "name": "uri"
+          }
+        ]
+      }
+    },
+    {
+      "name": "optionsRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenRegistry",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
