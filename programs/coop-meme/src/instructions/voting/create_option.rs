@@ -1,7 +1,10 @@
 use crate::{
     error::*,
     events::{TradingOverEvent, VoteEvent},
-    state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
+    state::{
+        ConfigData, MemeCoinData, OptionsRegistry, TokenOption, UserTokenOptionVotes,
+        UserTokenVotes,
+    },
     utils::{freeze_user_token_account, token_transfer_user, unfreeze_user_token_account},
     CreateOptionInfo, OptionType,
 };
@@ -85,6 +88,17 @@ pub struct CreateOption<'info> {
       associated_token::token_program=token_program,
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(
+      mut,
+      seeds = [b"options", coop_token.key().as_ref()],
+      bump=vote_options_registry.bump,
+      realloc = vote_options_registry.get_size(),
+      // realloc = 8 + std::mem::size_of_val(&vote_options_registry) + std::mem::size_of::<OptionsRegistry>(),
+      realloc::payer = user,
+      realloc::zero = false,      // Preserve data
+    )]
+    pub vote_options_registry: Box<Account<'info, OptionsRegistry>>,
 
     pub system_program: Program<'info, System>,
 
@@ -140,6 +154,10 @@ impl<'info> CreateOption<'info> {
                 && self.user_token_ata.amount >= current_total_votes,
             CoopMemeError::NotEnoughToken
         );
+        require!(
+            self.vote_options_registry.token == self.coop_token.key(),
+            CoopMemeError::InvalidOption
+        );
 
         self.memecoin.total_votes += current_total_votes;
         self.token_option.total_votes += current_total_votes;
@@ -181,6 +199,9 @@ impl<'info> CreateOption<'info> {
             self.token_program.to_account_info(),
             &[seeds_for_freeze],
         )?;
+        self.vote_options_registry
+            .token_registry
+            .push(self.token_option.key());
 
         let option_value = &self.token_option.option_value;
         let option_type;

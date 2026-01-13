@@ -8,7 +8,7 @@ use anchor_spl::{
 use crate::{
     error::*,
     events::CreatedEvent,
-    state::{ConfigData, MemeCoinData, RBAControlList, RoleType},
+    state::{ConfigData, MemeCoinData, OptionsRegistry, RBAControlList, RoleType},
     utils::has_role,
 };
 #[derive(Accounts)]
@@ -83,13 +83,23 @@ pub struct MemeCoin<'info> {
     pub global_token_ata: AccountInfo<'info>,
     /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
     #[account(
-      init_if_needed,
+      init,
       associated_token::mint=coop_token,
       associated_token::authority=memecoin,
       associated_token::token_program=token_program,
       payer=creator
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
+    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
+    #[account(
+      init,
+      space = 8 + OptionsRegistry::INIT_SPACE,
+      payer=creator,
+      seeds = [b"options", coop_token.key().as_ref()],
+      bump
+    )]
+    pub vote_options_registry: Box<Account<'info, OptionsRegistry>>,
+
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 
@@ -164,6 +174,12 @@ impl<'info> MemeCoin<'info> {
             total_votes: 0,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
+        });
+
+        self.vote_options_registry.set_inner(OptionsRegistry {
+            token: self.coop_token.key(),
+            token_registry: Vec::new(),
+            bump: bumps.vote_options_registry,
         });
 
         self.config.current_coop_token_metadata.token_id =

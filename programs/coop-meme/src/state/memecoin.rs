@@ -35,6 +35,22 @@ pub struct MemeCoinData {
 
 #[account]
 #[derive(InitSpace)]
+pub struct OptionsRegistry {
+    pub token: Pubkey, // 32
+    #[max_len(0)]
+    pub token_registry: Vec<Pubkey>, // 4 + 32 * N
+    pub bump: u8,      // 1
+}
+
+impl OptionsRegistry {
+    pub fn get_size(&self) -> usize {
+        // adding one element
+        8 + 4 + ((self.token_registry.len() + 1) * 32) + 32 + 1
+    }
+}
+
+#[account]
+#[derive(InitSpace)]
 pub struct TokenOption {
     pub token: Pubkey,
     pub option_type: OptionType,

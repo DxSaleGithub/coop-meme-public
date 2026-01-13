@@ -73,7 +73,7 @@ describe('coop-meme-2', () => {
 
     const trader2 = trader2Keypair.publicKey;
 
-    await airdropSol();
+    // await airdropSol();
 
     const user = provider.wallet.publicKey;
 
@@ -126,6 +126,12 @@ describe('coop-meme-2', () => {
       [Buffer.from('user'), trader2.toBuffer(), coopToken.toBuffer()],
       program.programId
     );
+
+    const [voteOptionsRegistry] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('options'), coopToken.toBuffer()],
+        program.programId
+      );
 
     const [memecoinPda] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -265,6 +271,7 @@ describe('coop-meme-2', () => {
       userToken2Ata,
       userData,
       user2Data,
+      voteOptionsRegistry,
     };
   }
 
@@ -307,7 +314,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -318,8 +325,8 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
 
     const newOwnerFee = new anchor.BN(1000);
-    const newCoopInterval = new anchor.BN(900);
-    const newFairlaunchPeriod = new anchor.BN(300);
+    const newCoopInterval = new anchor.BN(300);
+    const newFairlaunchPeriod = new anchor.BN(150);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
@@ -641,21 +648,24 @@ describe('coop-meme-2', () => {
   });
 
   it('first voting with option', async () => {
-    await vote_with_option('name', 'Token1');
-    await vote_with_option('sym', 'TKN1');
+    await vote_with_option('name', 'Coop');
+    await vote_with_option('sym', 'COOP');
     await vote_with_option('uri', 'uri1');
+    await vote_with_option('name', 'Coop2');
+    await vote_with_option('sym', 'COOP2');
+    await vote_with_option('uri', 'uri2');
   });
 
   it('first voting', async () => {
-    await vote(1, 'Token1');
-    await vote(2, 'TKN1');
+    await vote(1, 'Coop');
+    await vote(2, 'COOP');
     await vote(3, 'uri1');
   });
 
   it('first unvoting', async () => {
-    await unvote(1, 'Token1');
-    await unvote(2, 'TKN1');
-    await unvote(3, 'uri1');
+    await unvote(1, 'Coop2');
+    await unvote(2, 'COOP2');
+    await unvote(3, 'uri2');
   });
 
   it.skip('multiple buy, sell, vote and unvote', async () => {
@@ -684,7 +694,7 @@ describe('coop-meme-2', () => {
     await delay(150 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
-    await finalizeVote('Token1', 'TKN1', 'uri1');
+    await finalizeVote('Coop', 'COOP', 'uri1');
   });
 
   it.skip('Is listing memecoin!', async () => {
@@ -1274,6 +1284,7 @@ describe('coop-meme-2', () => {
       // globalFairlaunchTokenAta,
       globalTokenAta,
       voteTokenAta,
+      voteOptionsRegistry,
       // voteFairlaunchTokenAta,
     } = await setup(true);
 
@@ -1319,6 +1330,7 @@ describe('coop-meme-2', () => {
         // tokenFairlaunchMetadataAccount: fairlaunchMetadataPda,
         // globalFairlaunchTokenAta,
         voteTokenAta,
+        voteOptionsRegistry,
         // voteFairlaunchTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram:
@@ -2666,6 +2678,7 @@ describe('coop-meme-2', () => {
       userTokenAta,
       voteTokenAta,
       userTokenVotes,
+      voteOptionsRegistry,
     } = await setup(false);
 
     const memecoinData = await program.account.memeCoinData.fetch(
@@ -2719,9 +2732,21 @@ describe('coop-meme-2', () => {
       votes: new BN('1000000000000'),
     };
 
+    let voteOptionsList = await program.account.optionsRegistry.fetch(
+      voteOptionsRegistry
+    );
+
+    const currentLen = voteOptionsList.tokenRegistry.length;
+    console.log('current option list length', currentLen.toString());
+
+    let newLen = 0;
+    if (currentLen != 0 && currentLen % 3 == 0) {
+      newLen = currentLen + 3;
+    }
     const txSig = await program.methods
       .voteWithOption(
         new Uint8Array(hashed_option_value),
+        // new BN(newLen),
         createOption
       )
       .accounts({
@@ -2736,6 +2761,7 @@ describe('coop-meme-2', () => {
         userTokenOptionVotes,
         userTokenAta,
         voteTokenAta,
+        voteOptionsRegistry,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram:
           anchor.utils.token.ASSOCIATED_PROGRAM_ID,
@@ -2769,6 +2795,14 @@ describe('coop-meme-2', () => {
       userTokenVotes
     );
     console.log('user tokens vote state data:', userVotesState);
+
+    voteOptionsList = await program.account.optionsRegistry.fetch(
+      voteOptionsRegistry
+    );
+    console.log(
+      'vote options list',
+      voteOptionsList.tokenRegistry.toString()
+    );
   }
 
   // async function unvote_fairlaunch(option_index) {
