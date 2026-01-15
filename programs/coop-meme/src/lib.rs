@@ -101,6 +101,7 @@ pub mod coop_meme {
     // TRADING METHODS
     pub fn create_token(
         ctx: Context<MemeCoin>,
+        nonce: u64,
         total_supply: u64,
         // token_share_price: u32,
         name: String,
@@ -109,6 +110,7 @@ pub mod coop_meme {
     ) -> Result<()> {
         ctx.accounts.create_memecoin(
             &ctx.bumps,
+            nonce,
             total_supply,
             // token_share_price,
             name,

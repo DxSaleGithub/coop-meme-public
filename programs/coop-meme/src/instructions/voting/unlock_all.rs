@@ -35,7 +35,7 @@ pub struct UnlockAll<'info> {
     )]
     pub global_vault: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes(), &memecoin.token_nonce.to_le_bytes()],
       bump = memecoin.token_bump
     )]
     pub coop_token: Box<Account<'info, Mint>>,

@@ -6,6 +6,7 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct MemeCoinData {
     pub token_id: u32,
+    pub token_nonce: u64,
     // pub token_fairlaunch_mint: Pubkey,
     pub token_mint: Pubkey,
     pub creator: Pubkey,

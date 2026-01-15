@@ -13,6 +13,7 @@ import { sha256 } from '@noble/hashes/sha2';
 
 import { ComputeBudgetProgram } from '@solana/web3.js';
 import { tokenAmount } from '@metaplex-foundation/umi';
+import { findVanityPDA } from './generate-pda';
 
 describe('coop-meme-2', () => {
   // Configure the client to use the local cluster.
@@ -106,10 +107,29 @@ describe('coop-meme-2', () => {
       .addn(1)
       .toArrayLike(Buffer, 'le', 4); // u64 LE
 
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId
+    // const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
+    //   [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
+    //   program.programId
+    // );
+
+    const coop_program = new PublicKey(
+      '8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW'
     );
+
+    const base_seeds = [
+      Buffer.from('mint'),
+      creator.toBuffer(),
+      seedBuffer,
+    ];
+
+    const result = await findVanityPDA(coop_program, base_seeds, 'c');
+
+    console.log('derived address', result.pda);
+    console.log('ending with', result.pda.toString());
+
+    const coopTokenNonce = result.nonce;
+
+    const coopToken = new PublicKey(result.pda);
 
     // const [fairlaunchToken] =
     //   anchor.web3.PublicKey.findProgramAddressSync(
@@ -259,6 +279,7 @@ describe('coop-meme-2', () => {
       rbac,
       globalVault,
       coopToken,
+      coopTokenNonce,
       memecoinPda,
       metadataPda,
       globalTokenAta,
@@ -275,7 +296,7 @@ describe('coop-meme-2', () => {
     };
   }
 
-  it.skip('Is initialized!', async () => {
+  it('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -380,7 +401,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it.skip('provide roles', async () => {
+  it('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -1285,6 +1306,7 @@ describe('coop-meme-2', () => {
       globalTokenAta,
       voteTokenAta,
       voteOptionsRegistry,
+      coopTokenNonce,
       // voteFairlaunchTokenAta,
     } = await setup(true);
 
@@ -1310,6 +1332,7 @@ describe('coop-meme-2', () => {
 
     const txSig = await program.methods
       .createToken(
+        new BN(coopTokenNonce),
         new BN('1000000000000000000'),
         // new BN('30'),
         'Token Thursday 3',
@@ -3132,82 +3155,23 @@ describe('coop-meme-2', () => {
   // }
 
   async function finalizeVote(name_value, symbol_value, uri_value) {
-    const user = provider.wallet.publicKey;
+    const {
+      user,
+      rbac,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+    } = await setup(false);
 
-    const creator = provider.wallet.publicKey;
-
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId
-    );
-
-    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('roles')],
-      program.programId
-    );
-
-    // Fetch the config to get `total_coop_created`
-    const config = await program.account.configData.fetch(configPda);
-
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId
-      );
-
-    console.log('global vault', globalVault);
-
-    const totalCoopCreated = new BN(config.totalCoopCreated - 1); // e.g., 0
-    const seedBuffer = totalCoopCreated
-      .addn(1)
-      .toArrayLike(Buffer, 'le', 4); // u64 LE
-
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId
-    );
-
-    // const coopToken = new PublicKey(
-    //   'Eta57k6dDGDfiDCXzZTeWzT5idpr4R8tiBXVDp3kaCT3'
-    // );
-
-    const [memecoinPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('memecoin'), coopToken.toBuffer()],
-        program.programId
-      );
     const memecoinData = await program.account.memeCoinData.fetch(
       memecoinPda
     );
 
     console.log('Memecoin state data:', memecoinData);
-
-    const nameOptionIndex = new BN(Number(1)); // e.g., 0
-    const nameOptionSeedBuffer = nameOptionIndex.toArrayLike(
-      Buffer,
-      'le',
-      4
-    );
-    const nameValueBuffer = Buffer.from(name_value); // e.g., "my_option_value"// u64 LE
-
     let hashed_name_value = sha256(name_value);
-
-    const symbolOptionIndex = new BN(Number(2)); // e.g., 0
-    const symbolOptionSeedBuffer = symbolOptionIndex.toArrayLike(
-      Buffer,
-      'le',
-      4
-    ); // u64 LE
-    const symbolValueBuffer = Buffer.from(symbol_value); // e.g., "my_option_value"// u64 LE
     let hashed_symbol_value = sha256(symbol_value);
-
-    const uriOptionIndex = new BN(Number(3)); // e.g., 0
-    const uriOptionSeedBuffer = uriOptionIndex.toArrayLike(
-      Buffer,
-      'le',
-      4
-    ); // u64 LE
-    const uriValueBuffer = Buffer.from(uri_value); // e.g., "my_option_value"// u64 LE
     let hashed_uri_value = sha256(uri_value);
 
     const [nameTokenOption] =
@@ -3287,11 +3251,6 @@ describe('coop-meme-2', () => {
     } else {
       console.log(tx.meta.logMessages);
     }
-
-    //   const memecoinState = await program.account.memeCoinData.fetch(
-    //     memecoinPda
-    //   );
-    //   console.log('Memecoin state data:', memecoinState);
   }
 
   async function listToken() {

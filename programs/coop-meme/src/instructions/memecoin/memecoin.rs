@@ -12,6 +12,7 @@ use crate::{
     utils::has_role,
 };
 #[derive(Accounts)]
+#[instruction(nonce:u64)] // References FIRST instr param for seeds
 pub struct MemeCoin<'info> {
     #[account[mut]]
     pub creator: Signer<'info>,
@@ -40,7 +41,7 @@ pub struct MemeCoin<'info> {
 
     #[account(
         init,
-        seeds = [b"mint", creator.key().as_ref(), &(config.total_coop_created+1).to_le_bytes() ],
+        seeds = [b"mint", creator.key().as_ref(), &(config.total_coop_created+1).to_le_bytes(), &nonce.to_le_bytes() ],
         bump,
         payer = creator,
         mint::decimals = 9,
@@ -117,6 +118,7 @@ impl<'info> MemeCoin<'info> {
     pub fn create_memecoin(
         &mut self,
         bumps: &MemeCoinBumps,
+        nonce: u64,
         total_supply: u64,
         name: String,
         symbol: String,
@@ -146,6 +148,7 @@ impl<'info> MemeCoin<'info> {
 
         self.memecoin.set_inner(MemeCoinData {
             token_id: self.config.total_coop_created.checked_add(1).unwrap(),
+            token_nonce: nonce,
             token_mint: self.coop_token.key(),
             creator: self.creator.key(),
             token_total_supply: total_supply,
