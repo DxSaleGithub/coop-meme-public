@@ -75,6 +75,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -143,7 +148,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "amm_config",
@@ -307,6 +312,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -627,6 +637,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -879,6 +894,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -1188,6 +1208,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -1805,6 +1830,10 @@
       ],
       "args": [
         {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
           "name": "total_supply",
           "type": "u64"
         },
@@ -2280,6 +2309,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -2785,6 +2819,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -3194,7 +3233,7 @@
         {
           "name": "create_pool_fee",
           "writable": true,
-          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
+          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
         },
         {
           "name": "observation_state",
@@ -3230,7 +3269,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "amm_config",
@@ -3485,6 +3524,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -3789,6 +3833,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -4109,6 +4158,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -4370,7 +4424,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -4521,7 +4575,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -4783,6 +4837,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -5111,6 +5170,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -5617,6 +5681,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -5944,6 +6013,11 @@
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "MemeCoinData"
               }
             ]
@@ -7325,6 +7399,10 @@
           {
             "name": "token_id",
             "type": "u32"
+          },
+          {
+            "name": "token_nonce",
+            "type": "u64"
           },
           {
             "name": "token_mint",

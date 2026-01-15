@@ -81,6 +81,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -149,7 +154,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "ammConfig",
@@ -313,6 +318,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -633,6 +643,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -885,6 +900,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -1194,6 +1214,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -1811,6 +1836,10 @@ export type CoopMeme = {
       ],
       "args": [
         {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
           "name": "totalSupply",
           "type": "u64"
         },
@@ -2286,6 +2315,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -2791,6 +2825,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -3200,7 +3239,7 @@ export type CoopMeme = {
         {
           "name": "createPoolFee",
           "writable": true,
-          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
+          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
         },
         {
           "name": "observationState",
@@ -3236,7 +3275,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "ammConfig",
@@ -3491,6 +3530,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -3795,6 +3839,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -4115,6 +4164,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -4376,7 +4430,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -4527,7 +4581,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -4789,6 +4843,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -5117,6 +5176,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -5623,6 +5687,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -5950,6 +6019,11 @@ export type CoopMeme = {
               {
                 "kind": "account",
                 "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
                 "account": "memeCoinData"
               }
             ]
@@ -7331,6 +7405,10 @@ export type CoopMeme = {
           {
             "name": "tokenId",
             "type": "u32"
+          },
+          {
+            "name": "tokenNonce",
+            "type": "u64"
           },
           {
             "name": "tokenMint",
