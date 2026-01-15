@@ -62,6 +62,10 @@ pub mod coop_meme {
         )
     }
 
+    pub fn update_config_storage(ctx: Context<UpdateConfigStorage>) -> Result<()> {
+        ctx.accounts.add_new_field()
+    }
+
     pub fn grant_role(ctx: Context<RBAControl>, role_type: RoleType, user: Pubkey) -> Result<()> {
         ctx.accounts.grant_role(role_type, user)
     }

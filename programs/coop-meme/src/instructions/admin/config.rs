@@ -79,6 +79,7 @@ impl<'info> Config<'info> {
             global_vault_bump: bumbs.global_vault,
             current_coop_token_metadata: MemeCoinDataMetadata {
                 token_id: 0,
+                token_nonce: 0,
                 token_mint: Pubkey::default(),
                 // token_fairlaunch_mint: Pubkey::default(),
                 creator: Pubkey::default(),
@@ -200,6 +201,35 @@ impl<'info> UpdateConfig<'info> {
             self.config.min_option_add_token_amount = token_amount;
         }
 
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct UpdateConfigStorage<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.config_bump,
+        has_one = admin @ CoopMemeError::Unauthorized,
+        realloc = 8 + ConfigData::INIT_SPACE + 8,
+        // realloc = 8 + std::mem::size_of_val(&vote_options_registry) + std::mem::size_of::<OptionsRegistry>(),
+        realloc::payer = admin,
+        realloc::zero = false      // Preserve data
+    )]
+    pub config: Account<'info, ConfigData>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> UpdateConfigStorage<'info> {
+    pub fn add_new_field(&mut self) -> Result<()> {
+        require!(
+            self.admin.key() == self.config.admin,
+            CoopMemeError::Unauthorized
+        );
         Ok(())
     }
 }

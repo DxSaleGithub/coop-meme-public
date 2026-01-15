@@ -85,6 +85,7 @@ describe('coop-meme-2', () => {
         [Buffer.from('config')],
         program.programId
       );
+    console.log('config pda', configPda.toString());
     let config = await program.account.configData.fetch(configPda);
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -107,11 +108,6 @@ describe('coop-meme-2', () => {
       .addn(1)
       .toArrayLike(Buffer, 'le', 4); // u64 LE
 
-    // const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-    //   [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-    //   program.programId
-    // );
-
     const coop_program = new PublicKey(
       '8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW'
     );
@@ -130,12 +126,6 @@ describe('coop-meme-2', () => {
     const coopTokenNonce = result.nonce;
 
     const coopToken = new PublicKey(result.pda);
-
-    // const [fairlaunchToken] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [Buffer.from('mint'), coopToken.toBuffer(), seedBuffer],
-    //     program.programId
-    //   );
 
     const [userData] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('user'), trader.toBuffer(), coopToken.toBuffer()],
@@ -173,26 +163,6 @@ describe('coop-meme-2', () => {
         metadataProgramId
       );
 
-    // const [fairlaunchMetadataPda] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [
-    //       Buffer.from('metadata'),
-    //       metadataProgramId.toBuffer(),
-    //       fairlaunchToken.toBuffer(),
-    //     ],
-    //     metadataProgramId
-    //   );
-
-    // const [globalFairlaunchTokenAta] =
-    //   anchor.web3.PublicKey.findProgramAddressSync(
-    //     [
-    //       globalVault.toBuffer(),
-    //       anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-    //       fairlaunchToken.toBuffer(),
-    //     ],
-    //     anchor.utils.token.ASSOCIATED_PROGRAM_ID
-    //   );
-
     const [globalTokenAta] =
       anchor.web3.PublicKey.findProgramAddressSync(
         [
@@ -209,12 +179,6 @@ describe('coop-meme-2', () => {
       true // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
 
-    // const voteFairlaunchTokenAta = await getAssociatedTokenAddress(
-    //   fairlaunchToken,
-    //   memecoinPda,
-    //   true // allowOwnerOffCurve = false (always false unless you know it's needed)
-    // );
-
     const traderTokenAta = await getAssociatedTokenAddress(
       coopToken,
       trader,
@@ -226,12 +190,6 @@ describe('coop-meme-2', () => {
       trader2,
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
-
-    // const traderFairlaunchTokenAta = await getAssociatedTokenAddress(
-    //   fairlaunchToken,
-    //   trader,
-    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    // );
 
     const [userTokenVotes] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -260,12 +218,6 @@ describe('coop-meme-2', () => {
       user2,
       false // allowOwnerOffCurve = false (always false unless you know it's needed)
     );
-
-    // const userFairlaunchTokenAta = await getAssociatedTokenAddress(
-    //   fairlaunchToken,
-    //   user,
-    //   false // allowOwnerOffCurve = false (always false unless you know it's needed)
-    // );
 
     return {
       owner,
@@ -335,7 +287,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it('updates the config', async () => {
+  it.only('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -399,6 +351,32 @@ describe('coop-meme-2', () => {
     //   config.initVirtualToken.toString(),
     //   newInitVirtualToken.toString()
     // );
+  });
+
+  it('updates the config storage', async () => {
+    const { owner, configPda } = await setup(false);
+
+    console.log(program.programId);
+
+    // const configPda = new PublicKey(
+    //   '5gpD3r3asr296Fok41Fu91ZVfNTpBwRpYBqtN4oTTruN'
+    // );
+
+    // const configState = await program.account.configData.fetch(
+    //   configPda
+    // );
+    // console.log('Config state data:', configState);
+
+    await program.methods
+      .updateConfigStorage()
+      .accounts({
+        admin: owner,
+        config: configPda,
+      })
+      .rpc();
+
+    // const config = await program.account.configData.fetch(configPda);
+    // console.log('Config state data:', config);
   });
 
   it('provide roles', async () => {
@@ -470,15 +448,15 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', roleList);
   });
 
-  it('Is creating memecoin!', async () => {
+  it.only('Is creating memecoin!', async () => {
     await create_tokens();
   });
 
-  it('first buying memecoin in fairlaunch!', async () => {
+  it.only('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
   });
 
-  it('first selling memecoin in fairlaunch!', async () => {
+  it.only('first selling memecoin in fairlaunch!', async () => {
     await sell_tokens_fairlaunch(1, '50000000'); // 5 sol
   });
 
@@ -511,7 +489,7 @@ describe('coop-meme-2', () => {
     await sell_tokens_fairlaunch(1, '50000000');
   });
 
-  it('first buying memecoin!', async () => {
+  it.only('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(150 * 1000); // 2 minutes = 120000 ms
@@ -520,7 +498,7 @@ describe('coop-meme-2', () => {
     await buy_tokens('100000000'); // 10 SOL
   });
 
-  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
+  it.only('refund sol and claim tokens after first buy in bonding-curve', async () => {
     await claim_and_refund(1);
   });
 
@@ -536,7 +514,7 @@ describe('coop-meme-2', () => {
   //   await buy_tokens('100000000');
   // });
 
-  it('first selling memecoin!', async () => {
+  it.only('first selling memecoin!', async () => {
     await sell_tokens('1000000000000');
   });
 
@@ -668,7 +646,7 @@ describe('coop-meme-2', () => {
     // await refund(2);
   });
 
-  it('first voting with option', async () => {
+  it.only('first voting with option', async () => {
     await vote_with_option('name', 'Coop');
     await vote_with_option('sym', 'COOP');
     await vote_with_option('uri', 'uri1');
@@ -677,13 +655,13 @@ describe('coop-meme-2', () => {
     await vote_with_option('uri', 'uri2');
   });
 
-  it('first voting', async () => {
+  it.only('first voting', async () => {
     await vote(1, 'Coop');
     await vote(2, 'COOP');
     await vote(3, 'uri1');
   });
 
-  it('first unvoting', async () => {
+  it.only('first unvoting', async () => {
     await unvote(1, 'Coop2');
     await unvote(2, 'COOP2');
     await unvote(3, 'uri2');
@@ -709,7 +687,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it('Is finalizing voting', async () => {
+  it.only('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(150 * 1000); // 2 minutes = 120000 ms

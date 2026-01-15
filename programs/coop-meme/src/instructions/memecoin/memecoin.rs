@@ -187,6 +187,7 @@ impl<'info> MemeCoin<'info> {
 
         self.config.current_coop_token_metadata.token_id =
             self.config.total_coop_created.checked_add(1).unwrap();
+        self.config.current_coop_token_metadata.token_nonce = nonce;
         self.config.current_coop_token_metadata.token_mint = self.coop_token.key();
         self.config.current_coop_token_metadata.creator = self.creator.key();
         self.config
