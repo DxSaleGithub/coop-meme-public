@@ -248,7 +248,7 @@ describe('coop-meme-2', () => {
     };
   }
 
-  it('Is initialized!', async () => {
+  it.skip('Is initialized!', async () => {
     // Add your test here.
 
     const tx = await program.methods.initialize(teamWallet).rpc();
@@ -287,7 +287,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -297,7 +297,8 @@ describe('coop-meme-2', () => {
     );
     console.log('Config state data:', configState);
 
-    const newOwnerFee = new anchor.BN(1000);
+    const newTeamFee = new anchor.BN(100);
+    const newOwnerFee = new anchor.BN(100);
     const newCoopInterval = new anchor.BN(300);
     const newFairlaunchPeriod = new anchor.BN(150);
     // const newInitVirtualSol = new anchor.BN(2_000_000_000); // 2 SOL in lamports
@@ -353,7 +354,7 @@ describe('coop-meme-2', () => {
     // );
   });
 
-  it('updates the config storage', async () => {
+  it.skip('updates the config storage', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -379,7 +380,7 @@ describe('coop-meme-2', () => {
     // console.log('Config state data:', config);
   });
 
-  it('provide roles', async () => {
+  it.skip('provide roles', async () => {
     const owner = provider.wallet.publicKey;
 
     // const owner = creator.publicKey;
@@ -401,6 +402,12 @@ describe('coop-meme-2', () => {
     // const owner = new PublicKey(
     //   'uabpfJPMqUdGZF6PoySKpNUx7tENy6Q9NpaeGeETrzd' // Dennis 2
     // );
+
+    // const owner = new PublicKey(
+    //   'CUjHyH9ebi4gpRsLvSB2VSnkc4gwgze3WqJr2Fwpv49S' // Ralph
+    // );
+
+    // CUjHyH9ebi4gpRsLvSB2VSnkc4gwgze3WqJr2Fwpv49S
 
     const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('roles')],
@@ -448,15 +455,15 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', roleList);
   });
 
-  it.only('Is creating memecoin!', async () => {
+  it('Is creating memecoin!', async () => {
     await create_tokens();
   });
 
-  it.only('first buying memecoin in fairlaunch!', async () => {
+  it('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
   });
 
-  it.only('first selling memecoin in fairlaunch!', async () => {
+  it.skip('first selling memecoin in fairlaunch!', async () => {
     await sell_tokens_fairlaunch(1, '50000000'); // 5 sol
   });
 
@@ -489,7 +496,7 @@ describe('coop-meme-2', () => {
     await sell_tokens_fairlaunch(1, '50000000');
   });
 
-  it.only('first buying memecoin!', async () => {
+  it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(150 * 1000); // 2 minutes = 120000 ms
@@ -498,7 +505,7 @@ describe('coop-meme-2', () => {
     await buy_tokens('100000000'); // 10 SOL
   });
 
-  it.only('refund sol and claim tokens after first buy in bonding-curve', async () => {
+  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
     await claim_and_refund(1);
   });
 
@@ -514,7 +521,7 @@ describe('coop-meme-2', () => {
   //   await buy_tokens('100000000');
   // });
 
-  it.only('first selling memecoin!', async () => {
+  it('first selling memecoin!', async () => {
     await sell_tokens('1000000000000');
   });
 
@@ -646,7 +653,7 @@ describe('coop-meme-2', () => {
     // await refund(2);
   });
 
-  it.only('first voting with option', async () => {
+  it('first voting with option', async () => {
     await vote_with_option('name', 'Coop');
     await vote_with_option('sym', 'COOP');
     await vote_with_option('uri', 'uri1');
@@ -655,13 +662,13 @@ describe('coop-meme-2', () => {
     await vote_with_option('uri', 'uri2');
   });
 
-  it.only('first voting', async () => {
+  it('first voting', async () => {
     await vote(1, 'Coop');
     await vote(2, 'COOP');
     await vote(3, 'uri1');
   });
 
-  it.only('first unvoting', async () => {
+  it('first unvoting', async () => {
     await unvote(1, 'Coop2');
     await unvote(2, 'COOP2');
     await unvote(3, 'uri2');
@@ -687,7 +694,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it.only('Is finalizing voting', async () => {
+  it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(150 * 1000); // 2 minutes = 120000 ms
@@ -702,6 +709,10 @@ describe('coop-meme-2', () => {
 
   it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
+  });
+
+  it('unfreeze all tokens', async () => {
+    await unfreeze_multiple_users();
   });
 
   it.skip('Is swapping SOL to memecoin!', async () => {
@@ -3591,6 +3602,63 @@ describe('coop-meme-2', () => {
       'User state data: claimed refund?',
       userDataState.refund.toString()
     );
+  }
+
+  async function unfreeze_multiple_users() {
+    const {
+      user,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+      userTokenAta,
+    } = await setup(false);
+
+    const txSig = await program.methods
+      .unfreezeMultipleAccounts()
+      .accounts({
+        creator,
+        config: configPda,
+        globalVault,
+        coopToken,
+        memecoin: memecoinPda,
+        user1: user,
+        user1TokenAta: userTokenAta,
+        user2: user,
+        user2TokenAta: userTokenAta,
+        user3: user,
+        user3TokenAta: userTokenAta,
+        user4: user,
+        user4TokenAta: userTokenAta,
+        user5: user,
+        user5TokenAta: userTokenAta,
+        user6: user,
+        user6TokenAta: userTokenAta,
+        // user7: user,
+        // user7TokenAta: userTokenAta,
+        // user8: user,
+        // user8TokenAta: userTokenAta,
+        // user8: user,
+        // user8TokenAta: userTokenAta,
+        // user9: user,
+        // user9Ata: userTokenAta,
+        // user10: user,
+        // user10Ata: userTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
   }
 
   async function pause() {

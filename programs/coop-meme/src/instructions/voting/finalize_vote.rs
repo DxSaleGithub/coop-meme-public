@@ -96,17 +96,18 @@ impl<'info> FinalizeVote<'info> {
         );
         // trade is over -> check via timestamp and mark as inactive if not already
         let current_time = Clock::get()?.unix_timestamp as u64;
-        if (self.memecoin.is_trading_active && self.memecoin.token_market_end_time < current_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+        if (current_time > self.memecoin.token_market_end_time) {
+            if (self.memecoin.is_trading_active) {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
+        } else {
+            return Err((CoopMemeError::TradingActive).into());
         }
-        require!(
-            !self.memecoin.is_trading_active,
-            CoopMemeError::TradingActive
-        );
         require!(
             self.memecoin.creator == self.creator.key(),
             CoopMemeError::Unauthorized
@@ -136,15 +137,16 @@ impl<'info> FinalizeVote<'info> {
             CoopMemeError::InvalidTokenUri
         );
         require!(
-            self.name_option.index <= self.memecoin.total_options,
+            self.name_option.index != 0 && self.name_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(
-            self.symbol_option.index <= self.memecoin.total_options,
+            self.symbol_option.index != 0
+                && self.symbol_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(
-            self.uri_option.index <= self.memecoin.total_options,
+            self.uri_option.index != 0 && self.uri_option.index <= self.memecoin.total_options,
             CoopMemeError::InvalidOption
         );
         require!(

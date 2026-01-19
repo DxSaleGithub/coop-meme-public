@@ -180,6 +180,10 @@ pub mod coop_meme {
         ctx.accounts.unvote_all_tokens()
     }
 
+    pub fn unfreeze_multiple_accounts(ctx: Context<BatchThawAccounts>) -> Result<()> {
+        ctx.accounts.batch_thaw_accounts()
+    }
+
     pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
         ctx.accounts.finalize_vote(final_uri)
     }

@@ -1,7 +1,6 @@
 use crate::{
     error::*,
     events::{BondingCurveStartedEvent, ClaimedTokens, RefundSol, TradeEvent, TradingOverEvent},
-    instruction::ClaimTokens,
     state::{ConfigData, MemeCoinData, UserData},
     utils::*,
 };
@@ -74,10 +73,12 @@ pub struct Trade<'info> {
       associated_token::token_program=token_program,
       payer=trader
     )]
-    pub trader_token_ata: Box<Account<'info, TokenAccount>>,
+    pub trader_token_ata: Box<Account<'info, TokenAccount>>, // /// CHECK: This is an ATA for coop token for trade
     /// CHECK: This is an ATA for coop token for trader.
     #[account(
-      mut,
+      init_if_needed,
+      payer=trader,
+      space= 8 + UserData::INIT_SPACE,
       seeds = [b"user", trader.key().as_ref(), coop_token.key().as_ref()],
       bump
     )]
@@ -103,15 +104,18 @@ impl<'info> Trade<'info> {
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
         if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+            if !self.memecoin.is_trading_active {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
             return Ok(());
         }
-        if !self.memecoin.is_bonding_curve_active {
-            if current_time as u64 > self.memecoin.token_fairlaunch_end_time {
+        if current_time as u64 > self.memecoin.token_fairlaunch_end_time {
+            if !self.memecoin.is_bonding_curve_active {
                 self.memecoin.is_bonding_curve_active = true;
                 self.config
                     .current_coop_token_metadata
@@ -120,12 +124,12 @@ impl<'info> Trade<'info> {
                     coop_token: self.config.current_coop_token_metadata.token_mint.key(),
                     memecoin: self.memecoin.key(),
                 });
-            } else {
-                return Err((CoopMemeError::TradingFairlaunchNotOver).into());
             }
+        } else {
+            return Err((CoopMemeError::TradingFairlaunchNotOver).into());
         }
 
-        if !self.memecoin.initial_sale {
+        if !self.memecoin.initial_sale && self.memecoin.fairlaunch_sol_raised > 0 {
             // buy tokens using fairlaunch sol raised
             let fairlaunch_cap = self.memecoin.fairlaunch_cap;
             let token_raised = self.memecoin.fairlaunch_sol_raised;
@@ -279,16 +283,20 @@ impl<'info> Trade<'info> {
         );
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
+
         if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+            if !self.memecoin.is_trading_active {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
             return Ok(());
         }
-        if !self.memecoin.is_bonding_curve_active {
-            if current_time as u64 > self.memecoin.token_fairlaunch_end_time {
+        if current_time as u64 > self.memecoin.token_fairlaunch_end_time {
+            if !self.memecoin.is_bonding_curve_active {
                 self.memecoin.is_bonding_curve_active = true;
                 self.config
                     .current_coop_token_metadata
@@ -297,9 +305,9 @@ impl<'info> Trade<'info> {
                     coop_token: self.config.current_coop_token_metadata.token_mint.key(),
                     memecoin: self.memecoin.key(),
                 });
-            } else {
-                return Err((CoopMemeError::TradingFairlaunchNotOver).into());
             }
+        } else {
+            return Err((CoopMemeError::TradingFairlaunchNotOver).into());
         }
 
         let sol_amount = calculate_sol_amount_when_sell(
@@ -493,7 +501,7 @@ impl<'info> Trade<'info> {
             !self.user_data.tokens_claimed,
             CoopMemeError::AlreadyClaimed
         );
-        require!(self.memecoin.initial_sale, CoopMemeError::TradingNotActive);
+        require!(self.memecoin.initial_sale, CoopMemeError::NoTokensToClaim);
 
         let mut is_refund: bool = false;
 

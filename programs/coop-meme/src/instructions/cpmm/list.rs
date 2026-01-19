@@ -198,12 +198,18 @@ pub struct List<'info> {
 impl<'info> List<'info> {
     pub fn list_token(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
-
         has_role(&self.rbac.roles, RoleType::LISTING, self.owner.key())?;
-
+        require!(
+            !self.memecoin.is_trading_active,
+            CoopMemeError::TokenAlreadyListed
+        );
         require!(
             !self.memecoin.is_token_listed,
             CoopMemeError::TokenAlreadyListed
+        );
+        require!(
+            self.memecoin.is_voting_finalized,
+            CoopMemeError::VotingNotFinalized
         );
         let mut owner_token_ata;
         let mut owner_wsol_ata;
@@ -247,28 +253,6 @@ impl<'info> List<'info> {
         } else {
             return Err(CoopMemeError::InvalidListingInfo.into());
         }
-
-        // trade is over -> check via timestamp and mark as inactive if not already
-        let current_time = Clock::get()?.unix_timestamp as u64;
-        if (self.memecoin.is_trading_active && self.memecoin.token_market_end_time < current_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
-        }
-        require!(
-            !self.memecoin.is_trading_active,
-            CoopMemeError::TradingActive
-        );
-        require!(
-            self.memecoin.is_voting_finalized,
-            CoopMemeError::VotingNotFinalized
-        );
-        // require!(
-        //     self.config.admin.key() == self.owner.key(),
-        //     CoopMemeError::Unauthorized
-        // );
 
         // transfer listing fee from gloval vault to team wallet
         let seeds: &[&[u8]] = &[
@@ -369,17 +353,6 @@ impl<'info> List<'info> {
             memecoin: self.memecoin.key(),
             lp_mint: self.lp_mint.key()
         });
-
-        // // reset current memecoin data
-        // self.config.current_coop_token_metadata.token_id = 0;
-        // self.config.current_coop_token_metadata.token_mint = Pubkey::default();
-        // self.config.current_coop_token_metadata.creator = Pubkey::default();
-        // self.config.current_coop_token_metadata.is_trading_active = false;
-        // self.config
-        //     .current_coop_token_metadata
-        //     .is_bonding_curve_active = false;
-        // self.config.current_coop_token_metadata.is_voting_finalized = false;
-        // self.config.current_coop_token_metadata.is_token_listed = false;
 
         Ok(())
     }

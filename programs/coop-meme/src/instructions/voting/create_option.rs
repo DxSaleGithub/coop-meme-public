@@ -129,11 +129,14 @@ impl<'info> CreateOption<'info> {
         let current_time = clock.unix_timestamp; // i64 in seconds
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+            if !self.memecoin.is_trading_active {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
             return Ok(());
         }
 
@@ -159,6 +162,23 @@ impl<'info> CreateOption<'info> {
             CoopMemeError::InvalidOption
         );
 
+        let value_length: usize = self.token_option.option_value.len();
+        if self.token_option.option_type == OptionType::NAME {
+            require!(
+                value_length > 0 && value_length < 37,
+                CoopMemeError::InvalidTokenName
+            );
+        } else if self.token_option.option_type == OptionType::SYM {
+            require!(
+                value_length > 0 && value_length < 15,
+                CoopMemeError::InvalidTokenSymbol
+            );
+        } else {
+            require!(
+                value_length > 0 && value_length < 256,
+                CoopMemeError::InvalidTokenUri
+            );
+        }
         self.memecoin.total_votes += current_total_votes;
         self.token_option.total_votes += current_total_votes;
         self.user_token_votes.total_votes += current_total_votes;

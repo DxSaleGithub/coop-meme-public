@@ -105,7 +105,9 @@ impl<'info> TradeFairlaunch<'info> {
             return Ok(());
         }
 
-        let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
+        let team_fees = 0u64;
+        // let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
+
         let amount_to_buy = amount
             .checked_sub(team_fees)
             .ok_or(CoopMemeError::InvalidOperation)
@@ -139,6 +141,7 @@ impl<'info> TradeFairlaunch<'info> {
     }
 
     pub fn sell_tokens(&mut self, amount: u64) -> Result<()> {
+        require!(false, CoopMemeError::NoSellDuringFairlaunch);
         require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(
             self.memecoin.is_trading_active,
@@ -171,10 +174,10 @@ impl<'info> TradeFairlaunch<'info> {
             CoopMemeError::NotEnoughSol
         );
 
-        let team_fees = self
-            ._calculate_and_send_fees_with_signer(amount)
-            .unwrap()
-            .unwrap();
+        // let team_fees = self
+        //     ._calculate_and_send_fees_with_signer(amount)
+        //     .unwrap()
+        //     .unwrap();
 
         self.memecoin.fairlaunch_sol_raised = self
             .memecoin
@@ -221,13 +224,6 @@ impl<'info> TradeFairlaunch<'info> {
         );
         require!(!self.user_data.refund, CoopMemeError::AlreadyRefunded);
 
-        // // Safe proportional token calculation (divide-first order)
-        // let ratio = self
-        //     .user_data
-        //     .sol_deposit
-        //     .checked_div(self.memecoin.fairlaunch_sol_raised)
-        //     .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
-
         // Safe proportional token calculation (divide-first order)
         let numerator = (self.user_data.sol_deposit as u128)
             .checked_mul(self.memecoin.fairlaunch_cap as u128)
@@ -242,10 +238,6 @@ impl<'info> TradeFairlaunch<'info> {
             CoopMemeError::InvalidOperation
         );
         let user_real_sol = user_real_sol_u128 as u64;
-
-        // let user_real_sol = ratio
-        //     .checked_mul(self.memecoin.fairlaunch_cap)
-        //     .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
 
         require!(
             user_real_sol <= self.memecoin.fairlaunch_cap,

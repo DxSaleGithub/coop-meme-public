@@ -4718,6 +4718,497 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "unfreezeMultipleAccounts",
+      "discriminator": [
+        217,
+        126,
+        137,
+        17,
+        210,
+        208,
+        32,
+        249
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user1",
+          "writable": true
+        },
+        {
+          "name": "user1TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user1"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user2",
+          "writable": true
+        },
+        {
+          "name": "user2TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user2"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user3",
+          "writable": true
+        },
+        {
+          "name": "user3TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user3"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user4",
+          "writable": true
+        },
+        {
+          "name": "user4TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user4"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user5",
+          "writable": true
+        },
+        {
+          "name": "user5TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user5"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user6",
+          "writable": true
+        },
+        {
+          "name": "user6TokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user6"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "docs": [
+            "SPL Token program"
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "unpause",
       "discriminator": [
         169,
@@ -6929,8 +7420,178 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "tradingFairlaunchOver",
+      "msg": "Trading fairlaunch over"
+    },
+    {
+      "code": 6010,
+      "name": "tradingFairlaunchNotOver",
+      "msg": "Trading fairlaunch not over"
+    },
+    {
+      "code": 6011,
+      "name": "tradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6012,
+      "name": "notEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6013,
+      "name": "notEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6014,
+      "name": "invalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6015,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6016,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6017,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6018,
+      "name": "tokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6019,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
+    },
+    {
+      "code": 6020,
+      "name": "optionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6021,
+      "name": "tokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
+    },
+    {
+      "code": 6022,
+      "name": "invalidOption",
+      "msg": "Token Option invalid"
+    },
+    {
+      "code": 6023,
+      "name": "roleExist",
+      "msg": "Role already exists"
+    },
+    {
+      "code": 6024,
+      "name": "roleDoesNotExist",
+      "msg": "Role does not exist"
+    },
+    {
+      "code": 6025,
+      "name": "inSufficientRole",
+      "msg": "Signer does not have sufficient role"
+    },
+    {
+      "code": 6026,
+      "name": "paused",
+      "msg": "Operation is paused currently"
+    },
+    {
+      "code": 6027,
+      "name": "notPaused",
+      "msg": "Operation is not paused currently"
+    },
+    {
+      "code": 6028,
+      "name": "inEmergency",
+      "msg": "Operation is in emergency mode"
+    },
+    {
+      "code": 6029,
+      "name": "notInEmergency",
+      "msg": "Operation is not in emergency mode"
+    },
+    {
+      "code": 6030,
+      "name": "capNotExceeded",
+      "msg": "Fairlaunch cap not exceeded"
+    },
+    {
+      "code": 6031,
+      "name": "alreadyRefunded",
+      "msg": "Sol is refunded already"
+    },
+    {
+      "code": 6032,
+      "name": "alreadyClaimed",
+      "msg": "Fairlaunch tokens already claimed"
+    },
+    {
+      "code": 6033,
+      "name": "noSellDuringFairlaunch",
+      "msg": "Sell not allowed during fairlaunch"
+    },
+    {
+      "code": 6034,
+      "name": "noTokensToClaim",
+      "msg": "No tokens to claim"
     }
   ],
   "types": [

@@ -112,11 +112,14 @@ impl<'info> UserVote<'info> {
         let current_time = clock.unix_timestamp; // i64 in seconds
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+            if !self.memecoin.is_trading_active {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
             return Ok(());
         }
         require!(
@@ -201,11 +204,14 @@ impl<'info> UserVote<'info> {
         let current_time = clock.unix_timestamp; // i64 in seconds
 
         if (current_time as u64 > self.memecoin.token_market_end_time) {
-            self.memecoin.is_trading_active = false;
-            emit!(TradingOverEvent {
-                coop_token: self.coop_token.key(),
-                memecoin: self.memecoin.key(),
-            });
+            if !self.memecoin.is_trading_active {
+                self.memecoin.is_trading_active = false;
+                self.config.current_coop_token_metadata.is_trading_active = false;
+                emit!(TradingOverEvent {
+                    coop_token: self.coop_token.key(),
+                    memecoin: self.memecoin.key(),
+                });
+            }
             return Ok(());
         }
         self._validate_unvote_info(votes)?;

@@ -76,4 +76,8 @@ pub enum CoopMemeError {
     AlreadyRefunded,
     #[msg("Fairlaunch tokens already claimed")]
     AlreadyClaimed,
+    #[msg("Sell not allowed during fairlaunch")]
+    NoSellDuringFairlaunch,
+    #[msg("No tokens to claim")]
+    NoTokensToClaim,
 }
