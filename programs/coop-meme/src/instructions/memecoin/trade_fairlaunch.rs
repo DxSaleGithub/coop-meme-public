@@ -108,6 +108,13 @@ impl<'info> TradeFairlaunch<'info> {
         let team_fees = 0u64;
         // let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
 
+        sol_transfer_from_user(
+            &self.trader,
+            self.global_vault.to_account_info(),
+            &self.system_program,
+            amount,
+        )?;
+
         let amount_to_buy = amount
             .checked_sub(team_fees)
             .ok_or(CoopMemeError::InvalidOperation)
@@ -136,6 +143,8 @@ impl<'info> TradeFairlaunch<'info> {
             amount_out: 0,
             timestamp: Clock::get()?.unix_timestamp as u64
         });
+
+        // should check if the global vault balance increased by `amount`
 
         Ok(())
     }

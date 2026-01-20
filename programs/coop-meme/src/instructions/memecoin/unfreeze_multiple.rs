@@ -168,7 +168,7 @@ pub struct BatchThawAccounts<'info> {
 
 impl<'info> BatchThawAccounts<'info> {
     pub fn batch_thaw_accounts(&mut self) -> Result<()> {
-        // require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+        require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
 
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
