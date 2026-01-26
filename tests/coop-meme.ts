@@ -288,9 +288,9 @@ describe('coop-meme-2', () => {
       configState.teamWallet.toString(),
       teamWallet.toString(),
     );
-    assert.strictEqual(configState.teamFee, 1000);
-    assert.strictEqual(configState.ownerFee, 1000);
-    assert.strictEqual(configState.affiliatedFee, 1000);
+    assert.strictEqual(configState.teamFee, 10);
+    assert.strictEqual(configState.ownerFee, 10);
+    assert.strictEqual(configState.affiliatedFee, 10);
     assert.strictEqual(configState.listingFee, 500);
     assert.strictEqual(configState.coopInterval.toNumber(), 600);
     assert.strictEqual(configState.fairlaunchPeriod, 300);
@@ -300,7 +300,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -312,10 +312,12 @@ describe('coop-meme-2', () => {
 
     const newTeamFee = new anchor.BN(10);
     const newOwnerFee = new anchor.BN(10);
-    const newCoopInterval = new anchor.BN(600);
-    const newFairlaunchPeriod = new anchor.BN(180);
-    const newInitVirtualSol = new anchor.BN(30_000_000_000); // 2 SOL in lamports
+    const newCoopInterval = new anchor.BN(300);
+    const newFairlaunchPeriod = new anchor.BN(50);
+    const newInitVirtualSol = new anchor.BN(5_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
+    const newInitRealToken = new anchor.BN('1000000000000000000'); // 2 SOL in lamports
+
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
     const newMinOptionToken = new anchor.BN(1000_000_000_000);
     const newFairlaunchCap = new anchor.BN(1_000_000_000);
@@ -337,7 +339,7 @@ describe('coop-meme-2', () => {
         newFairlaunchPeriod,
         newInitVirtualSol,
         null,
-        null,
+        newInitRealToken,
         newFairlaunchCap,
         newMinVoteToken,
         newMinOptionToken,
@@ -514,10 +516,20 @@ describe('coop-meme-2', () => {
   it('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
-    await delay(150 * 1000); // 2 minutes = 120000 ms
+    await delay(70 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
+    await buy_tokens('100000000'); // 10 SOL
     await buy_tokens('500000000'); // 10 SOL
+    // await buy_tokens('500000000'); // 10 SOL
+    // await buy_tokens('500000000'); // 10 SOL
+    // await buy_tokens('4000000000'); // 10 SOL
+    // await buy_tokens('4000000000'); // 10 SOL
+    // await buy_tokens('10000000000'); // 10 SOL
+    // await buy_tokens('15000000000'); // 10 SOL
+    // await buy_tokens('30000000000'); // 10 SOL
+    // await buy_tokens('50000000000'); // 10 SOL
+    // await buy_tokens('100000000000'); // 10 SOL
   });
 
   it('refund sol and claim tokens after first buy in bonding-curve', async () => {
@@ -1433,6 +1445,11 @@ describe('coop-meme-2', () => {
       memecoinState.totalOptions.toString(),
     );
 
+    console.log(
+      'Memecoin state data: buy cap',
+      memecoinState.bondingCurveBuyCap.toString(),
+    );
+
     const userDataState = await program.account.userData.fetch(
       finalUserData,
     );
@@ -1628,6 +1645,9 @@ describe('coop-meme-2', () => {
           anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .preInstructions([
+        ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }),
+      ])
       .rpc();
 
     console.log('Tx hash:', txSig);
@@ -1694,6 +1714,11 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: total options',
       memecoinState.totalOptions.toString(),
+    );
+
+    console.log(
+      'Memecoin state data: buy cap',
+      memecoinState.bondingCurveBuyCap.toString(),
     );
 
     const userDataState = await program.account.userData.fetch(

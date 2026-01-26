@@ -7592,6 +7592,11 @@ export type CoopMeme = {
       "code": 6034,
       "name": "noTokensToClaim",
       "msg": "No tokens to claim"
+    },
+    {
+      "code": 6035,
+      "name": "capExceeded",
+      "msg": "Cap exceeded for buy"
     }
   ],
   "types": [
@@ -8008,6 +8013,10 @@ export type CoopMeme = {
           },
           {
             "name": "fairlaunchSolRaised",
+            "type": "u64"
+          },
+          {
+            "name": "bondingCurveBuyCap",
             "type": "u64"
           },
           {

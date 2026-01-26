@@ -239,7 +239,7 @@ impl<'info> List<'info> {
             owner_token_ata = self.owner_token_1.to_account_info();
 
             init_token_0 = sol_to_list;
-            init_token_1 = self.memecoin.real_token_reserves + 200_000_000_000_000_000;
+            init_token_1 = self.memecoin.real_token_reserves;
             // init_token_1 = self._calc_final_token_for_listing(sol_to_list).unwrap();
         } else if (self.token_1_mint.key() == self.native_mint.key()
             && self.token_0_mint.key() == self.coop_token.key())
@@ -247,7 +247,7 @@ impl<'info> List<'info> {
             owner_wsol_ata = self.owner_token_1.to_account_info();
             owner_token_ata = self.owner_token_0.to_account_info();
 
-            init_token_0 = self.memecoin.real_token_reserves + 200_000_000_000_000_000;
+            init_token_0 = self.memecoin.real_token_reserves;
             // init_token_0 = self._calc_final_token_for_listing(sol_to_list).unwrap();
             init_token_1 = sol_to_list;
         } else {
@@ -271,8 +271,7 @@ impl<'info> List<'info> {
         self._wrap_sol(sol_to_list, &[seeds], owner_wsol_ata)?;
 
         require!(
-            (self.memecoin.real_token_reserves as u64 + 200_000_000_000_000_000)
-                <= self.global_token_ata.amount,
+            (self.memecoin.real_token_reserves as u64) <= self.global_token_ata.amount,
             CoopMemeError::NotEnoughToken
         );
 
@@ -295,7 +294,7 @@ impl<'info> List<'info> {
             owner_token_ata.to_account_info(),
             &self.token_program,
             &[seeds],
-            self.memecoin.real_token_reserves as u64 + 200_000_000_000_000_000,
+            self.memecoin.real_token_reserves as u64,
         )?;
 
         let cpi_accounts = cpi::accounts::Initialize {
@@ -340,7 +339,7 @@ impl<'info> List<'info> {
         emit!(ListEvent {
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            token_in: self.memecoin.real_token_reserves as u64 + 200_000_000_000_000_000,
+            token_in: self.memecoin.real_token_reserves as u64,
             sol_in: (sol_to_list),
             lp_mint: self.lp_mint.key()
         });

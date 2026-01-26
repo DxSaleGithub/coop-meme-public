@@ -7586,6 +7586,11 @@
       "code": 6034,
       "name": "NoTokensToClaim",
       "msg": "No tokens to claim"
+    },
+    {
+      "code": 6035,
+      "name": "CapExceeded",
+      "msg": "Cap exceeded for buy"
     }
   ],
   "types": [
@@ -8002,6 +8007,10 @@
           },
           {
             "name": "fairlaunch_sol_raised",
+            "type": "u64"
+          },
+          {
+            "name": "bonding_curve_buy_cap",
             "type": "u64"
           },
           {

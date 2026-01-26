@@ -1,3 +1,5 @@
+use std::u64;
+
 use crate::{
     error::*,
     events::{BondingCurveStartedEvent, ClaimedTokens, RefundSol, TradeEvent, TradingOverEvent},
@@ -99,6 +101,10 @@ impl<'info> Trade<'info> {
         require!(
             self.memecoin.is_trading_active,
             CoopMemeError::TradingNotActive
+        );
+        require!(
+            self.memecoin.bonding_curve_buy_cap > amount,
+            CoopMemeError::CapExceeded
         );
 
         let clock = Clock::get()?; // Pull the clock sysvar
@@ -217,6 +223,20 @@ impl<'info> Trade<'info> {
             .checked_sub(token_amount)
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
+
+        let one_unit = 1_000_000_000;
+        if self.memecoin.real_token_reserves < (300_000_000 * one_unit) {
+            self.memecoin.bonding_curve_buy_cap = u64::MAX;
+        } else {
+            let new_buy_cap = (self.memecoin.token_total_supply
+                - self.memecoin.real_token_reserves)
+                / (100_000_000 * one_unit);
+            if new_buy_cap > 1 {
+                self.memecoin.bonding_curve_buy_cap = new_buy_cap * one_unit;
+            } else {
+                self.memecoin.bonding_curve_buy_cap = one_unit;
+            }
+        }
 
         let seeds: &[&[u8]] = &[
             b"global",                        // your static seed

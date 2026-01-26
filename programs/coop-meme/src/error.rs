@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 
-use crate::Emergency;
-
 #[error_code]
 pub enum ErrorCode {
     #[msg("Invalid total supply")]
@@ -80,4 +78,6 @@ pub enum CoopMemeError {
     NoSellDuringFairlaunch,
     #[msg("No tokens to claim")]
     NoTokensToClaim,
+    #[msg("Cap exceeded for buy")]
+    CapExceeded,
 }
