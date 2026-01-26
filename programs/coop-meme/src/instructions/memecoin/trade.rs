@@ -103,7 +103,7 @@ impl<'info> Trade<'info> {
             CoopMemeError::TradingNotActive
         );
         require!(
-            self.memecoin.bonding_curve_buy_cap > amount,
+            self.memecoin.bonding_curve_buy_cap >= amount,
             CoopMemeError::CapExceeded
         );
 
