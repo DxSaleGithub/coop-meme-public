@@ -8016,6 +8016,10 @@ export type CoopMeme = {
             "type": "u64"
           },
           {
+            "name": "fairlaunchBuyers",
+            "type": "u64"
+          },
+          {
             "name": "bondingCurveBuyCap",
             "type": "u64"
           },

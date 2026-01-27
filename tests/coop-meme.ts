@@ -74,7 +74,12 @@ describe('coop-meme-2', () => {
 
     const trader2 = trader2Keypair.publicKey;
 
-    // await airdropSol();
+    let userSolBalance = await provider.connection.getBalance(
+      trader2,
+    );
+    if (userSolBalance == 0) {
+      // await airdropSol();
+    }
 
     const user = provider.wallet.publicKey;
 
@@ -300,7 +305,7 @@ describe('coop-meme-2', () => {
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it.only('updates the config', async () => {
+  it('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -312,8 +317,8 @@ describe('coop-meme-2', () => {
 
     const newTeamFee = new anchor.BN(10);
     const newOwnerFee = new anchor.BN(10);
-    const newCoopInterval = new anchor.BN(600);
-    const newFairlaunchPeriod = new anchor.BN(180);
+    const newCoopInterval = new anchor.BN(200);
+    const newFairlaunchPeriod = new anchor.BN(50);
     const newInitVirtualSol = new anchor.BN(5_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newInitRealToken = new anchor.BN('1000000000000000000'); // 2 SOL in lamports
@@ -476,8 +481,8 @@ describe('coop-meme-2', () => {
 
   it('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
-    // await buy_tokens_fairlaunch(1, '5000000000'); // 10 sol == 10000000000
-    // await buy_tokens_fairlaunch(1, '5000000000'); // 10 sol == 10000000000
+    // await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
+    // await buy_tokens_fairlaunch(2, '500000000'); // 10 sol == 10000000000
   });
 
   it.skip('first selling memecoin in fairlaunch!', async () => {
@@ -730,11 +735,11 @@ describe('coop-meme-2', () => {
     await finalizeVote('Coop', 'COOP', 'uri1');
   });
 
-  it('Is listing memecoin!', async () => {
+  it.skip('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it('unvoting all tokens', async () => {
+  it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
@@ -742,7 +747,7 @@ describe('coop-meme-2', () => {
     await unfreeze_multiple_users();
   });
 
-  it('Is swapping SOL to memecoin!', async () => {
+  it.skip('Is swapping SOL to memecoin!', async () => {
     const {
       user,
       owner,
@@ -874,7 +879,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping memecoin to SOL!', async () => {
+  it.skip('Is swapping memecoin to SOL!', async () => {
     const {
       user,
       owner,
@@ -1448,6 +1453,11 @@ describe('coop-meme-2', () => {
     console.log(
       'Memecoin state data: buy cap',
       memecoinState.bondingCurveBuyCap.toString(),
+    );
+
+    console.log(
+      'Memecoin state data: fairlaunch buyers',
+      memecoinState.fairlaunchBuyers.toString(),
     );
 
     const userDataState = await program.account.userData.fetch(

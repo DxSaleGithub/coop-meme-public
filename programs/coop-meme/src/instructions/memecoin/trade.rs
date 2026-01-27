@@ -106,6 +106,7 @@ impl<'info> Trade<'info> {
             self.memecoin.bonding_curve_buy_cap >= amount,
             CoopMemeError::CapExceeded
         );
+        require!(amount > 0, CoopMemeError::InsufficientAmount);
 
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds

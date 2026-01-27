@@ -168,6 +168,7 @@ impl<'info> MemeCoin<'info> {
             fairlaunch_token_reserves: 0,
             fairlaunch_cap: self.config.fairlaunch_cap,
             fairlaunch_sol_raised: 0,
+            fairlaunch_buyers: 0,
             bonding_curve_buy_cap: 1_000_000_000,
             initial_sale: false,
             is_bonding_curve_active: false,

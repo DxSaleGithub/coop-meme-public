@@ -8010,6 +8010,10 @@
             "type": "u64"
           },
           {
+            "name": "fairlaunch_buyers",
+            "type": "u64"
+          },
+          {
             "name": "bonding_curve_buy_cap",
             "type": "u64"
           },

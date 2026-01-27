@@ -88,6 +88,7 @@ impl<'info> TradeFairlaunch<'info> {
             !self.memecoin.is_bonding_curve_active,
             CoopMemeError::TradingFairlaunchOver
         );
+        require!(amount > 0, CoopMemeError::InsufficientAmount);
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
 
@@ -114,6 +115,10 @@ impl<'info> TradeFairlaunch<'info> {
             &self.system_program,
             amount,
         )?;
+
+        if self.user_data.sol_deposit == 0 && amount != 0 {
+            self.memecoin.fairlaunch_buyers += 1;
+        }
 
         let amount_to_buy = amount
             .checked_sub(team_fees)
