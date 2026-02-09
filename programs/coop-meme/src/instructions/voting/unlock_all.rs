@@ -97,10 +97,12 @@ impl<'info> UnlockAll<'info> {
     pub fn unvote_all_tokens(&mut self) -> Result<()> {
         require!(!self.config.is_paused, CoopMemeError::Paused);
         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
-        require!(
-            self.memecoin.initial_sale,
-            CoopMemeError::TradingFairlaunchNotOver
-        );
+        if self.memecoin.fairlaunch_sol_raised > 0 {
+            require!(
+                self.memecoin.initial_sale,
+                CoopMemeError::TradingFairlaunchNotOver
+            );
+        }
         require!(
             !self.user_token_votes.all_unlocked,
             CoopMemeError::NotEnoughToken
@@ -141,7 +143,7 @@ impl<'info> UnlockAll<'info> {
             )?;
         }
 
-        if !self.user_data.refund {
+        if !self.user_data.refund && self.user_data.sol_deposit > 0 {
             if self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap {
                 // Safe proportional token calculation (divide-first order)
                 let numerator = (self.user_data.sol_deposit as u128)
@@ -192,7 +194,7 @@ impl<'info> UnlockAll<'info> {
             }
         }
 
-        if !self.user_data.tokens_claimed {
+        if !self.user_data.tokens_claimed && self.user_data.sol_deposit > 0 {
             // Safe proportional token calculation (divide-first order)
             let numerator = (self.user_data.sol_deposit as u128)
                 .checked_mul(self.memecoin.fairlaunch_token_reserves as u128)

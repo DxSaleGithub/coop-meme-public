@@ -80,4 +80,10 @@ pub enum CoopMemeError {
     NoTokensToClaim,
     #[msg("Cap exceeded for buy")]
     CapExceeded,
+    #[msg("Vote token amount less than min vote token amount")]
+    InvalidVoteTokenAmount,
+    #[msg("Fairlaunch deposit failed")]
+    DepositFailed,
+    #[msg("User did not contribute in fairlaunch")]
+    NoDepositInFairlaunch,
 }

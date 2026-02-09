@@ -126,6 +126,10 @@ impl<'info> UserVote<'info> {
             self.user_token_ata.amount >= self.config.min_vote_token_amount,
             CoopMemeError::NotEnoughToken
         );
+        require!(
+            votes >= self.config.min_vote_token_amount,
+            CoopMemeError::InvalidVoteTokenAmount
+        );
         self._validate_vote_info(votes)?;
 
         self.memecoin.total_votes += votes;

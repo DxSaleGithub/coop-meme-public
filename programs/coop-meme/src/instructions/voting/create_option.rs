@@ -154,8 +154,12 @@ impl<'info> CreateOption<'info> {
 
         require!(
             self.user_token_ata.amount >= self.config.min_option_add_token_amount
-                && self.user_token_ata.amount >= current_total_votes,
+                && current_total_votes >= self.config.min_option_add_token_amount,
             CoopMemeError::NotEnoughToken
+        );
+        require!(
+            current_total_votes >= self.config.min_option_add_token_amount,
+            CoopMemeError::InvalidVoteTokenAmount
         );
         require!(
             self.vote_options_registry.token == self.coop_token.key(),
@@ -165,7 +169,7 @@ impl<'info> CreateOption<'info> {
         let value_length: usize = self.token_option.option_value.len();
         if self.token_option.option_type == OptionType::NAME {
             require!(
-                value_length > 0 && value_length < 37,
+                (value_length > 0 && value_length < 37),
                 CoopMemeError::InvalidTokenName
             );
         } else if self.token_option.option_type == OptionType::SYM {

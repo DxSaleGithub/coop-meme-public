@@ -105,6 +105,7 @@ impl<'info> TradeFairlaunch<'info> {
             });
             return Ok(());
         }
+        let global_vault_current_sol = self.global_vault.lamports();
 
         let team_fees = 0u64;
         // let team_fees = self._calculate_and_send_fees(amount).unwrap().unwrap();
@@ -150,281 +151,289 @@ impl<'info> TradeFairlaunch<'info> {
         });
 
         // should check if the global vault balance increased by `amount`
+        require!(
+            self.global_vault.lamports() == global_vault_current_sol + amount,
+            CoopMemeError::DepositFailed
+        );
 
         Ok(())
     }
 
-    pub fn sell_tokens(&mut self, amount: u64) -> Result<()> {
-        require!(false, CoopMemeError::NoSellDuringFairlaunch);
-        require!(!self.config.is_paused, CoopMemeError::Paused);
-        require!(
-            self.memecoin.is_trading_active,
-            CoopMemeError::TradingNotActive
-        );
-        require!(
-            !self.memecoin.is_bonding_curve_active,
-            CoopMemeError::TradingFairlaunchOver
-        );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
+    // pub fn sell_tokens(&mut self, amount: u64) -> Result<()> {
+    //     require!(false, CoopMemeError::NoSellDuringFairlaunch);
+    //     require!(!self.config.is_paused, CoopMemeError::Paused);
+    //     require!(
+    //         self.memecoin.is_trading_active,
+    //         CoopMemeError::TradingNotActive
+    //     );
+    //     require!(
+    //         !self.memecoin.is_bonding_curve_active,
+    //         CoopMemeError::TradingFairlaunchOver
+    //     );
+    //     let clock = Clock::get()?; // Pull the clock sysvar
+    //     let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_fairlaunch_end_time
-            && !self.memecoin.is_bonding_curve_active)
-        {
-            self.memecoin.is_bonding_curve_active = true;
-            self.config
-                .current_coop_token_metadata
-                .is_bonding_curve_active = true;
-            emit!(BondingCurveStartedEvent {
-                coop_token: self.config.current_coop_token_metadata.token_mint.key(),
-                memecoin: self.memecoin.key(),
-            });
+    //     if (current_time as u64 > self.memecoin.token_fairlaunch_end_time
+    //         && !self.memecoin.is_bonding_curve_active)
+    //     {
+    //         self.memecoin.is_bonding_curve_active = true;
+    //         self.config
+    //             .current_coop_token_metadata
+    //             .is_bonding_curve_active = true;
+    //         emit!(BondingCurveStartedEvent {
+    //             coop_token: self.config.current_coop_token_metadata.token_mint.key(),
+    //             memecoin: self.memecoin.key(),
+    //         });
 
-            return Ok(());
-        }
+    //         return Ok(());
+    //     }
 
-        require!(
-            self.user_data.sol_deposit >= amount,
-            CoopMemeError::NotEnoughSol
-        );
+    //     require!(
+    //         self.user_data.sol_deposit >= amount,
+    //         CoopMemeError::NotEnoughSol
+    //     );
 
-        // let team_fees = self
-        //     ._calculate_and_send_fees_with_signer(amount)
-        //     .unwrap()
-        //     .unwrap();
+    //     // let team_fees = self
+    //     //     ._calculate_and_send_fees_with_signer(amount)
+    //     //     .unwrap()
+    //     //     .unwrap();
 
-        self.memecoin.fairlaunch_sol_raised = self
-            .memecoin
-            .fairlaunch_sol_raised
-            .checked_sub(amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+    //     self.memecoin.fairlaunch_sol_raised = self
+    //         .memecoin
+    //         .fairlaunch_sol_raised
+    //         .checked_sub(amount)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
 
-        self.user_data.sol_deposit = self
-            .user_data
-            .sol_deposit
-            .checked_sub(amount)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+    //     self.user_data.sol_deposit = self
+    //         .user_data
+    //         .sol_deposit
+    //         .checked_sub(amount)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
 
-        emit!(TradeEvent {
-            trader: self.trader.key(),
-            coop_token: self.config.current_coop_token_metadata.token_mint.key(),
-            memecoin: self.memecoin.key(),
-            amount_in: amount as u64,
-            direction: 2, // SOL withdraw to user
-            minimum_receive_amount: 0,
-            amount_out: 0,
-            timestamp: Clock::get()?.unix_timestamp as u64
-        });
+    //     emit!(TradeEvent {
+    //         trader: self.trader.key(),
+    //         coop_token: self.config.current_coop_token_metadata.token_mint.key(),
+    //         memecoin: self.memecoin.key(),
+    //         amount_in: amount as u64,
+    //         direction: 2, // SOL withdraw to user
+    //         minimum_receive_amount: 0,
+    //         amount_out: 0,
+    //         timestamp: Clock::get()?.unix_timestamp as u64
+    //     });
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    pub fn refund(&mut self) -> Result<()> {
-        require!(!self.config.is_paused, CoopMemeError::Paused);
+    // pub fn refund(&mut self) -> Result<()> {
+    //     require!(!self.config.is_paused, CoopMemeError::Paused);
 
-        if self.memecoin.is_trading_active {
-            require!(
-                self.memecoin.is_bonding_curve_active,
-                CoopMemeError::TradingFairlaunchNotOver
-            );
-        } else {
-            require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
-        }
-        require!(
-            self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap,
-            CoopMemeError::CapNotExceeded
-        );
-        require!(!self.user_data.refund, CoopMemeError::AlreadyRefunded);
+    //     if self.memecoin.is_trading_active {
+    //         require!(
+    //             self.memecoin.is_bonding_curve_active,
+    //             CoopMemeError::TradingFairlaunchNotOver
+    //         );
+    //     } else {
+    //         require!(self.memecoin.is_token_listed, CoopMemeError::TokenNotListed);
+    //     }
+    //     require!(
+    //         self.memecoin.fairlaunch_sol_raised > self.memecoin.fairlaunch_cap,
+    //         CoopMemeError::CapNotExceeded
+    //     );
+    //     require!(
+    //         self.user_data.sol_deposit > 0,
+    //         CoopMemeError::NoDepositInFairlaunch
+    //     );
+    //     require!(!self.user_data.refund, CoopMemeError::AlreadyRefunded);
 
-        // Safe proportional token calculation (divide-first order)
-        let numerator = (self.user_data.sol_deposit as u128)
-            .checked_mul(self.memecoin.fairlaunch_cap as u128)
-            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+    //     // Safe proportional token calculation (divide-first order)
+    //     let numerator = (self.user_data.sol_deposit as u128)
+    //         .checked_mul(self.memecoin.fairlaunch_cap as u128)
+    //         .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
 
-        let user_real_sol_u128 = numerator
-            .checked_div(self.memecoin.fairlaunch_sol_raised as u128)
-            .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
+    //     let user_real_sol_u128 = numerator
+    //         .checked_div(self.memecoin.fairlaunch_sol_raised as u128)
+    //         .ok_or_else(|| error!(CoopMemeError::InvalidOperation))?;
 
-        require!(
-            user_real_sol_u128 < u64::MAX as u128,
-            CoopMemeError::InvalidOperation
-        );
-        let user_real_sol = user_real_sol_u128 as u64;
+    //     require!(
+    //         user_real_sol_u128 < u64::MAX as u128,
+    //         CoopMemeError::InvalidOperation
+    //     );
+    //     let user_real_sol = user_real_sol_u128 as u64;
 
-        require!(
-            user_real_sol <= self.memecoin.fairlaunch_cap,
-            CoopMemeError::InvalidFairSharePrice
-        );
-        let sol_to_refund = self.user_data.sol_deposit - user_real_sol;
+    //     require!(
+    //         user_real_sol <= self.memecoin.fairlaunch_cap,
+    //         CoopMemeError::InvalidFairSharePrice
+    //     );
+    //     let sol_to_refund = self.user_data.sol_deposit - user_real_sol;
 
-        if sol_to_refund > 0 {
-            let seeds: &[&[u8]] = &[
-                b"global",                        // your static seed
-                &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-            ];
+    //     if sol_to_refund > 0 {
+    //         let seeds: &[&[u8]] = &[
+    //             b"global",                        // your static seed
+    //             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+    //         ];
 
-            self.user_data.refund = true;
+    //         self.user_data.refund = true;
 
-            sol_transfer_with_signer(
-                self.global_vault.to_account_info(),
-                self.trader.to_account_info(),
-                &self.system_program,
-                &[seeds],
-                sol_to_refund as u64,
-            )?;
-        }
+    //         sol_transfer_with_signer(
+    //             self.global_vault.to_account_info(),
+    //             self.trader.to_account_info(),
+    //             &self.system_program,
+    //             &[seeds],
+    //             sol_to_refund as u64,
+    //         )?;
+    //     }
 
-        emit!(RefundSol {
-            trader: self.trader.key(),
-            coop_token: self.coop_token.key(),
-            memecoin: self.memecoin.key(),
-            contributed_sol: self.user_data.sol_deposit,
-            refund_sol: sol_to_refund,
-            timestamp: Clock::get()?.unix_timestamp as u64
-        });
+    //     emit!(RefundSol {
+    //         trader: self.trader.key(),
+    //         coop_token: self.coop_token.key(),
+    //         memecoin: self.memecoin.key(),
+    //         contributed_sol: self.user_data.sol_deposit,
+    //         refund_sol: sol_to_refund,
+    //         timestamp: Clock::get()?.unix_timestamp as u64
+    //     });
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    fn _calculate_and_send_fees(&self, amount: u64) -> Result<(Option<((u64))>)> {
-        // let team_fees = amount *  / 10000;
-        let team_fees = amount
-            .checked_mul(self.config.team_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
-        // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
-        let owner_fees = team_fees
-            .checked_mul(self.config.owner_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
-        // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
-        let affiliate_fees = team_fees
-            .checked_mul(self.config.affiliated_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+    // fn _calculate_and_send_fees(&self, amount: u64) -> Result<(Option<((u64))>)> {
+    //     // let team_fees = amount *  / 10000;
+    //     let team_fees = amount
+    //         .checked_mul(self.config.team_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
+    //     // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
+    //     let owner_fees = team_fees
+    //         .checked_mul(self.config.owner_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
+    //     // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
+    //     let affiliate_fees = team_fees
+    //         .checked_mul(self.config.affiliated_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.creator.to_account_info(),
-            &self.system_program,
-            owner_fees as u64,
-        )?;
+    //     sol_transfer_from_user(
+    //         &self.trader,
+    //         self.creator.to_account_info(),
+    //         &self.system_program,
+    //         owner_fees as u64,
+    //     )?;
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.affiliate.to_account_info(),
-            &self.system_program,
-            (affiliate_fees as u64),
-        )?;
+    //     sol_transfer_from_user(
+    //         &self.trader,
+    //         self.affiliate.to_account_info(),
+    //         &self.system_program,
+    //         (affiliate_fees as u64),
+    //     )?;
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.team_wallet.to_account_info(),
-            &self.system_program,
-            (team_fees
-                .checked_sub(owner_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_sub(affiliate_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
-        )?;
+    //     sol_transfer_from_user(
+    //         &self.trader,
+    //         self.team_wallet.to_account_info(),
+    //         &self.system_program,
+    //         (team_fees
+    //             .checked_sub(owner_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()
+    //             .checked_sub(affiliate_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()) as u64,
+    //     )?;
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.global_vault.to_account_info(),
-            &self.system_program,
-            (amount
-                .checked_sub(team_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
-        )?;
+    //     sol_transfer_from_user(
+    //         &self.trader,
+    //         self.global_vault.to_account_info(),
+    //         &self.system_program,
+    //         (amount
+    //             .checked_sub(team_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()) as u64,
+    //     )?;
 
-        return Ok(Some(team_fees as u64));
-    }
+    //     return Ok(Some(team_fees as u64));
+    // }
 
-    fn _calculate_and_send_fees_with_signer(&self, amount: u64) -> Result<(Option<((u64))>)> {
-        // let team_fees = amount *  / 10000;
-        let team_fees = amount
-            .checked_mul(self.config.team_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
-        // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
-        let owner_fees = team_fees
-            .checked_mul(self.config.owner_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
-        // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
-        let affiliate_fees = team_fees
-            .checked_mul(self.config.affiliated_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+    // fn _calculate_and_send_fees_with_signer(&self, amount: u64) -> Result<(Option<((u64))>)> {
+    //     // let team_fees = amount *  / 10000;
+    //     let team_fees = amount
+    //         .checked_mul(self.config.team_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
+    //     // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
+    //     let owner_fees = team_fees
+    //         .checked_mul(self.config.owner_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
+    //     // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
+    //     let affiliate_fees = team_fees
+    //         .checked_mul(self.config.affiliated_fee as u64)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap()
+    //         .checked_div(10000)
+    //         .ok_or(CoopMemeError::InvalidOperation)
+    //         .unwrap();
 
-        let seeds: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        ];
+    //     let seeds: &[&[u8]] = &[
+    //         b"global",                        // your static seed
+    //         &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+    //     ];
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.creator.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            owner_fees as u64,
-        )?;
+    //     sol_transfer_with_signer(
+    //         self.global_vault.to_account_info(),
+    //         self.creator.to_account_info(),
+    //         &self.system_program,
+    //         &[seeds],
+    //         owner_fees as u64,
+    //     )?;
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.affiliate.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            affiliate_fees as u64,
-        )?;
+    //     sol_transfer_with_signer(
+    //         self.global_vault.to_account_info(),
+    //         self.affiliate.to_account_info(),
+    //         &self.system_program,
+    //         &[seeds],
+    //         affiliate_fees as u64,
+    //     )?;
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.team_wallet.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            (team_fees
-                .checked_sub(owner_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_sub(affiliate_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
-        )?;
+    //     sol_transfer_with_signer(
+    //         self.global_vault.to_account_info(),
+    //         self.team_wallet.to_account_info(),
+    //         &self.system_program,
+    //         &[seeds],
+    //         (team_fees
+    //             .checked_sub(owner_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()
+    //             .checked_sub(affiliate_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()) as u64,
+    //     )?;
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.trader.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            (amount
-                .checked_sub(team_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
-        )?;
-        return Ok(Some(team_fees as u64));
-    }
+    //     sol_transfer_with_signer(
+    //         self.global_vault.to_account_info(),
+    //         self.trader.to_account_info(),
+    //         &self.system_program,
+    //         &[seeds],
+    //         (amount
+    //             .checked_sub(team_fees)
+    //             .ok_or(CoopMemeError::InvalidOperation)
+    //             .unwrap()) as u64,
+    //     )?;
+    //     return Ok(Some(team_fees as u64));
+    // }
 }

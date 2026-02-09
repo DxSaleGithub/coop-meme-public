@@ -317,7 +317,7 @@ describe('coop-meme-2', () => {
 
     const newTeamFee = new anchor.BN(10);
     const newOwnerFee = new anchor.BN(10);
-    const newCoopInterval = new anchor.BN(200);
+    const newCoopInterval = new anchor.BN(300);
     const newFairlaunchPeriod = new anchor.BN(50);
     const newInitVirtualSol = new anchor.BN(5_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
@@ -461,6 +461,81 @@ describe('coop-meme-2', () => {
         rbac,
       })
       .rpc();
+
+    await program.methods
+      .grantRole(listingRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    const roleList = await program.account.rbaControlList.fetch(rbac);
+
+    console.log('Config state data:', roleList);
+  });
+
+  it.skip('provide creator role', async () => {
+    const owner = provider.wallet.publicKey;
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId,
+    );
+
+    const creatorRoleType = {
+      creating: {},
+    };
+
+    await program.methods
+      .grantRole(creatorRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    const roleList = await program.account.rbaControlList.fetch(rbac);
+
+    console.log('Config state data:', roleList);
+  });
+
+  it.skip('provide finalize voting role', async () => {
+    const owner = provider.wallet.publicKey;
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId,
+    );
+
+    const votingRoleType = {
+      voting: {},
+    };
+
+    await program.methods
+      .grantRole(votingRoleType, owner)
+      .accounts({
+        admin: owner,
+        rbac,
+      })
+      .rpc();
+
+    const roleList = await program.account.rbaControlList.fetch(rbac);
+
+    console.log('Config state data:', roleList);
+  });
+
+  it.skip('provide listing role', async () => {
+    const owner = provider.wallet.publicKey;
+
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId,
+    );
+
+    const listingRoleType = {
+      listing: {},
+    };
 
     await program.methods
       .grantRole(listingRoleType, owner)
@@ -729,17 +804,17 @@ describe('coop-meme-2', () => {
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(150 * 1000); // 2 minutes = 120000 ms
+    await delay(250 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await finalizeVote('Coop', 'COOP', 'uri1');
   });
 
-  it.skip('Is listing memecoin!', async () => {
+  it('Is listing memecoin!', async () => {
     await listToken();
   });
 
-  it.skip('unvoting all tokens', async () => {
+  it('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
@@ -747,7 +822,7 @@ describe('coop-meme-2', () => {
     await unfreeze_multiple_users();
   });
 
-  it.skip('Is swapping SOL to memecoin!', async () => {
+  it('Is swapping SOL to memecoin!', async () => {
     const {
       user,
       owner,
@@ -879,7 +954,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it.skip('Is swapping memecoin to SOL!', async () => {
+  it('Is swapping memecoin to SOL!', async () => {
     const {
       user,
       owner,
@@ -3174,7 +3249,9 @@ describe('coop-meme-2', () => {
       );
 
     const txSig = await program.methods
-      .finalizeVote('final_uri')
+      .finalizeVote(
+        'https://black-bright-snake-211.mypinata.cloud/ipfs/bafkreifkoue4kekaunoi4eu4yzj3z2gwjvlswaamfrl7kf2bg6zohowg5a',
+      )
       .accounts({
         user,
         creator,

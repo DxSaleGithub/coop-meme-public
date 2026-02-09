@@ -21,6 +21,7 @@ impl<'info> Pause<'info> {
             self.admin.key() == self.config.admin,
             CoopMemeError::Unauthorized
         );
+        require!(is_paused != None, CoopMemeError::InvalidOption);
 
         if let Some(pause_status) = is_paused {
             self.config.is_paused = pause_status;

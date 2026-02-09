@@ -69,7 +69,7 @@ impl<'info> Config<'info> {
             // max_price_per_token: 1_000_000_000,            // 0.01 sol
             init_virtual_sol: 30_000_000_000,              // 30 sol
             init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token
-            init_real_token: 800_000_000_000_000_000,
+            init_real_token: 1_000_000_000_000_000_000,
             fairlaunch_cap: 20_000_000_000,
             total_coop_created: 0,
             total_coop_listed: 0,
@@ -127,8 +127,6 @@ impl<'info> UpdateConfig<'info> {
         new_team_wallet: Option<Pubkey>,
         new_coop_interval: Option<u64>,
         new_fairlaunch_period: Option<u32>,
-        // new_min_price_per_token: Option<u32>,
-        // new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
         new_init_real_token: Option<u64>,
@@ -230,6 +228,33 @@ impl<'info> UpdateConfigStorage<'info> {
             self.admin.key() == self.config.admin,
             CoopMemeError::Unauthorized
         );
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct TransferOwnership<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+    /// CHECK: This is a system account so safe.
+    #[account[]]
+    pub new_admin: AccountInfo<'info>,
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump = config.config_bump,
+        has_one = admin @ CoopMemeError::Unauthorized
+    )]
+    pub config: Account<'info, ConfigData>,
+}
+
+impl<'info> TransferOwnership<'info> {
+    pub fn transfer_ownership(&mut self) -> Result<()> {
+        require!(
+            self.admin.key() == self.config.admin,
+            CoopMemeError::Unauthorized
+        );
+        self.config.admin = self.new_admin.key();
         Ok(())
     }
 }

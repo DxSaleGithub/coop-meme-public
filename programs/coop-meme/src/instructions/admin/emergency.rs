@@ -26,6 +26,7 @@ impl<'info> Emergency<'info> {
             self.admin.key() == self.config.admin,
             CoopMemeError::Unauthorized
         );
+        require!(in_emergency != None, CoopMemeError::InvalidOption);
 
         if let Some(emergency_status) = in_emergency {
             self.config.in_emergency = emergency_status;

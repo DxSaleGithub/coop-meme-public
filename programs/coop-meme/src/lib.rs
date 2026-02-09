@@ -66,6 +66,10 @@ pub mod coop_meme {
         ctx.accounts.add_new_field()
     }
 
+    pub fn transfer_ownership(ctx: Context<TransferOwnership>) -> Result<()> {
+        ctx.accounts.transfer_ownership()
+    }
+
     pub fn grant_role(ctx: Context<RBAControl>, role_type: RoleType, user: Pubkey) -> Result<()> {
         ctx.accounts.grant_role(role_type, user)
     }
@@ -134,13 +138,13 @@ pub mod coop_meme {
         ctx.accounts.buy_tokens(amount, min_tokens_receive)
     }
 
-    pub fn sell_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
-        ctx.accounts.sell_tokens(amount)
-    }
+    // pub fn sell_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
+    //     ctx.accounts.sell_tokens(amount)
+    // }
 
-    pub fn refund_sol(ctx: Context<TradeFairlaunch>) -> Result<()> {
-        ctx.accounts.refund()
-    }
+    // pub fn refund_sol(ctx: Context<TradeFairlaunch>) -> Result<()> {
+    //     ctx.accounts.refund()
+    // }
 
     pub fn sell_tokens_bondingcurve(
         ctx: Context<Trade>,
@@ -150,9 +154,9 @@ pub mod coop_meme {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
 
-    pub fn claim_tokens(ctx: Context<Trade>) -> Result<()> {
-        ctx.accounts.claim_tokens()
-    }
+    // pub fn claim_tokens(ctx: Context<Trade>) -> Result<()> {
+    //     ctx.accounts.claim_tokens()
+    // }
 
     pub fn claim_tokens_and_refund_sol(ctx: Context<Trade>) -> Result<()> {
         ctx.accounts.claim_tokens_and_refund_sol()
