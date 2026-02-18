@@ -3945,7 +3945,8 @@
       "accounts": [
         {
           "name": "creator",
-          "writable": true
+          "writable": true,
+          "signer": true
         },
         {
           "name": "config",
@@ -3967,67 +3968,7 @@
           }
         },
         {
-          "name": "coop_token",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  105,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
-                "path": "memecoin.token_id",
-                "account": "MemeCoinData"
-              },
-              {
-                "kind": "account",
-                "path": "memecoin.token_nonce",
-                "account": "MemeCoinData"
-              }
-            ]
-          }
-        },
-        {
-          "name": "memecoin",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  109,
-                  101,
-                  99,
-                  111,
-                  105,
-                  110
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ]
-          }
-        },
-        {
           "name": "global_vault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -4046,65 +3987,38 @@
           }
         },
         {
-          "name": "user_1",
-          "writable": true
-        },
-        {
-          "name": "user_1_token_ata",
+          "name": "rbac",
           "writable": true,
           "pda": {
             "seeds": [
               {
-                "kind": "account",
-                "path": "user_1"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101,
+                  115
+                ]
               }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
+            ]
           }
+        },
+        {
+          "name": "coop_token",
+          "writable": true
+        },
+        {
+          "name": "user_1",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true
+        },
+        {
+          "name": "user_1_token_ata",
+          "writable": true
         },
         {
           "name": "user_2",
@@ -4112,60 +4026,7 @@
         },
         {
           "name": "user_2_token_ata",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user_2"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user_3",
@@ -4173,60 +4034,7 @@
         },
         {
           "name": "user_3_token_ata",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user_3"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user_4",
@@ -4234,60 +4042,7 @@
         },
         {
           "name": "user_4_token_ata",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user_4"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user_5",
@@ -4295,60 +4050,7 @@
         },
         {
           "name": "user_5_token_ata",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user_5"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user_6",
@@ -4356,60 +4058,79 @@
         },
         {
           "name": "user_6_token_ata",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user_6"
-              },
-              {
-                "kind": "account",
-                "path": "token_program"
-              },
-              {
-                "kind": "account",
-                "path": "coop_token"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
+        },
+        {
+          "name": "user_7",
+          "writable": true
+        },
+        {
+          "name": "user_7_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_8",
+          "writable": true
+        },
+        {
+          "name": "user_8_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_9",
+          "writable": true
+        },
+        {
+          "name": "user_9_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_10",
+          "writable": true
+        },
+        {
+          "name": "user_10_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_11",
+          "writable": true
+        },
+        {
+          "name": "user_11_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_12",
+          "writable": true
+        },
+        {
+          "name": "user_12_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_13",
+          "writable": true
+        },
+        {
+          "name": "user_13_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_14",
+          "writable": true
+        },
+        {
+          "name": "user_14_token_ata",
+          "writable": true
+        },
+        {
+          "name": "user_15",
+          "writable": true
+        },
+        {
+          "name": "user_15_token_ata",
+          "writable": true
         },
         {
           "name": "token_program",

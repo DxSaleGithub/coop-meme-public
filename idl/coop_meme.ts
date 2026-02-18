@@ -3951,7 +3951,8 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "creator",
-          "writable": true
+          "writable": true,
+          "signer": true
         },
         {
           "name": "config",
@@ -3973,67 +3974,7 @@ export type CoopMeme = {
           }
         },
         {
-          "name": "coopToken",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  105,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "creator"
-              },
-              {
-                "kind": "account",
-                "path": "memecoin.token_id",
-                "account": "memeCoinData"
-              },
-              {
-                "kind": "account",
-                "path": "memecoin.token_nonce",
-                "account": "memeCoinData"
-              }
-            ]
-          }
-        },
-        {
-          "name": "memecoin",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  109,
-                  101,
-                  99,
-                  111,
-                  105,
-                  110
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ]
-          }
-        },
-        {
           "name": "globalVault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -4052,65 +3993,38 @@ export type CoopMeme = {
           }
         },
         {
-          "name": "user1",
-          "writable": true
-        },
-        {
-          "name": "user1TokenAta",
+          "name": "rbac",
           "writable": true,
           "pda": {
             "seeds": [
               {
-                "kind": "account",
-                "path": "user1"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101,
+                  115
+                ]
               }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
+            ]
           }
+        },
+        {
+          "name": "coopToken",
+          "writable": true
+        },
+        {
+          "name": "user1",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true
+        },
+        {
+          "name": "user1TokenAta",
+          "writable": true
         },
         {
           "name": "user2",
@@ -4118,60 +4032,7 @@ export type CoopMeme = {
         },
         {
           "name": "user2TokenAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user2"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user3",
@@ -4179,60 +4040,7 @@ export type CoopMeme = {
         },
         {
           "name": "user3TokenAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user3"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user4",
@@ -4240,60 +4048,7 @@ export type CoopMeme = {
         },
         {
           "name": "user4TokenAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user4"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user5",
@@ -4301,60 +4056,7 @@ export type CoopMeme = {
         },
         {
           "name": "user5TokenAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user5"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user6",
@@ -4362,60 +4064,79 @@ export type CoopMeme = {
         },
         {
           "name": "user6TokenAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user6"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "coopToken"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
+        },
+        {
+          "name": "user7",
+          "writable": true
+        },
+        {
+          "name": "user7TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user8",
+          "writable": true
+        },
+        {
+          "name": "user8TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user9",
+          "writable": true
+        },
+        {
+          "name": "user9TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user10",
+          "writable": true
+        },
+        {
+          "name": "user10TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user11",
+          "writable": true
+        },
+        {
+          "name": "user11TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user12",
+          "writable": true
+        },
+        {
+          "name": "user12TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user13",
+          "writable": true
+        },
+        {
+          "name": "user13TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user14",
+          "writable": true
+        },
+        {
+          "name": "user14TokenAta",
+          "writable": true
+        },
+        {
+          "name": "user15",
+          "writable": true
+        },
+        {
+          "name": "user15TokenAta",
+          "writable": true
         },
         {
           "name": "tokenProgram",

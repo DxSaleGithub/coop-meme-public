@@ -201,7 +201,7 @@ impl<'info> List<'info> {
         has_role(&self.rbac.roles, RoleType::LISTING, self.owner.key())?;
         require!(
             !self.memecoin.is_trading_active,
-            CoopMemeError::TokenAlreadyListed
+            CoopMemeError::TradingActive
         );
         require!(
             !self.memecoin.is_token_listed,

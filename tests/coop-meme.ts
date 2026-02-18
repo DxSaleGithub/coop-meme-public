@@ -22,7 +22,7 @@ describe('coop-meme-2', () => {
 
   const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
   let teamWallet = new PublicKey(
-    '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM',
+    'GBJw4QXMXHZahnz41TvC5cSiZagbx7zedVt7VL3RUMqx',
   );
   let affiliate = provider.wallet.publicKey;
   let cpSwapProgram = new PublicKey(
@@ -317,7 +317,7 @@ describe('coop-meme-2', () => {
 
     const newTeamFee = new anchor.BN(10);
     const newOwnerFee = new anchor.BN(10);
-    const newCoopInterval = new anchor.BN(300);
+    const newCoopInterval = new anchor.BN(200);
     const newFairlaunchPeriod = new anchor.BN(50);
     const newInitVirtualSol = new anchor.BN(5_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
@@ -328,7 +328,7 @@ describe('coop-meme-2', () => {
     const newFairlaunchCap = new anchor.BN(1_000_000_000);
 
     const newTeamWallet = new PublicKey(
-      '3ntH2aAoCMDLR95iXmUahxdUtTEAvD9WHwxepSi9oAQM',
+      'GBJw4QXMXHZahnz41TvC5cSiZagbx7zedVt7VL3RUMqx',
     );
 
     // const newMinPricePerToken = 1;
@@ -804,7 +804,7 @@ describe('coop-meme-2', () => {
   it('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
-    await delay(250 * 1000); // 2 minutes = 120000 ms
+    await delay(155 * 1000); // 2 minutes = 120000 ms
 
     console.log('3 minutes passed.');
     await finalizeVote('Coop', 'COOP', 'uri1');
@@ -814,11 +814,11 @@ describe('coop-meme-2', () => {
     await listToken();
   });
 
-  it('unvoting all tokens', async () => {
+  it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it.skip('unfreeze all tokens', async () => {
+  it('unfreeze all tokens', async () => {
     await unfreeze_multiple_users();
   });
 
@@ -3578,6 +3578,7 @@ describe('coop-meme-2', () => {
     const {
       user,
       creator,
+      rbac,
       configPda,
       globalVault,
       coopToken,
@@ -3591,8 +3592,9 @@ describe('coop-meme-2', () => {
         creator,
         config: configPda,
         globalVault,
+        rbac,
         coopToken,
-        memecoin: memecoinPda,
+        // memecoin: memecoinPda,
         user1: user,
         user1TokenAta: userTokenAta,
         user2: user,
@@ -3605,16 +3607,26 @@ describe('coop-meme-2', () => {
         user5TokenAta: userTokenAta,
         user6: user,
         user6TokenAta: userTokenAta,
-        // user7: user,
-        // user7TokenAta: userTokenAta,
-        // user8: user,
-        // user8TokenAta: userTokenAta,
-        // user8: user,
-        // user8TokenAta: userTokenAta,
-        // user9: user,
-        // user9Ata: userTokenAta,
-        // user10: user,
-        // user10Ata: userTokenAta,
+        user7: user,
+        user7TokenAta: userTokenAta,
+        user8: user,
+        user8TokenAta: userTokenAta,
+        user9: user,
+        user9TokenAta: userTokenAta,
+        user10: user,
+        user10TokenAta: userTokenAta,
+        user11: user,
+        user11TokenAta: userTokenAta,
+        user12: user,
+        user12TokenAta: userTokenAta,
+        user13: user,
+        user13TokenAta: userTokenAta,
+        user14: user,
+        user14TokenAta: userTokenAta,
+        user15: user,
+        user15TokenAta: userTokenAta,
+        // user16: user,
+        // user16TokenAta: userTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
       })
       .rpc();
