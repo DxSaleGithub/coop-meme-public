@@ -11,8 +11,17 @@ coop_meme = "8EFH8uJyQFwcxUXAqhbLNSf6kNnANidbz4gPHa2QNrzW"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
-wallet = "~/.config/solana/id.json"
+cluster = "mainnet"
+wallet = "./deployer.json"
+rpc_url = "https://mainnet.helius-rpc.com/?api-key=1a8670ff-1c4d-4df1-a280-5f735d9b7d95"
+
+# [provider]
+# cluster = "devnet"
+# wallet = "~/.config/solana/id.json"
+
+# [provider]
+# cluster = "devnet"
+# wallet = "./deployer.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

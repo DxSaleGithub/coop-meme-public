@@ -59,14 +59,12 @@ impl<'info> Config<'info> {
             is_paused: false,
             in_emergency: false,
             team_wallet: team_wallet,
-            team_fee: 10,
+            team_fee: 100,
             owner_fee: 10,
             affiliated_fee: 10,
             listing_fee: 500,
             coop_interval: 600,
             fairlaunch_period: 300,
-            // min_price_per_token: 100,                      //  0.0000001 sol
-            // max_price_per_token: 1_000_000_000,            // 0.01 sol
             init_virtual_sol: 30_000_000_000,              // 30 sol
             init_virtual_token: 1_000_000_000_000_000_000, // 1 billion token
             init_real_token: 1_000_000_000_000_000_000,
@@ -81,7 +79,6 @@ impl<'info> Config<'info> {
                 token_id: 0,
                 token_nonce: 0,
                 token_mint: Pubkey::default(),
-                // token_fairlaunch_mint: Pubkey::default(),
                 creator: Pubkey::default(),
                 is_bonding_curve_active: false,
                 is_trading_active: false,
@@ -99,8 +96,6 @@ impl<'info> Config<'info> {
 
         Ok(())
     }
-
-    // update methods here
 }
 
 #[derive(Accounts)]
@@ -166,14 +161,6 @@ impl<'info> UpdateConfig<'info> {
         if let Some(period) = new_fairlaunch_period {
             self.config.fairlaunch_period = period;
         }
-
-        // if let Some(min_price) = new_min_price_per_token {
-        //     self.config.min_price_per_token = min_price;
-        // }
-
-        // if let Some(max_price) = new_max_price_per_token {
-        //     self.config.max_price_per_token = max_price;
-        // }
 
         if let Some(sol) = new_init_virtual_sol {
             self.config.init_virtual_sol = sol;

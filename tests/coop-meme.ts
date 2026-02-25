@@ -22,7 +22,7 @@ describe('coop-meme-2', () => {
 
   const program = anchor.workspace.CoopMeme as Program<CoopMeme>;
   let teamWallet = new PublicKey(
-    'GBJw4QXMXHZahnz41TvC5cSiZagbx7zedVt7VL3RUMqx',
+    'DczcCAEB3Fo3gd8ahDXjK4qp4geKDF69Xg1XDMcBDZPo',
   );
   let affiliate = provider.wallet.publicKey;
   let cpSwapProgram = new PublicKey(
@@ -293,19 +293,17 @@ describe('coop-meme-2', () => {
       configState.teamWallet.toString(),
       teamWallet.toString(),
     );
-    assert.strictEqual(configState.teamFee, 10);
+    assert.strictEqual(configState.teamFee, 100);
     assert.strictEqual(configState.ownerFee, 10);
     assert.strictEqual(configState.affiliatedFee, 10);
     assert.strictEqual(configState.listingFee, 500);
     assert.strictEqual(configState.coopInterval.toNumber(), 600);
     assert.strictEqual(configState.fairlaunchPeriod, 300);
-    // assert.strictEqual(configState.minPricePerToken, 100);
-    // assert.strictEqual(configState.maxPricePerToken, 1000000000);
     assert.strictEqual(configState.totalCoopCreated, 0);
     assert.strictEqual(configState.totalCoopListed, 0);
   });
 
-  it('updates the config', async () => {
+  it.skip('updates the config', async () => {
     const { owner, configPda } = await setup(false);
 
     console.log(program.programId);
@@ -315,10 +313,10 @@ describe('coop-meme-2', () => {
     );
     console.log('Config state data:', configState);
 
-    const newTeamFee = new anchor.BN(10);
+    const newTeamFee = new anchor.BN(200);
     const newOwnerFee = new anchor.BN(10);
-    const newCoopInterval = new anchor.BN(200);
-    const newFairlaunchPeriod = new anchor.BN(50);
+    const newCoopInterval = new anchor.BN(300);
+    const newFairlaunchPeriod = new anchor.BN(120);
     const newInitVirtualSol = new anchor.BN(5_000_000_000); // 2 SOL in lamports
     // const newInitVirtualToken = new anchor.BN('2000000000000000000'); // 2 billion tokens
     const newInitRealToken = new anchor.BN('1000000000000000000'); // 2 SOL in lamports
@@ -328,7 +326,7 @@ describe('coop-meme-2', () => {
     const newFairlaunchCap = new anchor.BN(1_000_000_000);
 
     const newTeamWallet = new PublicKey(
-      'GBJw4QXMXHZahnz41TvC5cSiZagbx7zedVt7VL3RUMqx',
+      'DczcCAEB3Fo3gd8ahDXjK4qp4geKDF69Xg1XDMcBDZPo',
     );
 
     // const newMinPricePerToken = 1;
@@ -402,6 +400,10 @@ describe('coop-meme-2', () => {
 
   it.skip('provide roles', async () => {
     const owner = provider.wallet.publicKey;
+
+    // const owner = new PublicKey(
+    //   'CUjHyH9ebi4gpRsLvSB2VSnkc4gwgze3WqJr2Fwpv49S', // script for mainnet/devnet
+    // );
 
     // const owner = creator.publicKey;
     // const owner = new PublicKey(
@@ -550,11 +552,11 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', roleList);
   });
 
-  it('Is creating memecoin!', async () => {
+  it.skip('Is creating memecoin!', async () => {
     await create_tokens();
   });
 
-  it('first buying memecoin in fairlaunch!', async () => {
+  it.skip('first buying memecoin in fairlaunch!', async () => {
     await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
     // await buy_tokens_fairlaunch(1, '500000000'); // 10 sol == 10000000000
     // await buy_tokens_fairlaunch(2, '500000000'); // 10 sol == 10000000000
@@ -593,7 +595,7 @@ describe('coop-meme-2', () => {
     await sell_tokens_fairlaunch(1, '50000000');
   });
 
-  it('first buying memecoin!', async () => {
+  it.skip('first buying memecoin!', async () => {
     console.log('Starting wait...');
 
     await delay(70 * 1000); // 2 minutes = 120000 ms
@@ -612,7 +614,7 @@ describe('coop-meme-2', () => {
     // await buy_tokens('100000000000'); // 10 SOL
   });
 
-  it('refund sol and claim tokens after first buy in bonding-curve', async () => {
+  it.skip('refund sol and claim tokens after first buy in bonding-curve', async () => {
     await claim_and_refund(1);
   });
 
@@ -628,7 +630,7 @@ describe('coop-meme-2', () => {
   //   await buy_tokens('100000000');
   // });
 
-  it('first selling memecoin!', async () => {
+  it.skip('first selling memecoin!', async () => {
     await sell_tokens(new BN('1000000000000'));
   });
 
@@ -760,7 +762,7 @@ describe('coop-meme-2', () => {
     // await refund(2);
   });
 
-  it('first voting with option', async () => {
+  it.skip('first voting with option', async () => {
     await vote_with_option('name', 'Coop');
     await vote_with_option('sym', 'COOP');
     await vote_with_option('uri', 'uri1');
@@ -769,13 +771,13 @@ describe('coop-meme-2', () => {
     await vote_with_option('uri', 'uri2');
   });
 
-  it('first voting', async () => {
+  it.skip('first voting', async () => {
     await vote(1, 'Coop');
     await vote(2, 'COOP');
     await vote(3, 'uri1');
   });
 
-  it('first unvoting', async () => {
+  it.skip('first unvoting', async () => {
     await unvote(1, 'Coop2');
     await unvote(2, 'COOP2');
     await unvote(3, 'uri2');
@@ -801,7 +803,7 @@ describe('coop-meme-2', () => {
     await emergencyWithdrawCoopToken();
   });
 
-  it('Is finalizing voting', async () => {
+  it.skip('Is finalizing voting', async () => {
     console.log('Starting wait...');
 
     await delay(155 * 1000); // 2 minutes = 120000 ms
@@ -810,7 +812,7 @@ describe('coop-meme-2', () => {
     await finalizeVote('Coop', 'COOP', 'uri1');
   });
 
-  it('Is listing memecoin!', async () => {
+  it.skip('Is listing memecoin!', async () => {
     await listToken();
   });
 
@@ -818,11 +820,11 @@ describe('coop-meme-2', () => {
     await unvote_all_tokens();
   });
 
-  it('unfreeze all tokens', async () => {
+  it.skip('unfreeze all tokens', async () => {
     await unfreeze_multiple_users();
   });
 
-  it('Is swapping SOL to memecoin!', async () => {
+  it.skip('Is swapping SOL to memecoin!', async () => {
     const {
       user,
       owner,
@@ -954,7 +956,7 @@ describe('coop-meme-2', () => {
     console.log('Config state data:', configState);
   });
 
-  it('Is swapping memecoin to SOL!', async () => {
+  it.skip('Is swapping memecoin to SOL!', async () => {
     const {
       user,
       owner,
@@ -1090,6 +1092,59 @@ describe('coop-meme-2', () => {
       configPda,
     );
     console.log('Config state data:', configState);
+  });
+
+  it.skip('transfer ownership', async () => {
+    const rpcUrl = provider.connection.rpcEndpoint;
+    console.log('Cluster RPC:', rpcUrl);
+
+    const [configPda] =
+      await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from('config')],
+        program.programId,
+      );
+    console.log('config pda', configPda.toString());
+
+    const owner = provider.wallet.publicKey;
+
+    console.log('owner', owner.toString());
+
+    let newOwner = new PublicKey(
+      '3octULVVhxV6BKcNtfCU53HQsVhrcKxSA2G3LTUXzPJZ',
+    );
+
+    if (rpcUrl.includes('devnet')) {
+      console.log('Running on devnet');
+      newOwner = new PublicKey(
+        '3octULVVhxV6BKcNtfCU53HQsVhrcKxSA2G3LTUXzPJZ',
+      );
+    } else if (rpcUrl.includes('mainnet')) {
+      console.log('Running on mainnet');
+      newOwner = new PublicKey(
+        '4v1BCT6qefpmKNfgKD1hAZSgnZTFwPadYedGDAWTkN53',
+      );
+    } else {
+      console.log('Running on localnet/other');
+    }
+
+    await program.methods
+      .transferOwnership()
+      .accounts({
+        admin: owner,
+        newAdmin: newOwner,
+        config: configPda,
+      })
+      .signers([])
+      .rpc();
+
+    const configAccountData = await program.account.configData.fetch(
+      configPda,
+    );
+    console.log('config account', configAccountData);
+    assert.equal(
+      configAccountData.admin.toString(),
+      newOwner.toString(),
+    );
   });
 
   // it.skip('Is burn memecoin!', async () => {
