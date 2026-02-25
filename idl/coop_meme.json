@@ -148,7 +148,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "amm_config",
@@ -2919,7 +2919,7 @@
         {
           "name": "create_pool_fee",
           "writable": true,
-          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
+          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
         },
         {
           "name": "observation_state",
@@ -2955,7 +2955,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "amm_config",
@@ -3597,7 +3597,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -3748,7 +3748,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -6354,198 +6354,8 @@
   "errors": [
     {
       "code": 6000,
-      "name": "Unauthorized",
-      "msg": "Only the admin is authorized to perform this action."
-    },
-    {
-      "code": 6001,
       "name": "InvalidTotalSupply",
       "msg": "Invalid total supply"
-    },
-    {
-      "code": 6002,
-      "name": "TradingNotActive",
-      "msg": "Trading not active"
-    },
-    {
-      "code": 6003,
-      "name": "InsufficientAmount",
-      "msg": "Insufficient Amount"
-    },
-    {
-      "code": 6004,
-      "name": "InvalidFairSharePrice",
-      "msg": "Invalid fairshare token price"
-    },
-    {
-      "code": 6005,
-      "name": "InvalidTokenName",
-      "msg": "Invalid coop token name"
-    },
-    {
-      "code": 6006,
-      "name": "InvalidTokenSymbol",
-      "msg": "Invalid coop token symbol"
-    },
-    {
-      "code": 6007,
-      "name": "InvalidTokenUri",
-      "msg": "Invalid coop token uri"
-    },
-    {
-      "code": 6008,
-      "name": "InvalidOperation",
-      "msg": "Invalid arithmetic operation"
-    },
-    {
-      "code": 6009,
-      "name": "TradingFairlaunchOver",
-      "msg": "Trading fairlaunch over"
-    },
-    {
-      "code": 6010,
-      "name": "TradingFairlaunchNotOver",
-      "msg": "Trading fairlaunch not over"
-    },
-    {
-      "code": 6011,
-      "name": "TradingActive",
-      "msg": "Trading active"
-    },
-    {
-      "code": 6012,
-      "name": "NotEnoughToken",
-      "msg": "Not enough token"
-    },
-    {
-      "code": 6013,
-      "name": "NotEnoughSol",
-      "msg": "Not enough sol"
-    },
-    {
-      "code": 6014,
-      "name": "InvalidTokenVoteInfo",
-      "msg": "Invalid token vote info"
-    },
-    {
-      "code": 6015,
-      "name": "VotingNotFinalized",
-      "msg": "Token voting is not finalized"
-    },
-    {
-      "code": 6016,
-      "name": "VotingFinalized",
-      "msg": "Token voting is finalized"
-    },
-    {
-      "code": 6017,
-      "name": "TokenAlreadyListed",
-      "msg": "Token is already listed"
-    },
-    {
-      "code": 6018,
-      "name": "TokenNotListed",
-      "msg": "Token not listed"
-    },
-    {
-      "code": 6019,
-      "name": "InvalidListingInfo",
-      "msg": "Listing info not valid"
-    },
-    {
-      "code": 6020,
-      "name": "OptionLimitExceeded",
-      "msg": "Option limit exceeded"
-    },
-    {
-      "code": 6021,
-      "name": "TokenOptionAlreadyExist",
-      "msg": "Token Option already exist"
-    },
-    {
-      "code": 6022,
-      "name": "InvalidOption",
-      "msg": "Token Option invalid"
-    },
-    {
-      "code": 6023,
-      "name": "RoleExist",
-      "msg": "Role already exists"
-    },
-    {
-      "code": 6024,
-      "name": "RoleDoesNotExist",
-      "msg": "Role does not exist"
-    },
-    {
-      "code": 6025,
-      "name": "InSufficientRole",
-      "msg": "Signer does not have sufficient role"
-    },
-    {
-      "code": 6026,
-      "name": "Paused",
-      "msg": "Operation is paused currently"
-    },
-    {
-      "code": 6027,
-      "name": "NotPaused",
-      "msg": "Operation is not paused currently"
-    },
-    {
-      "code": 6028,
-      "name": "InEmergency",
-      "msg": "Operation is in emergency mode"
-    },
-    {
-      "code": 6029,
-      "name": "NotInEmergency",
-      "msg": "Operation is not in emergency mode"
-    },
-    {
-      "code": 6030,
-      "name": "CapNotExceeded",
-      "msg": "Fairlaunch cap not exceeded"
-    },
-    {
-      "code": 6031,
-      "name": "AlreadyRefunded",
-      "msg": "Sol is refunded already"
-    },
-    {
-      "code": 6032,
-      "name": "AlreadyClaimed",
-      "msg": "Fairlaunch tokens already claimed"
-    },
-    {
-      "code": 6033,
-      "name": "NoSellDuringFairlaunch",
-      "msg": "Sell not allowed during fairlaunch"
-    },
-    {
-      "code": 6034,
-      "name": "NoTokensToClaim",
-      "msg": "No tokens to claim"
-    },
-    {
-      "code": 6035,
-      "name": "CapExceeded",
-      "msg": "Cap exceeded for buy"
-    },
-    {
-      "code": 6036,
-      "name": "InvalidVoteTokenAmount",
-      "msg": "Vote token amount less than min vote token amount"
-    },
-    {
-      "code": 6037,
-      "name": "DepositFailed",
-      "msg": "Fairlaunch deposit failed"
-    },
-    {
-      "code": 6038,
-      "name": "NoDepositInFairlaunch",
-      "msg": "User did not contribute in fairlaunch"
     }
   ],
   "types": [
