@@ -102,13 +102,6 @@ impl<'info> EmergencyWithdrawSOL<'info> {
             )?;
         }
 
-        // // Only transfer if there is a positive withdrawable amount
-        // if withdraw_amount > 0 {
-        //     // Use invoke_signed for PDA authority
-        //     **vault_info.try_borrow_mut_lamports()? -= withdraw_amount;
-        //     **admin_info.try_borrow_mut_lamports()? += withdraw_amount;
-        // }
-
         Ok(())
     }
 }

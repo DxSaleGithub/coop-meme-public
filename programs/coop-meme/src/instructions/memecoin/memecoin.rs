@@ -277,7 +277,6 @@ impl<'info> MemeCoin<'info> {
             token_id: self.memecoin.token_id,
             creator: self.creator.key(),
             coop_token: self.coop_token.key(),
-            // fairlaunch_token: self.fairlaunch_token.key(),
             memecoin: self.memecoin.key(),
             metadata: self.token_metadata_account.key(),
             decimals: 9,

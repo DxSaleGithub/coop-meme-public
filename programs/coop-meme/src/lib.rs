@@ -34,8 +34,6 @@ pub mod coop_meme {
         new_team_wallet: Option<Pubkey>,
         new_coop_interval: Option<u64>,
         new_fairlaunch_period: Option<u32>,
-        // new_min_price_per_token: Option<u32>,
-        // new_max_price_per_token: Option<u32>,
         new_init_virtual_sol: Option<u64>,
         new_init_virtual_token: Option<u64>,
         new_init_real_token: Option<u64>,
@@ -51,8 +49,6 @@ pub mod coop_meme {
             new_team_wallet,
             new_coop_interval,
             new_fairlaunch_period,
-            // new_min_price_per_token,
-            // new_max_price_per_token,
             new_init_virtual_sol,
             new_init_virtual_token,
             new_init_real_token,
@@ -111,20 +107,12 @@ pub mod coop_meme {
         ctx: Context<MemeCoin>,
         nonce: u64,
         total_supply: u64,
-        // token_share_price: u32,
         name: String,
         symbol: String,
         uri: String,
     ) -> Result<()> {
-        ctx.accounts.create_memecoin(
-            &ctx.bumps,
-            nonce,
-            total_supply,
-            // token_share_price,
-            name,
-            symbol,
-            uri,
-        )
+        ctx.accounts
+            .create_memecoin(&ctx.bumps, nonce, total_supply, name, symbol, uri)
     }
 
     pub fn buy_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
@@ -137,15 +125,6 @@ pub mod coop_meme {
     ) -> Result<()> {
         ctx.accounts.buy_tokens(amount, min_tokens_receive)
     }
-
-    // pub fn sell_tokens_fairlaunch(ctx: Context<TradeFairlaunch>, amount: u64) -> Result<()> {
-    //     ctx.accounts.sell_tokens(amount)
-    // }
-
-    // pub fn refund_sol(ctx: Context<TradeFairlaunch>) -> Result<()> {
-    //     ctx.accounts.refund()
-    // }
-
     pub fn sell_tokens_bondingcurve(
         ctx: Context<Trade>,
         amount: u64,
@@ -153,11 +132,6 @@ pub mod coop_meme {
     ) -> Result<()> {
         ctx.accounts.sell_tokens(amount, min_sol_receive)
     }
-
-    // pub fn claim_tokens(ctx: Context<Trade>) -> Result<()> {
-    //     ctx.accounts.claim_tokens()
-    // }
-
     pub fn claim_tokens_and_refund_sol(ctx: Context<Trade>) -> Result<()> {
         ctx.accounts.claim_tokens_and_refund_sol()
     }
