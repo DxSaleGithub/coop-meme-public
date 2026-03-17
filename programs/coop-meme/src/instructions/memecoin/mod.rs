@@ -13,3 +13,7 @@ pub use trade_fairlaunch::*;
 pub mod unfreeze_multiple;
 
 pub use unfreeze_multiple::*;
+
+pub mod freeze_authority_revoke;
+
+pub use freeze_authority_revoke::*;

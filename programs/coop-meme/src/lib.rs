@@ -162,6 +162,10 @@ pub mod coop_meme {
         ctx.accounts.batch_thaw_accounts()
     }
 
+    pub fn revoke_freeze_authority(ctx: Context<FreezeAuthorityRevoke>) -> Result<()> {
+        ctx.accounts.revoke_freeze_authority()
+    }
+
     pub fn finalize_vote(ctx: Context<FinalizeVote>, final_uri: String) -> Result<()> {
         ctx.accounts.finalize_vote(final_uri)
     }

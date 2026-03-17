@@ -106,3 +106,9 @@ pub struct BurnEvent {
     pub memecoin: Pubkey,
     pub lp_mint: Pubkey,
 }
+
+#[event]
+pub struct RevokeFreezeAuthority {
+    pub token: Pubkey,
+    pub old_authority: Pubkey,
+}

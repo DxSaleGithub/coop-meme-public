@@ -86,4 +86,6 @@ pub enum CoopMemeError {
     DepositFailed,
     #[msg("User did not contribute in fairlaunch")]
     NoDepositInFairlaunch,
+    #[msg("Token has no freeze authority set")]
+    NoFreezeAuthoritySet,
 }
