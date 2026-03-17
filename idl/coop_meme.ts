@@ -154,7 +154,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -2925,7 +2925,7 @@ export type CoopMeme = {
         {
           "name": "createPoolFee",
           "writable": true,
-          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observationState",
@@ -2961,7 +2961,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -3119,6 +3119,151 @@ export type CoopMeme = {
               }
             ]
           }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "revokeFreezeAuthority",
+      "discriminator": [
+        84,
+        177,
+        206,
+        249,
+        25,
+        1,
+        237,
+        159
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalVault",
+          "docs": [
+            "It does not store any data and is used only for lamport/token transfers.",
+            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "rbac",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coopToken",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_id",
+                "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
+              }
+            ]
+          }
+        },
+        {
+          "name": "memecoin",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101,
+                  99,
+                  111,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "coopToken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": []
@@ -3603,7 +3748,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -3754,7 +3899,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -6292,6 +6437,19 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "revokeFreezeAuthority",
+      "discriminator": [
+        201,
+        215,
+        176,
+        255,
+        255,
+        176,
+        193,
+        141
+      ]
+    },
+    {
       "name": "tradeEvent",
       "discriminator": [
         189,
@@ -6360,8 +6518,203 @@ export type CoopMeme = {
   "errors": [
     {
       "code": 6000,
+      "name": "unauthorized",
+      "msg": "Only the admin is authorized to perform this action."
+    },
+    {
+      "code": 6001,
       "name": "invalidTotalSupply",
       "msg": "Invalid total supply"
+    },
+    {
+      "code": 6002,
+      "name": "tradingNotActive",
+      "msg": "Trading not active"
+    },
+    {
+      "code": 6003,
+      "name": "insufficientAmount",
+      "msg": "Insufficient Amount"
+    },
+    {
+      "code": 6004,
+      "name": "invalidFairSharePrice",
+      "msg": "Invalid fairshare token price"
+    },
+    {
+      "code": 6005,
+      "name": "invalidTokenName",
+      "msg": "Invalid coop token name"
+    },
+    {
+      "code": 6006,
+      "name": "invalidTokenSymbol",
+      "msg": "Invalid coop token symbol"
+    },
+    {
+      "code": 6007,
+      "name": "invalidTokenUri",
+      "msg": "Invalid coop token uri"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOperation",
+      "msg": "Invalid arithmetic operation"
+    },
+    {
+      "code": 6009,
+      "name": "tradingFairlaunchOver",
+      "msg": "Trading fairlaunch over"
+    },
+    {
+      "code": 6010,
+      "name": "tradingFairlaunchNotOver",
+      "msg": "Trading fairlaunch not over"
+    },
+    {
+      "code": 6011,
+      "name": "tradingActive",
+      "msg": "Trading active"
+    },
+    {
+      "code": 6012,
+      "name": "notEnoughToken",
+      "msg": "Not enough token"
+    },
+    {
+      "code": 6013,
+      "name": "notEnoughSol",
+      "msg": "Not enough sol"
+    },
+    {
+      "code": 6014,
+      "name": "invalidTokenVoteInfo",
+      "msg": "Invalid token vote info"
+    },
+    {
+      "code": 6015,
+      "name": "votingNotFinalized",
+      "msg": "Token voting is not finalized"
+    },
+    {
+      "code": 6016,
+      "name": "votingFinalized",
+      "msg": "Token voting is finalized"
+    },
+    {
+      "code": 6017,
+      "name": "tokenAlreadyListed",
+      "msg": "Token is already listed"
+    },
+    {
+      "code": 6018,
+      "name": "tokenNotListed",
+      "msg": "Token not listed"
+    },
+    {
+      "code": 6019,
+      "name": "invalidListingInfo",
+      "msg": "Listing info not valid"
+    },
+    {
+      "code": 6020,
+      "name": "optionLimitExceeded",
+      "msg": "Option limit exceeded"
+    },
+    {
+      "code": 6021,
+      "name": "tokenOptionAlreadyExist",
+      "msg": "Token Option already exist"
+    },
+    {
+      "code": 6022,
+      "name": "invalidOption",
+      "msg": "Token Option invalid"
+    },
+    {
+      "code": 6023,
+      "name": "roleExist",
+      "msg": "Role already exists"
+    },
+    {
+      "code": 6024,
+      "name": "roleDoesNotExist",
+      "msg": "Role does not exist"
+    },
+    {
+      "code": 6025,
+      "name": "inSufficientRole",
+      "msg": "Signer does not have sufficient role"
+    },
+    {
+      "code": 6026,
+      "name": "paused",
+      "msg": "Operation is paused currently"
+    },
+    {
+      "code": 6027,
+      "name": "notPaused",
+      "msg": "Operation is not paused currently"
+    },
+    {
+      "code": 6028,
+      "name": "inEmergency",
+      "msg": "Operation is in emergency mode"
+    },
+    {
+      "code": 6029,
+      "name": "notInEmergency",
+      "msg": "Operation is not in emergency mode"
+    },
+    {
+      "code": 6030,
+      "name": "capNotExceeded",
+      "msg": "Fairlaunch cap not exceeded"
+    },
+    {
+      "code": 6031,
+      "name": "alreadyRefunded",
+      "msg": "Sol is refunded already"
+    },
+    {
+      "code": 6032,
+      "name": "alreadyClaimed",
+      "msg": "Fairlaunch tokens already claimed"
+    },
+    {
+      "code": 6033,
+      "name": "noSellDuringFairlaunch",
+      "msg": "Sell not allowed during fairlaunch"
+    },
+    {
+      "code": 6034,
+      "name": "noTokensToClaim",
+      "msg": "No tokens to claim"
+    },
+    {
+      "code": 6035,
+      "name": "capExceeded",
+      "msg": "Cap exceeded for buy"
+    },
+    {
+      "code": 6036,
+      "name": "invalidVoteTokenAmount",
+      "msg": "Vote token amount less than min vote token amount"
+    },
+    {
+      "code": 6037,
+      "name": "depositFailed",
+      "msg": "Fairlaunch deposit failed"
+    },
+    {
+      "code": 6038,
+      "name": "noDepositInFairlaunch",
+      "msg": "User did not contribute in fairlaunch"
+    },
+    {
+      "code": 6039,
+      "name": "noFreezeAuthoritySet",
+      "msg": "Token has no freeze authority set"
     }
   ],
   "types": [
@@ -7218,6 +7571,22 @@ export type CoopMeme = {
           {
             "name": "timestamp",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revokeFreezeAuthority",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token",
+            "type": "pubkey"
+          },
+          {
+            "name": "oldAuthority",
+            "type": "pubkey"
           }
         ]
       }
