@@ -233,6 +233,12 @@ pub struct TransferOwnership<'info> {
         has_one = admin @ CoopMemeError::Unauthorized
     )]
     pub config: Account<'info, ConfigData>,
+    #[account[
+      mut,
+      seeds = [b"roles"],
+      bump=rbac.bump
+    ]]
+    pub rbac: Account<'info, RBAControlList>,
 }
 
 impl<'info> TransferOwnership<'info> {
@@ -242,6 +248,7 @@ impl<'info> TransferOwnership<'info> {
             CoopMemeError::Unauthorized
         );
         self.config.admin = self.new_admin.key();
+        self.rbac.admin = self.new_admin.key();
         Ok(())
     }
 }
