@@ -158,8 +158,10 @@ pub mod coop_meme {
         ctx.accounts.unvote_all_tokens()
     }
 
-    pub fn unfreeze_multiple_accounts(ctx: Context<BatchThawAccounts>) -> Result<()> {
-        ctx.accounts.batch_thaw_accounts()
+    pub fn unfreeze_multiple_accounts<'info>(
+        ctx: Context<'_, '_, '_, 'info, BatchThawAccounts<'info>>,
+    ) -> Result<()> {
+        ctx.accounts.batch_thaw_accounts(ctx.remaining_accounts)
     }
 
     pub fn revoke_freeze_authority(ctx: Context<FreezeAuthorityRevoke>) -> Result<()> {

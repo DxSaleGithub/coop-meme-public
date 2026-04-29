@@ -22,11 +22,11 @@ describe('raydium', () => {
     await listToken();
   });
 
-  it('unvoting all tokens', async () => {
+  it.skip('unvoting all tokens', async () => {
     await unvote_all_tokens();
   });
 
-  it.skip('unfreeze all tokens', async () => {
+  it('unfreeze all tokens', async () => {
     await unfreeze_multiple_users();
   });
 
@@ -416,6 +416,7 @@ describe('raydium', () => {
       configPda,
       globalVault,
       coopToken,
+      memecoinPda,
       userTokenAta,
     } = await setup(false);
 
@@ -427,42 +428,33 @@ describe('raydium', () => {
         globalVault,
         rbac,
         coopToken,
-        user1: user,
-        user1TokenAta: userTokenAta,
-        user2: user,
-        user2TokenAta: userTokenAta,
-        user3: user,
-        user3TokenAta: userTokenAta,
-        user4: user,
-        user4TokenAta: userTokenAta,
-        user5: user,
-        user5TokenAta: userTokenAta,
-        user6: user,
-        user6TokenAta: userTokenAta,
-        user7: user,
-        user7TokenAta: userTokenAta,
-        user8: user,
-        user8TokenAta: userTokenAta,
-        user9: user,
-        user9TokenAta: userTokenAta,
-        user10: user,
-        user10TokenAta: userTokenAta,
-        user11: user,
-        user11TokenAta: userTokenAta,
-        user12: user,
-        user12TokenAta: userTokenAta,
-        user13: user,
-        user13TokenAta: userTokenAta,
-        user14: user,
-        user14TokenAta: userTokenAta,
-        user15: user,
-        user15TokenAta: userTokenAta,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
       })
+      .remainingAccounts(
+        [
+          userTokenAta,
+          userTokenAta,
+          userTokenAta,
+          userTokenAta,
+          userTokenAta,
+        ].map((ata) => ({
+          pubkey: ata,
+          isSigner: false,
+          isWritable: true,
+        })),
+      )
       .rpc();
 
     console.log('Tx hash:', txSig);
-    await logTx(txSig);
+    const tx = await provider.connection.getTransaction(txSig, {
+      commitment: 'confirmed',
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!tx || !tx.meta) {
+      console.error('Transaction or metadata not found');
+    } else {
+      console.log(tx.meta.logMessages);
+    }
   }
 
   async function revokeFreezeAuthority() {

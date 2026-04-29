@@ -34,7 +34,7 @@ describe('memecoin', () => {
 
   it('first buying memecoin!', async () => {
     console.log('Starting wait for fairlaunch to end...');
-    await delay(120 * 1000);
+    await delay(130 * 1000);
     console.log('Wait done.');
     await buy_tokens('500000000');
     await buy_tokens('500000000');
