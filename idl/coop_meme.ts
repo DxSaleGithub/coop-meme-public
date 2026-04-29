@@ -1960,10 +1960,6 @@ export type CoopMeme = {
         },
         {
           "name": "globalVault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -2037,16 +2033,7 @@ export type CoopMeme = {
           }
         },
         {
-          "name": "nameOption",
-          "writable": true
-        },
-        {
-          "name": "symbolOption",
-          "writable": true
-        },
-        {
-          "name": "uriOption",
-          "writable": true
+          "name": "winningOption"
         },
         {
           "name": "tokenMetadataAccount",
@@ -4077,6 +4064,24 @@ export type CoopMeme = {
               }
             ]
           }
+        },
+        {
+          "name": "rbac",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101,
+                  115
+                ]
+              }
+            ]
+          }
         }
       ],
       "args": []
@@ -5601,10 +5606,6 @@ export type CoopMeme = {
         },
         {
           "name": "globalVault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -6974,15 +6975,15 @@ export type CoopMeme = {
         "kind": "struct",
         "fields": [
           {
-            "name": "optionType",
-            "type": {
-              "defined": {
-                "name": "optionType"
-              }
-            }
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {
@@ -7170,6 +7171,14 @@ export type CoopMeme = {
             "type": "u32"
           },
           {
+            "name": "leadingOption",
+            "type": "pubkey"
+          },
+          {
+            "name": "leadingVotes",
+            "type": "u64"
+          },
+          {
             "name": "memecoinBump",
             "type": "u8"
           },
@@ -7316,23 +7325,6 @@ export type CoopMeme = {
                 4
               ]
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "optionType",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "name"
-          },
-          {
-            "name": "sym"
-          },
-          {
-            "name": "uri"
           }
         ]
       }
@@ -7642,15 +7634,15 @@ export type CoopMeme = {
             "type": "pubkey"
           },
           {
-            "name": "optionType",
-            "type": {
-              "defined": {
-                "name": "optionType"
-              }
-            }
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {
@@ -7839,11 +7831,15 @@ export type CoopMeme = {
             "type": "u32"
           },
           {
-            "name": "optionType",
-            "type": "u8"
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {

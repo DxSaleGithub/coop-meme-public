@@ -1,5 +1,3 @@
-use std::string;
-
 use anchor_lang::prelude::*;
 
 #[account]
@@ -29,6 +27,8 @@ pub struct MemeCoinData {
     pub is_token_listed: bool,
     pub total_votes: u64,
     pub total_options: u32,
+    pub leading_option: Pubkey, // PDA of the option currently winning by vote count
+    pub leading_votes: u64,     // vote count of the leading option
     pub memecoin_bump: u8,
     pub token_bump: u8,
 }
@@ -49,24 +49,21 @@ impl OptionsRegistry {
     }
 }
 
+// A combined identity option: name + symbol + logo voted on as a unit.
 #[account]
 #[derive(InitSpace)]
 pub struct TokenOption {
     pub token: Pubkey,
-    pub option_type: OptionType,
-    #[max_len(256)]
-    pub option_value: String,
-    pub hashed_option_value: [u8; 32],
+    #[max_len(36)]
+    pub name: String,
+    #[max_len(14)]
+    pub symbol: String,
+    #[max_len(255)]
+    pub logo: String,
+    pub hashed_option_value: [u8; 32], // sha256(name || symbol || logo) for dedup seeding
     pub index: u32,
     pub total_votes: u64,
     pub bump: u8,
-}
-
-#[derive(InitSpace, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
-pub enum OptionType {
-    NAME,
-    SYM,
-    URI,
 }
 
 #[account]

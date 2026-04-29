@@ -1,5 +1,5 @@
-use crate::state::OptionType;
 use anchor_lang::prelude::*;
+
 #[account]
 #[derive(InitSpace)]
 pub struct UserTokenVotes {
@@ -15,11 +15,13 @@ pub struct UserTokenOptionVotes {
     pub bump: u8,
 }
 
-#[account]
-#[derive(InitSpace)]
+#[derive(InitSpace, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct CreateOptionInfo {
-    pub option_type: OptionType,
-    #[max_len(256)]
-    pub option_value: String,
+    #[max_len(36)]
+    pub name: String,
+    #[max_len(14)]
+    pub symbol: String,
+    #[max_len(255)]
+    pub logo: String,
     pub votes: u64,
 }

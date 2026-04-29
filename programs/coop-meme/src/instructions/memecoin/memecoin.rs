@@ -177,6 +177,8 @@ impl<'info> MemeCoin<'info> {
             is_voting_finalized: false,
             total_options: 0,
             total_votes: 0,
+            leading_option: Pubkey::default(),
+            leading_votes: 0,
             memecoin_bump: bumps.memecoin,
             token_bump: bumps.coop_token,
         });

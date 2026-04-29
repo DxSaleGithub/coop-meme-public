@@ -6,15 +6,16 @@ use crate::{
         UserTokenVotes,
     },
     utils::{freeze_user_token_account, token_transfer_user, unfreeze_user_token_account},
-    CreateOptionInfo, OptionType,
+    CreateOptionInfo,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
     token::{self, Mint, Token, TokenAccount},
 };
+
 #[derive(Accounts)]
-#[instruction(hashed_option_value:[u8;32])] // References FIRST instr param for seeds
+#[instruction(hashed_option_value:[u8;32])]
 pub struct CreateOption<'info> {
     #[account[mut]]
     pub user: Signer<'info>,
@@ -30,8 +31,6 @@ pub struct CreateOption<'info> {
     ]]
     pub config: Box<Account<'info, ConfigData>>,
     /// CHECK: This is a PDA owned by the program used as the global SOL/token vault.
-    /// It does not store any data and is used only for lamport/token transfers.
-    /// PDA seeds = [b"global"], bump = config.global_vault_bump
     #[account(
       mut,
       seeds = [b"global"],
@@ -73,7 +72,7 @@ pub struct CreateOption<'info> {
       bump
     ]]
     pub user_token_option_votes: Box<Account<'info, UserTokenOptionVotes>>,
-    /// CHECK: This is an ata for coop token for user.
+    /// CHECK: ATA for coop token for user.
     #[account(
       mut,
       associated_token::mint=coop_token,
@@ -88,15 +87,13 @@ pub struct CreateOption<'info> {
       associated_token::token_program=token_program,
     )]
     pub vote_token_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: This is an ata for coop token with votes token as authority to store locked tokens for voting.
     #[account(
       mut,
       seeds = [b"options", coop_token.key().as_ref()],
       bump=vote_options_registry.bump,
       realloc = vote_options_registry.get_size(),
-      // realloc = 8 + std::mem::size_of_val(&vote_options_registry) + std::mem::size_of::<OptionsRegistry>(),
       realloc::payer = user,
-      realloc::zero = false,      // Preserve data
+      realloc::zero = false,
     )]
     pub vote_options_registry: Box<Account<'info, OptionsRegistry>>,
 
@@ -125,10 +122,11 @@ impl<'info> CreateOption<'info> {
             self.memecoin.is_bonding_curve_active,
             CoopMemeError::TradingFairlaunchNotOver
         );
-        let clock = Clock::get()?; // Pull the clock sysvar
-        let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
+        let clock = Clock::get()?;
+        let current_time = clock.unix_timestamp;
+
+        if current_time as u64 > self.memecoin.token_market_end_time {
             if !self.memecoin.is_trading_active {
                 self.memecoin.is_trading_active = false;
                 self.config.current_coop_token_metadata.is_trading_active = false;
@@ -140,15 +138,24 @@ impl<'info> CreateOption<'info> {
             return Ok(());
         }
 
-        self.token_option.set_inner(TokenOption {
-            token: self.coop_token.key(),
-            option_type: create_option.option_type,
-            option_value: create_option.option_value,
-            hashed_option_value: hashed_option_value,
-            index: self.memecoin.total_options + 1,
-            total_votes: 0,
-            bump: bumps.token_option,
-        });
+        require!(
+            self.vote_options_registry.token == self.coop_token.key(),
+            CoopMemeError::InvalidOption
+        );
+
+        // Validate field lengths
+        require!(
+            !create_option.name.is_empty() && create_option.name.len() < 37,
+            CoopMemeError::InvalidTokenName
+        );
+        require!(
+            !create_option.symbol.is_empty() && create_option.symbol.len() < 15,
+            CoopMemeError::InvalidTokenSymbol
+        );
+        require!(
+            !create_option.logo.is_empty() && create_option.logo.len() < 256,
+            CoopMemeError::InvalidTokenUri
+        );
 
         let current_total_votes = create_option.votes;
 
@@ -157,32 +164,18 @@ impl<'info> CreateOption<'info> {
                 && current_total_votes >= self.config.min_option_add_token_amount,
             CoopMemeError::NotEnoughToken
         );
-        require!(
-            current_total_votes >= self.config.min_option_add_token_amount,
-            CoopMemeError::InvalidVoteTokenAmount
-        );
-        require!(
-            self.vote_options_registry.token == self.coop_token.key(),
-            CoopMemeError::InvalidOption
-        );
 
-        let value_length: usize = self.token_option.option_value.len();
-        if self.token_option.option_type == OptionType::NAME {
-            require!(
-                (value_length > 0 && value_length < 37),
-                CoopMemeError::InvalidTokenName
-            );
-        } else if self.token_option.option_type == OptionType::SYM {
-            require!(
-                value_length > 0 && value_length < 15,
-                CoopMemeError::InvalidTokenSymbol
-            );
-        } else {
-            require!(
-                value_length > 0 && value_length < 256,
-                CoopMemeError::InvalidTokenUri
-            );
-        }
+        self.token_option.set_inner(TokenOption {
+            token: self.coop_token.key(),
+            name: create_option.name.clone(),
+            symbol: create_option.symbol.clone(),
+            logo: create_option.logo.clone(),
+            hashed_option_value,
+            index: self.memecoin.total_options + 1,
+            total_votes: 0,
+            bump: bumps.token_option,
+        });
+
         self.memecoin.total_votes += current_total_votes;
         self.token_option.total_votes += current_total_votes;
         self.user_token_votes.total_votes += current_total_votes;
@@ -190,9 +183,15 @@ impl<'info> CreateOption<'info> {
         self.memecoin.total_options += 1;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 
+        // Track the option currently leading in votes.
+        if self.token_option.total_votes > self.memecoin.leading_votes {
+            self.memecoin.leading_option = self.token_option.key();
+            self.memecoin.leading_votes = self.token_option.total_votes;
+        }
+
         let seeds_for_unfreeze: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            b"global",
+            &[self.config.global_vault_bump],
         ];
         unfreeze_user_token_account(
             self.global_vault.to_account_info(),
@@ -202,20 +201,18 @@ impl<'info> CreateOption<'info> {
             &[seeds_for_unfreeze],
         )?;
 
-        // transfer token from user to vote_ata
         token_transfer_user(
             self.user_token_ata.to_account_info(),
             &self.user,
             self.vote_token_ata.to_account_info(),
             &self.token_program,
-            current_total_votes as u64,
+            current_total_votes,
         )?;
 
         let seeds_for_freeze: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
+            b"global",
+            &[self.config.global_vault_bump],
         ];
-
         freeze_user_token_account(
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
@@ -223,28 +220,20 @@ impl<'info> CreateOption<'info> {
             self.token_program.to_account_info(),
             &[seeds_for_freeze],
         )?;
+
         self.vote_options_registry
             .token_registry
             .push(self.token_option.key());
-
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
 
         emit!(VoteEvent {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 3, // vote and lock tokens with option
+            direction: 3,
             option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
+            name: create_option.name,
+            symbol: create_option.symbol,
+            logo: create_option.logo,
             votes: current_total_votes
         });
 

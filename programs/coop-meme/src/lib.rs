@@ -143,7 +143,7 @@ pub mod coop_meme {
 
     pub fn vote_with_option(
         ctx: Context<CreateOption>,
-        hashed_option_value: [u8; 32],
+        hashed_option_value: [u8; 32], // sha256(name || symbol || logo) — used as PDA seed for dedup
         create_option: CreateOptionInfo,
     ) -> Result<()> {
         ctx.accounts

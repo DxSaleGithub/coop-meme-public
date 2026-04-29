@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
 
-use crate::OptionType;
 #[event]
 pub struct CreatedEvent {
     pub token_id: u32,
@@ -66,10 +65,11 @@ pub struct VoteEvent {
     pub user: Pubkey,
     pub coop_token: Pubkey,
     pub memecoin: Pubkey,
-    pub direction: u8, // 1 -> Vote and Lock, 2 -> Unvote and Unlock
+    pub direction: u8, // 1 -> Vote and Lock, 2 -> Unvote and Unlock, 3 -> Create option and vote
     pub option_index: u32,
-    pub option_type: u8,
-    pub option_value: String,
+    pub name: String,
+    pub symbol: String,
+    pub logo: String,
     pub votes: u64,
 }
 

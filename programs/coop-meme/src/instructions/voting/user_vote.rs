@@ -6,7 +6,6 @@ use crate::{
         freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
         unfreeze_user_token_account,
     },
-    OptionType,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -137,6 +136,12 @@ impl<'info> UserVote<'info> {
         self.user_token_votes.total_votes += votes;
         self.user_token_option_votes.total_votes += votes;
 
+        // Update leading option if this one now has more votes.
+        if self.token_option.total_votes > self.memecoin.leading_votes {
+            self.memecoin.leading_option = self.token_option.key();
+            self.memecoin.leading_votes = self.token_option.total_votes;
+        }
+
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
@@ -171,24 +176,15 @@ impl<'info> UserVote<'info> {
             &[seeds_for_freeze],
         )?;
 
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
-
         emit!(VoteEvent {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 1, // vote and lock tokens
+            direction: 1,
             option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
+            name: self.token_option.name.clone(),
+            symbol: self.token_option.symbol.clone(),
+            logo: self.token_option.logo.clone(),
             votes
         });
         Ok(())
@@ -224,6 +220,16 @@ impl<'info> UserVote<'info> {
         self.token_option.total_votes -= votes;
         self.user_token_votes.total_votes -= votes;
         self.user_token_option_votes.total_votes -= votes;
+
+        // Keep leading_votes in sync. If the leader is fully unvoted, clear the hint.
+        if self.token_option.key() == self.memecoin.leading_option {
+            if self.token_option.total_votes == 0 {
+                self.memecoin.leading_option = Pubkey::default();
+                self.memecoin.leading_votes = 0;
+            } else {
+                self.memecoin.leading_votes = self.token_option.total_votes;
+            }
+        }
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
@@ -267,24 +273,15 @@ impl<'info> UserVote<'info> {
             &[seeds_for_freeze],
         )?;
 
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
-
         emit!(VoteEvent {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 2, // unvote and unlock tokens
+            direction: 2,
             option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
+            name: self.token_option.name.clone(),
+            symbol: self.token_option.symbol.clone(),
+            logo: self.token_option.logo.clone(),
             votes
         });
 
