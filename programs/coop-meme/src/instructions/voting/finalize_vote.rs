@@ -113,18 +113,6 @@ impl<'info> FinalizeVote<'info> {
             CoopMemeError::InvalidTokenUri
         );
 
-        // Advisory check: warn via error if admin chose an option other than the tracked leader,
-        // but do NOT block — the VOTING admin may have off-chain evidence of the true winner
-        // (e.g., the leader changed due to unvotes since the last on-chain update).
-        // Uncomment the block below to make this a hard check instead:
-        //
-        // if self.memecoin.leading_option != Pubkey::default() {
-        //     require!(
-        //         self.winning_option.key() == self.memecoin.leading_option,
-        //         CoopMemeError::InvalidOption
-        //     );
-        // }
-
         let final_name = &self.winning_option.name;
         let final_symbol = &self.winning_option.symbol;
 

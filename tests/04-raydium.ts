@@ -30,7 +30,7 @@ describe('raydium', () => {
     await unfreeze_multiple_users();
   });
 
-  it.skip('revoke freeze authority', async () => {
+  it('revoke freeze authority', async () => {
     await revokeFreezeAuthority();
   });
 

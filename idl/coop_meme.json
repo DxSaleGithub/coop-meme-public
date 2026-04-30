@@ -7038,14 +7038,6 @@
             "type": "u32"
           },
           {
-            "name": "leading_option",
-            "type": "pubkey"
-          },
-          {
-            "name": "leading_votes",
-            "type": "u64"
-          },
-          {
             "name": "memecoin_bump",
             "type": "u8"
           },

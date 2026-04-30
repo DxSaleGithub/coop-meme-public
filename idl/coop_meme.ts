@@ -7044,14 +7044,6 @@ export type CoopMeme = {
             "type": "u32"
           },
           {
-            "name": "leadingOption",
-            "type": "pubkey"
-          },
-          {
-            "name": "leadingVotes",
-            "type": "u64"
-          },
-          {
             "name": "memecoinBump",
             "type": "u8"
           },

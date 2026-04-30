@@ -183,16 +183,7 @@ impl<'info> CreateOption<'info> {
         self.memecoin.total_options += 1;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 
-        // Track the option currently leading in votes.
-        if self.token_option.total_votes > self.memecoin.leading_votes {
-            self.memecoin.leading_option = self.token_option.key();
-            self.memecoin.leading_votes = self.token_option.total_votes;
-        }
-
-        let seeds_for_unfreeze: &[&[u8]] = &[
-            b"global",
-            &[self.config.global_vault_bump],
-        ];
+        let seeds_for_unfreeze: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
         unfreeze_user_token_account(
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
@@ -209,10 +200,7 @@ impl<'info> CreateOption<'info> {
             current_total_votes,
         )?;
 
-        let seeds_for_freeze: &[&[u8]] = &[
-            b"global",
-            &[self.config.global_vault_bump],
-        ];
+        let seeds_for_freeze: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
         freeze_user_token_account(
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),

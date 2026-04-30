@@ -136,12 +136,6 @@ impl<'info> UserVote<'info> {
         self.user_token_votes.total_votes += votes;
         self.user_token_option_votes.total_votes += votes;
 
-        // Update leading option if this one now has more votes.
-        if self.token_option.total_votes > self.memecoin.leading_votes {
-            self.memecoin.leading_option = self.token_option.key();
-            self.memecoin.leading_votes = self.token_option.total_votes;
-        }
-
         let seeds_for_unfreeze: &[&[u8]] = &[
             b"global",                        // your static seed
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
@@ -220,16 +214,6 @@ impl<'info> UserVote<'info> {
         self.token_option.total_votes -= votes;
         self.user_token_votes.total_votes -= votes;
         self.user_token_option_votes.total_votes -= votes;
-
-        // Keep leading_votes in sync. If the leader is fully unvoted, clear the hint.
-        if self.token_option.key() == self.memecoin.leading_option {
-            if self.token_option.total_votes == 0 {
-                self.memecoin.leading_option = Pubkey::default();
-                self.memecoin.leading_votes = 0;
-            } else {
-                self.memecoin.leading_votes = self.token_option.total_votes;
-            }
-        }
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[

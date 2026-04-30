@@ -27,8 +27,6 @@ pub struct MemeCoinData {
     pub is_token_listed: bool,
     pub total_votes: u64,
     pub total_options: u32,
-    pub leading_option: Pubkey, // PDA of the option currently winning by vote count
-    pub leading_votes: u64,     // vote count of the leading option
     pub memecoin_bump: u8,
     pub token_bump: u8,
 }
