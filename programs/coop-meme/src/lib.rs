@@ -143,7 +143,7 @@ pub mod coop_meme {
 
     pub fn vote_with_option(
         ctx: Context<CreateOption>,
-        hashed_option_value: [u8; 32],
+        hashed_option_value: [u8; 32], // sha256(name || symbol || logo) — used as PDA seed for dedup
         create_option: CreateOptionInfo,
     ) -> Result<()> {
         ctx.accounts
@@ -158,8 +158,10 @@ pub mod coop_meme {
         ctx.accounts.unvote_all_tokens()
     }
 
-    pub fn unfreeze_multiple_accounts(ctx: Context<BatchThawAccounts>) -> Result<()> {
-        ctx.accounts.batch_thaw_accounts()
+    pub fn unfreeze_multiple_accounts<'info>(
+        ctx: Context<'_, '_, '_, 'info, BatchThawAccounts<'info>>,
+    ) -> Result<()> {
+        ctx.accounts.batch_thaw_accounts(ctx.remaining_accounts)
     }
 
     pub fn revoke_freeze_authority(ctx: Context<FreezeAuthorityRevoke>) -> Result<()> {

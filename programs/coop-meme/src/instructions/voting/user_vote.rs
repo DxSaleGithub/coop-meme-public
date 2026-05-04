@@ -6,7 +6,6 @@ use crate::{
         freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
         unfreeze_user_token_account,
     },
-    OptionType,
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -171,24 +170,15 @@ impl<'info> UserVote<'info> {
             &[seeds_for_freeze],
         )?;
 
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
-
         emit!(VoteEvent {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 1, // vote and lock tokens
+            direction: 1,
             option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
+            name: self.token_option.name.clone(),
+            symbol: self.token_option.symbol.clone(),
+            logo: self.token_option.logo.clone(),
             votes
         });
         Ok(())
@@ -267,24 +257,15 @@ impl<'info> UserVote<'info> {
             &[seeds_for_freeze],
         )?;
 
-        let option_value = &self.token_option.option_value;
-        let option_type;
-        if self.token_option.option_type == OptionType::NAME {
-            option_type = 1;
-        } else if self.token_option.option_type == OptionType::SYM {
-            option_type = 2;
-        } else {
-            option_type = 3;
-        }
-
         emit!(VoteEvent {
             user: self.user.key(),
             coop_token: self.coop_token.key(),
             memecoin: self.memecoin.key(),
-            direction: 2, // unvote and unlock tokens
+            direction: 2,
             option_index: self.token_option.index,
-            option_type,
-            option_value: option_value.to_string(),
+            name: self.token_option.name.clone(),
+            symbol: self.token_option.symbol.clone(),
+            logo: self.token_option.logo.clone(),
             votes
         });
 

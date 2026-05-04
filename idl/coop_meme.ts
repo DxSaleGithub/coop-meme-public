@@ -1960,10 +1960,6 @@ export type CoopMeme = {
         },
         {
           "name": "globalVault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -2037,16 +2033,7 @@ export type CoopMeme = {
           }
         },
         {
-          "name": "nameOption",
-          "writable": true
-        },
-        {
-          "name": "symbolOption",
-          "writable": true
-        },
-        {
-          "name": "uriOption",
-          "writable": true
+          "name": "winningOption"
         },
         {
           "name": "tokenMetadataAccount",
@@ -4077,6 +4064,24 @@ export type CoopMeme = {
               }
             ]
           }
+        },
+        {
+          "name": "rbac",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101,
+                  115
+                ]
+              }
+            ]
+          }
         }
       ],
       "args": []
@@ -4160,134 +4165,7 @@ export type CoopMeme = {
           "writable": true
         },
         {
-          "name": "user1",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
-          "writable": true
-        },
-        {
-          "name": "user1TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user2",
-          "writable": true
-        },
-        {
-          "name": "user2TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user3",
-          "writable": true
-        },
-        {
-          "name": "user3TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user4",
-          "writable": true
-        },
-        {
-          "name": "user4TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user5",
-          "writable": true
-        },
-        {
-          "name": "user5TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user6",
-          "writable": true
-        },
-        {
-          "name": "user6TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user7",
-          "writable": true
-        },
-        {
-          "name": "user7TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user8",
-          "writable": true
-        },
-        {
-          "name": "user8TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user9",
-          "writable": true
-        },
-        {
-          "name": "user9TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user10",
-          "writable": true
-        },
-        {
-          "name": "user10TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user11",
-          "writable": true
-        },
-        {
-          "name": "user11TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user12",
-          "writable": true
-        },
-        {
-          "name": "user12TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user13",
-          "writable": true
-        },
-        {
-          "name": "user13TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user14",
-          "writable": true
-        },
-        {
-          "name": "user14TokenAta",
-          "writable": true
-        },
-        {
-          "name": "user15",
-          "writable": true
-        },
-        {
-          "name": "user15TokenAta",
-          "writable": true
-        },
-        {
           "name": "tokenProgram",
-          "docs": [
-            "SPL Token program"
-          ],
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -5601,10 +5479,6 @@ export type CoopMeme = {
         },
         {
           "name": "globalVault",
-          "docs": [
-            "It does not store any data and is used only for lamport/token transfers.",
-            "PDA seeds = [b\"global\"], bump = config.global_vault_bump"
-          ],
           "writable": true,
           "pda": {
             "seeds": [
@@ -6974,15 +6848,15 @@ export type CoopMeme = {
         "kind": "struct",
         "fields": [
           {
-            "name": "optionType",
-            "type": {
-              "defined": {
-                "name": "optionType"
-              }
-            }
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {
@@ -7321,23 +7195,6 @@ export type CoopMeme = {
       }
     },
     {
-      "name": "optionType",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "name"
-          },
-          {
-            "name": "sym"
-          },
-          {
-            "name": "uri"
-          }
-        ]
-      }
-    },
-    {
       "name": "optionsRegistry",
       "type": {
         "kind": "struct",
@@ -7642,15 +7499,15 @@ export type CoopMeme = {
             "type": "pubkey"
           },
           {
-            "name": "optionType",
-            "type": {
-              "defined": {
-                "name": "optionType"
-              }
-            }
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {
@@ -7839,11 +7696,15 @@ export type CoopMeme = {
             "type": "u32"
           },
           {
-            "name": "optionType",
-            "type": "u8"
+            "name": "name",
+            "type": "string"
           },
           {
-            "name": "optionValue",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "logo",
             "type": "string"
           },
           {
