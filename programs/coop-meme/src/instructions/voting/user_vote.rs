@@ -3,8 +3,7 @@ use crate::{
     events::{TradingOverEvent, VoteEvent},
     state::{ConfigData, MemeCoinData, TokenOption, UserTokenOptionVotes, UserTokenVotes},
     utils::{
-        freeze_user_token_account, token_transfer_user, token_transfer_with_signer,
-        unfreeze_user_token_account,
+        freeze_user_token_account, token_transfer_with_signer, unfreeze_user_token_account,
     },
 };
 use anchor_lang::prelude::*;
@@ -110,15 +109,13 @@ impl<'info> UserVote<'info> {
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            if !self.memecoin.is_trading_active {
-                self.memecoin.is_trading_active = false;
-                self.config.current_coop_token_metadata.is_trading_active = false;
-                emit!(TradingOverEvent {
-                    coop_token: self.coop_token.key(),
-                    memecoin: self.memecoin.key(),
-                });
-            }
+        if current_time as u64 > self.memecoin.token_market_end_time {
+            self.memecoin.is_trading_active = false;
+            self.config.current_coop_token_metadata.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
             return Ok(());
         }
         require!(
@@ -131,15 +128,12 @@ impl<'info> UserVote<'info> {
         );
         self._validate_vote_info(votes)?;
 
-        self.memecoin.total_votes += votes;
-        self.token_option.total_votes += votes;
-        self.user_token_votes.total_votes += votes;
-        self.user_token_option_votes.total_votes += votes;
+        self.memecoin.total_votes = self.memecoin.total_votes.checked_add(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.token_option.total_votes = self.token_option.total_votes.checked_add(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_votes.total_votes = self.user_token_votes.total_votes.checked_add(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_option_votes.total_votes = self.user_token_option_votes.total_votes.checked_add(votes).ok_or(CoopMemeError::InvalidOperation)?;
 
-        let seeds_for_unfreeze: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        ];
+        let seeds_for_unfreeze: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
         unfreeze_user_token_account(
             self.global_vault.to_account_info(),
             self.coop_token.to_account_info(),
@@ -148,19 +142,31 @@ impl<'info> UserVote<'info> {
             &[seeds_for_unfreeze],
         )?;
 
-        // transfer token from user to vote_ata
-        token_transfer_user(
-            self.user_token_ata.to_account_info(),
-            &self.user,
-            self.vote_token_ata.to_account_info(),
-            &self.token_program,
+        // 1) Approve: grant global_vault delegate authority for exactly `votes`.
+        anchor_spl::token::approve(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                anchor_spl::token::Approve {
+                    to: self.user_token_ata.to_account_info(),
+                    delegate: self.global_vault.to_account_info(),
+                    authority: self.user.to_account_info(),
+                },
+            ),
             votes,
         )?;
 
-        let seeds_for_freeze: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        ];
+        // 2) Delegated Transfer: PDA-signed, global_vault acts as delegate.
+        let seeds_for_transfer: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
+        token_transfer_with_signer(
+            self.user_token_ata.to_account_info(),
+            self.global_vault.to_account_info(),
+            self.vote_token_ata.to_account_info(),
+            &self.token_program,
+            &[seeds_for_transfer],
+            votes,
+        )?;
+
+        let seeds_for_freeze: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
 
         freeze_user_token_account(
             self.global_vault.to_account_info(),
@@ -197,15 +203,13 @@ impl<'info> UserVote<'info> {
         let clock = Clock::get()?; // Pull the clock sysvar
         let current_time = clock.unix_timestamp; // i64 in seconds
 
-        if (current_time as u64 > self.memecoin.token_market_end_time) {
-            if !self.memecoin.is_trading_active {
-                self.memecoin.is_trading_active = false;
-                self.config.current_coop_token_metadata.is_trading_active = false;
-                emit!(TradingOverEvent {
-                    coop_token: self.coop_token.key(),
-                    memecoin: self.memecoin.key(),
-                });
-            }
+        if current_time as u64 > self.memecoin.token_market_end_time {
+            self.memecoin.is_trading_active = false;
+            self.config.current_coop_token_metadata.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
             return Ok(());
         }
         self._validate_unvote_info(votes)?;

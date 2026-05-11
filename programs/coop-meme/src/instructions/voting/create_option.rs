@@ -5,7 +5,7 @@ use crate::{
         ConfigData, MemeCoinData, OptionsRegistry, TokenOption, UserTokenOptionVotes,
         UserTokenVotes,
     },
-    utils::{freeze_user_token_account, token_transfer_user, unfreeze_user_token_account},
+    utils::{freeze_user_token_account, token_transfer_with_signer, unfreeze_user_token_account},
     CreateOptionInfo,
 };
 use anchor_lang::prelude::*;
@@ -127,14 +127,12 @@ impl<'info> CreateOption<'info> {
         let current_time = clock.unix_timestamp;
 
         if current_time as u64 > self.memecoin.token_market_end_time {
-            if !self.memecoin.is_trading_active {
-                self.memecoin.is_trading_active = false;
-                self.config.current_coop_token_metadata.is_trading_active = false;
-                emit!(TradingOverEvent {
-                    coop_token: self.coop_token.key(),
-                    memecoin: self.memecoin.key(),
-                });
-            }
+            self.memecoin.is_trading_active = false;
+            self.config.current_coop_token_metadata.is_trading_active = false;
+            emit!(TradingOverEvent {
+                coop_token: self.coop_token.key(),
+                memecoin: self.memecoin.key(),
+            });
             return Ok(());
         }
 
@@ -176,10 +174,10 @@ impl<'info> CreateOption<'info> {
             bump: bumps.token_option,
         });
 
-        self.memecoin.total_votes += current_total_votes;
-        self.token_option.total_votes += current_total_votes;
-        self.user_token_votes.total_votes += current_total_votes;
-        self.user_token_option_votes.total_votes += current_total_votes;
+        self.memecoin.total_votes = self.memecoin.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.token_option.total_votes = self.token_option.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_votes.total_votes = self.user_token_votes.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_option_votes.total_votes = self.user_token_option_votes.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
         self.memecoin.total_options += 1;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 
@@ -192,11 +190,27 @@ impl<'info> CreateOption<'info> {
             &[seeds_for_unfreeze],
         )?;
 
-        token_transfer_user(
+        // 1) Approve: grant global_vault delegate authority for exactly `current_total_votes`.
+        anchor_spl::token::approve(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                anchor_spl::token::Approve {
+                    to: self.user_token_ata.to_account_info(),
+                    delegate: self.global_vault.to_account_info(),
+                    authority: self.user.to_account_info(),
+                },
+            ),
+            current_total_votes,
+        )?;
+
+        // 2) Delegated Transfer: PDA-signed, global_vault acts as delegate.
+        let seeds_for_transfer: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
+        token_transfer_with_signer(
             self.user_token_ata.to_account_info(),
-            &self.user,
+            self.global_vault.to_account_info(),
             self.vote_token_ata.to_account_info(),
             &self.token_program,
+            &[seeds_for_transfer],
             current_total_votes,
         )?;
 
