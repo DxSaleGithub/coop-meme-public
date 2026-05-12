@@ -154,7 +154,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "ammConfig",
@@ -2912,7 +2912,7 @@ export type CoopMeme = {
         {
           "name": "createPoolFee",
           "writable": true,
-          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
+          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
         },
         {
           "name": "observationState",
@@ -2948,7 +2948,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "ammConfig",
@@ -3735,7 +3735,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
@@ -3886,7 +3886,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
         },
         {
           "name": "payer",
