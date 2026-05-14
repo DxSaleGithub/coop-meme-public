@@ -180,16 +180,16 @@ impl<'info> UnlockAll<'info> {
                             &[seeds],
                             sol_to_refund as u64,
                         )?;
-                    }
 
-                    emit!(RefundSol {
-                        trader: self.user.key(),
-                        coop_token: self.coop_token.key(),
-                        memecoin: self.memecoin.key(),
-                        contributed_sol: self.user_data.sol_deposit,
-                        refund_sol: sol_to_refund,
-                        timestamp: Clock::get()?.unix_timestamp as u64
-                    });
+                        emit!(RefundSol {
+                            trader: self.user.key(),
+                            coop_token: self.coop_token.key(),
+                            memecoin: self.memecoin.key(),
+                            contributed_sol: self.user_data.sol_deposit,
+                            refund_sol: sol_to_refund,
+                            timestamp: Clock::get()?.unix_timestamp as u64
+                        });
+                    }
                 }
             }
         }

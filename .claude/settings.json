@@ -4,7 +4,10 @@
       "Bash(git -C /Users/kuldeep/ETHEREUM/dxsale/Coop/coop-meme show 1f3178c --stat)",
       "Bash(git -C /Users/kuldeep/ETHEREUM/dxsale/Coop/coop-meme show 1f3178c -- programs/coop-meme/src/instructions/memecoin/freeze_authority_revoke.rs)",
       "Bash(git -C /Users/kuldeep/ETHEREUM/dxsale/Coop/coop-meme show 1f3178c -- idl/coop_meme.json)",
-      "Bash(git -C /Users/kuldeep/ETHEREUM/dxsale/Coop/coop-meme show 1f3178c -- programs/coop-meme/src/state/memecoin.rs)"
+      "Bash(git -C /Users/kuldeep/ETHEREUM/dxsale/Coop/coop-meme show 1f3178c -- programs/coop-meme/src/state/memecoin.rs)",
+      "Bash(xargs cat)",
+      "Bash(npx --yes md-to-pdf --version)",
+      "Bash(pandoc audit-fixes.md -o audit-fixes.pdf --pdf-engine=xelatex -V geometry:margin=1in -V fontsize=11pt)"
     ]
   }
 }

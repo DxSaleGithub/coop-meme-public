@@ -214,10 +214,10 @@ impl<'info> UserVote<'info> {
         }
         self._validate_unvote_info(votes)?;
 
-        self.memecoin.total_votes -= votes;
-        self.token_option.total_votes -= votes;
-        self.user_token_votes.total_votes -= votes;
-        self.user_token_option_votes.total_votes -= votes;
+        self.memecoin.total_votes = self.memecoin.total_votes.checked_sub(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.token_option.total_votes = self.token_option.total_votes.checked_sub(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_votes.total_votes = self.user_token_votes.total_votes.checked_sub(votes).ok_or(CoopMemeError::InvalidOperation)?;
+        self.user_token_option_votes.total_votes = self.user_token_option_votes.total_votes.checked_sub(votes).ok_or(CoopMemeError::InvalidOperation)?;
 
         let coop_token_key = self.coop_token.key(); // Pubkey copied here
         let seeds: &[&[u8]] = &[
