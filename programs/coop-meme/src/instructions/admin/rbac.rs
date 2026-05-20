@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{error::*, RBAControlList, Role, RoleType};
+use crate::{error::*, events::{RoleGrantedEvent, RoleRevokedEvent}, RBAControlList, Role, RoleType};
 #[derive(Accounts)]
 pub struct RBAControl<'info> {
     #[account[mut]]
@@ -30,10 +30,20 @@ impl<'info> RBAControl<'info> {
         if exists {
             return Err(CoopMemeError::RoleExist.into());
         }
+        let role_type_u8 = match role_type {
+            RoleType::VOTING => 0,
+            RoleType::LISTING => 1,
+            RoleType::CREATING => 2,
+        };
         self.rbac.roles.push(Role {
             role_type,
             user,
             status: true,
+        });
+        emit!(RoleGrantedEvent {
+            admin: self.owner.key(),
+            user,
+            role_type: role_type_u8,
         });
         Ok(())
     }
@@ -54,14 +64,19 @@ impl<'info> RBAControl<'info> {
             return Err(CoopMemeError::RoleDoesNotExist.into());
         }
 
-        if let Some(role) = self
-            .rbac
+        let role_type_u8 = match role_type {
+            RoleType::VOTING => 0,
+            RoleType::LISTING => 1,
+            RoleType::CREATING => 2,
+        };
+        self.rbac
             .roles
-            .iter_mut()
-            .find(|r| r.user == user && r.role_type == role_type)
-        {
-            role.status = false; // or whatever value you wish to set
-        }
+            .retain(|r| !(r.user == user && r.role_type == role_type));
+        emit!(RoleRevokedEvent {
+            admin: self.owner.key(),
+            user,
+            role_type: role_type_u8,
+        });
         Ok(())
     }
 }

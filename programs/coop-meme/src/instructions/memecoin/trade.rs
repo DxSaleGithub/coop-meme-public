@@ -246,7 +246,7 @@ impl<'info> Trade<'info> {
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
         require!(
-            token_amount > min_tokens_receive,
+            token_amount >= min_tokens_receive,
             CoopMemeError::InsufficientAmount
         );
 
@@ -349,7 +349,7 @@ impl<'info> Trade<'info> {
         )
         .unwrap();
         require!(
-            sol_amount > min_sol_receive,
+            sol_amount >= min_sol_receive,
             CoopMemeError::InsufficientAmount
         );
 
@@ -689,47 +689,42 @@ impl<'info> Trade<'info> {
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
-        let owner_fees = team_fees
-            .checked_mul(self.config.owner_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        // let owner_fees = team_fees
+        //     .checked_mul(self.config.owner_fee as u64)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap()
+        //     .checked_div(10000)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap();
+
         // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
-        let affiliate_fees = team_fees
-            .checked_mul(self.config.affiliated_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        // let affiliate_fees = team_fees
+        //     .checked_mul(self.config.affiliated_fee as u64)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap()
+        //     .checked_div(10000)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap();
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.creator.to_account_info(),
-            &self.system_program,
-            owner_fees as u64,
-        )?;
+        // sol_transfer_from_user(
+        //     &self.trader,
+        //     self.creator.to_account_info(),
+        //     &self.system_program,
+        //     owner_fees as u64,
+        // )?;
 
-        sol_transfer_from_user(
-            &self.trader,
-            self.affiliate.to_account_info(),
-            &self.system_program,
-            (affiliate_fees as u64),
-        )?;
+        // sol_transfer_from_user(
+        //     &self.trader,
+        //     self.affiliate.to_account_info(),
+        //     &self.system_program,
+        //     affiliate_fees as u64,
+        // )?;
 
         sol_transfer_from_user(
             &self.trader,
             self.team_wallet.to_account_info(),
             &self.system_program,
-            (team_fees
-                .checked_sub(owner_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_sub(affiliate_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
+            team_fees,
         )?;
 
         sol_transfer_from_user(
@@ -754,55 +749,47 @@ impl<'info> Trade<'info> {
             .ok_or(CoopMemeError::InvalidOperation)
             .unwrap();
         // let owner_fees = team_fees * self.config.owner_fee as u64 / 10000;
-        let owner_fees = team_fees
-            .checked_mul(self.config.owner_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        // let owner_fees = team_fees
+        //     .checked_mul(self.config.owner_fee as u64)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap()
+        //     .checked_div(10000)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap();
+
         // let affiliate_fees = team_fees * self.config.affiliated_fee as u64 / 10000;
-        let affiliate_fees = team_fees
-            .checked_mul(self.config.affiliated_fee as u64)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap()
-            .checked_div(10000)
-            .ok_or(CoopMemeError::InvalidOperation)
-            .unwrap();
+        // let affiliate_fees = team_fees
+        //     .checked_mul(self.config.affiliated_fee as u64)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap()
+        //     .checked_div(10000)
+        //     .ok_or(CoopMemeError::InvalidOperation)
+        //     .unwrap();
 
-        let seeds: &[&[u8]] = &[
-            b"global",                        // your static seed
-            &[self.config.global_vault_bump], // your bump, wrapped as byte slice
-        ];
+        let seeds: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.creator.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            owner_fees as u64,
-        )?;
+        // sol_transfer_with_signer(
+        //     self.global_vault.to_account_info(),
+        //     self.creator.to_account_info(),
+        //     &self.system_program,
+        //     &[seeds],
+        //     owner_fees as u64,
+        // )?;
 
-        sol_transfer_with_signer(
-            self.global_vault.to_account_info(),
-            self.affiliate.to_account_info(),
-            &self.system_program,
-            &[seeds],
-            affiliate_fees as u64,
-        )?;
+        // sol_transfer_with_signer(
+        //     self.global_vault.to_account_info(),
+        //     self.affiliate.to_account_info(),
+        //     &self.system_program,
+        //     &[seeds],
+        //     affiliate_fees as u64,
+        // )?;
 
         sol_transfer_with_signer(
             self.global_vault.to_account_info(),
             self.team_wallet.to_account_info(),
             &self.system_program,
             &[seeds],
-            (team_fees
-                .checked_sub(owner_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()
-                .checked_sub(affiliate_fees)
-                .ok_or(CoopMemeError::InvalidOperation)
-                .unwrap()) as u64,
+            team_fees,
         )?;
 
         sol_transfer_with_signer(

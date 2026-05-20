@@ -148,7 +148,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -1719,6 +1719,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -2906,7 +2911,7 @@
         {
           "name": "create_pool_fee",
           "writable": true,
-          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observation_state",
@@ -2942,7 +2947,7 @@
         },
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "amm_config",
@@ -3729,7 +3734,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -3880,7 +3885,7 @@
       "accounts": [
         {
           "name": "cp_swap_program",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -5978,6 +5983,11 @@
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "MemeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "MemeCoinData"
               }
             ]
           }
@@ -6266,6 +6276,19 @@
       ]
     },
     {
+      "name": "ConfigUpdatedEvent",
+      "discriminator": [
+        245,
+        158,
+        129,
+        99,
+        60,
+        100,
+        214,
+        220
+      ]
+    },
+    {
       "name": "CreatedEvent",
       "discriminator": [
         231,
@@ -6279,6 +6302,45 @@
       ]
     },
     {
+      "name": "EmergencyEvent",
+      "discriminator": [
+        58,
+        86,
+        35,
+        38,
+        218,
+        1,
+        117,
+        209
+      ]
+    },
+    {
+      "name": "EmergencyWithdrawSolEvent",
+      "discriminator": [
+        134,
+        116,
+        10,
+        9,
+        36,
+        154,
+        111,
+        25
+      ]
+    },
+    {
+      "name": "EmergencyWithdrawTokenEvent",
+      "discriminator": [
+        210,
+        84,
+        239,
+        225,
+        245,
+        236,
+        201,
+        14
+      ]
+    },
+    {
       "name": "ListEvent",
       "discriminator": [
         131,
@@ -6289,6 +6351,32 @@
         195,
         210,
         18
+      ]
+    },
+    {
+      "name": "OwnershipTransferredEvent",
+      "discriminator": [
+        64,
+        151,
+        32,
+        57,
+        187,
+        155,
+        242,
+        84
+      ]
+    },
+    {
+      "name": "PauseEvent",
+      "discriminator": [
+        32,
+        51,
+        61,
+        169,
+        156,
+        104,
+        130,
+        43
       ]
     },
     {
@@ -6315,6 +6403,32 @@
         176,
         193,
         141
+      ]
+    },
+    {
+      "name": "RoleGrantedEvent",
+      "discriminator": [
+        221,
+        21,
+        92,
+        108,
+        136,
+        12,
+        105,
+        112
+      ]
+    },
+    {
+      "name": "RoleRevokedEvent",
+      "discriminator": [
+        104,
+        105,
+        52,
+        114,
+        39,
+        94,
+        217,
+        251
       ]
     },
     {
@@ -6837,6 +6951,18 @@
       }
     },
     {
+      "name": "ConfigUpdatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "CreateOptionInfo",
       "type": {
         "kind": "struct",
@@ -6903,6 +7029,66 @@
           },
           {
             "name": "token_market_end_time",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmergencyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "in_emergency",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmergencyWithdrawSolEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "team_wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmergencyWithdrawTokenEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "coop_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "team_wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
             "type": "u64"
           }
         ]
@@ -7211,6 +7397,38 @@
       }
     },
     {
+      "name": "OwnershipTransferredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old_admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_admin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PauseEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_paused",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "PoolState",
       "serialization": "bytemuckunsafe",
       "repr": {
@@ -7462,6 +7680,46 @@
           {
             "name": "status",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleGrantedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "role_type",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoleRevokedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "role_type",
+            "type": "u8"
           }
         ]
       }

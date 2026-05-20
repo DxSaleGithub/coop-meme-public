@@ -6,6 +6,7 @@ use anchor_spl::{
 
 use crate::{
     error::*,
+    events::{ConfigUpdatedEvent, OwnershipTransferredEvent},
     state::{ConfigData, MemeCoinDataMetadata},
     RBAControlList,
 };
@@ -186,6 +187,10 @@ impl<'info> UpdateConfig<'info> {
             self.config.min_option_add_token_amount = token_amount;
         }
 
+        emit!(ConfigUpdatedEvent {
+            admin: self.admin.key(),
+        });
+
         Ok(())
     }
 }
@@ -247,8 +252,13 @@ impl<'info> TransferOwnership<'info> {
             self.admin.key() == self.config.admin,
             CoopMemeError::Unauthorized
         );
+        let old_admin = self.admin.key();
         self.config.admin = self.new_admin.key();
         self.rbac.admin = self.new_admin.key();
+        emit!(OwnershipTransferredEvent {
+            old_admin,
+            new_admin: self.new_admin.key(),
+        });
         Ok(())
     }
 }

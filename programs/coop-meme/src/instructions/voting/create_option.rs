@@ -155,6 +155,17 @@ impl<'info> CreateOption<'info> {
             CoopMemeError::InvalidTokenUri
         );
 
+        let expected_hash = anchor_lang::solana_program::hash::hashv(&[
+            create_option.name.as_bytes(),
+            create_option.symbol.as_bytes(),
+            create_option.logo.as_bytes(),
+        ])
+        .to_bytes();
+        require!(
+            hashed_option_value == expected_hash,
+            CoopMemeError::InvalidOption
+        );
+
         let current_total_votes = create_option.votes;
 
         require!(
@@ -169,7 +180,7 @@ impl<'info> CreateOption<'info> {
             symbol: create_option.symbol.clone(),
             logo: create_option.logo.clone(),
             hashed_option_value,
-            index: self.memecoin.total_options + 1,
+            index: self.memecoin.total_options.checked_add(1).ok_or(CoopMemeError::InvalidOperation)?,
             total_votes: 0,
             bump: bumps.token_option,
         });
@@ -178,7 +189,7 @@ impl<'info> CreateOption<'info> {
         self.token_option.total_votes = self.token_option.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
         self.user_token_votes.total_votes = self.user_token_votes.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
         self.user_token_option_votes.total_votes = self.user_token_option_votes.total_votes.checked_add(current_total_votes).ok_or(CoopMemeError::InvalidOperation)?;
-        self.memecoin.total_options += 1;
+        self.memecoin.total_options = self.memecoin.total_options.checked_add(1).ok_or(CoopMemeError::InvalidOperation)?;
         self.config.current_coop_token_metadata.total_options = self.memecoin.total_options;
 
         let seeds_for_unfreeze: &[&[u8]] = &[b"global", &[self.config.global_vault_bump]];

@@ -1,4 +1,4 @@
-use crate::{error::*, state::ConfigData};
+use crate::{error::*, events::PauseEvent, state::ConfigData};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -25,6 +25,10 @@ impl<'info> Pause<'info> {
 
         if let Some(pause_status) = is_paused {
             self.config.is_paused = pause_status;
+            emit!(PauseEvent {
+                admin: self.admin.key(),
+                is_paused: pause_status,
+            });
         }
 
         Ok(())

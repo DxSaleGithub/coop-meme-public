@@ -123,6 +123,14 @@ describe('memecoin', () => {
     await sell_tokens(new BN('1000000000000'));
   });
 
+  it.skip('emergency withdraw SOL', async () => {
+    await emergencyWithdrawSol();
+  });
+
+  it.skip('emergency withdraw Coop token', async () => {
+    await emergencyWithdrawCoopToken();
+  });
+
   // ---------------------------------------------------------------------------
   // Helper functions
   // ---------------------------------------------------------------------------
@@ -151,6 +159,12 @@ describe('memecoin', () => {
     const setComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
       units: 400_000,
     });
+
+    console.log('coop token in create', coopToken.toString());
+    console.log(
+      'global token ata in create',
+      globalTokenAta.toString(),
+    );
 
     const txSig = await program.methods
       .createToken(
@@ -651,5 +665,125 @@ describe('memecoin', () => {
       finalTrader,
     );
     console.log('user sol balance after refund', solAfter.toString());
+  }
+
+  async function pause() {
+    const admin = provider.wallet.publicKey;
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId,
+    );
+    await program.methods
+      .pause()
+      .accounts({ admin, config: configPda })
+      .rpc();
+  }
+
+  async function unpause() {
+    const admin = provider.wallet.publicKey;
+    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('config')],
+      program.programId,
+    );
+    await program.methods
+      .unpause()
+      .accounts({ admin, config: configPda })
+      .rpc();
+  }
+
+  async function emergencyWithdrawSol() {
+    const { owner, configPda, globalVault } = await setup(false);
+    const admin = owner;
+
+    await pause();
+    await program.methods
+      .startEmergencyMode()
+      .accounts({ admin, config: configPda })
+      .rpc();
+
+    const balanceBefore = await provider.connection.getBalance(
+      teamWallet,
+    );
+
+    const txSig = await program.methods
+      .emergencyWithdrawSol()
+      .accounts({
+        admin,
+        config: configPda,
+        globalVault,
+        teamWallet,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    await logTx(txSig);
+
+    const balanceAfter = await provider.connection.getBalance(
+      teamWallet,
+    );
+    assert(balanceAfter > balanceBefore);
+    await unpause();
+  }
+
+  async function emergencyWithdrawCoopToken() {
+    const {
+      owner,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+      globalTokenAta,
+    } = await setup(false);
+
+    const admin = owner;
+
+    const { getAssociatedTokenAddress } = await import(
+      '@solana/spl-token'
+    );
+    const adminTokenAta = await getAssociatedTokenAddress(
+      coopToken,
+      admin,
+      false,
+    );
+
+    await pause();
+    await program.methods
+      .startEmergencyMode()
+      .accounts({ admin, config: configPda })
+      .rpc();
+
+    console.log('coop token', coopToken.toString());
+    console.log('global token ata', globalTokenAta.toString());
+
+    const txSig = await program.methods
+      .emergencyWithdrawCoopToken()
+      .accounts({
+        admin,
+        creator,
+        config: configPda,
+        globalVault,
+        globalTokenAta,
+        teamWallet,
+        mint: coopToken,
+        memecoin: memecoinPda,
+        adminTokenAta,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram:
+          anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+
+    console.log('Tx hash:', txSig);
+    await logTx(txSig);
+
+    const globalBal =
+      await provider.connection.getTokenAccountBalance(
+        globalTokenAta,
+      );
+    assert.strictEqual(globalBal.value.amount.toString(), '0');
+    await unpause();
   }
 });

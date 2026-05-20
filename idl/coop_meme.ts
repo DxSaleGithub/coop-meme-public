@@ -154,7 +154,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -1725,6 +1725,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -2912,7 +2917,7 @@ export type CoopMeme = {
         {
           "name": "createPoolFee",
           "writable": true,
-          "address": "DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8"
+          "address": "3oE58BKVt8KuYkGxx8zBojugnymWmBiyafWgMrnb6eYy"
         },
         {
           "name": "observationState",
@@ -2948,7 +2953,7 @@ export type CoopMeme = {
         },
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "ammConfig",
@@ -3735,7 +3740,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -3886,7 +3891,7 @@ export type CoopMeme = {
       "accounts": [
         {
           "name": "cpSwapProgram",
-          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+          "address": "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
         },
         {
           "name": "payer",
@@ -5984,6 +5989,11 @@ export type CoopMeme = {
                 "kind": "account",
                 "path": "memecoin.token_id",
                 "account": "memeCoinData"
+              },
+              {
+                "kind": "account",
+                "path": "memecoin.token_nonce",
+                "account": "memeCoinData"
               }
             ]
           }
@@ -6272,6 +6282,19 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "configUpdatedEvent",
+      "discriminator": [
+        245,
+        158,
+        129,
+        99,
+        60,
+        100,
+        214,
+        220
+      ]
+    },
+    {
       "name": "createdEvent",
       "discriminator": [
         231,
@@ -6285,6 +6308,45 @@ export type CoopMeme = {
       ]
     },
     {
+      "name": "emergencyEvent",
+      "discriminator": [
+        58,
+        86,
+        35,
+        38,
+        218,
+        1,
+        117,
+        209
+      ]
+    },
+    {
+      "name": "emergencyWithdrawSolEvent",
+      "discriminator": [
+        134,
+        116,
+        10,
+        9,
+        36,
+        154,
+        111,
+        25
+      ]
+    },
+    {
+      "name": "emergencyWithdrawTokenEvent",
+      "discriminator": [
+        210,
+        84,
+        239,
+        225,
+        245,
+        236,
+        201,
+        14
+      ]
+    },
+    {
       "name": "listEvent",
       "discriminator": [
         131,
@@ -6295,6 +6357,32 @@ export type CoopMeme = {
         195,
         210,
         18
+      ]
+    },
+    {
+      "name": "ownershipTransferredEvent",
+      "discriminator": [
+        64,
+        151,
+        32,
+        57,
+        187,
+        155,
+        242,
+        84
+      ]
+    },
+    {
+      "name": "pauseEvent",
+      "discriminator": [
+        32,
+        51,
+        61,
+        169,
+        156,
+        104,
+        130,
+        43
       ]
     },
     {
@@ -6321,6 +6409,32 @@ export type CoopMeme = {
         176,
         193,
         141
+      ]
+    },
+    {
+      "name": "roleGrantedEvent",
+      "discriminator": [
+        221,
+        21,
+        92,
+        108,
+        136,
+        12,
+        105,
+        112
+      ]
+    },
+    {
+      "name": "roleRevokedEvent",
+      "discriminator": [
+        104,
+        105,
+        52,
+        114,
+        39,
+        94,
+        217,
+        251
       ]
     },
     {
@@ -6843,6 +6957,18 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "configUpdatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
       "name": "createOptionInfo",
       "type": {
         "kind": "struct",
@@ -6909,6 +7035,66 @@ export type CoopMeme = {
           },
           {
             "name": "tokenMarketEndTime",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "inEmergency",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyWithdrawSolEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "teamWallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyWithdrawTokenEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "coopToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "teamWallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
             "type": "u64"
           }
         ]
@@ -7217,6 +7403,38 @@ export type CoopMeme = {
       }
     },
     {
+      "name": "ownershipTransferredEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oldAdmin",
+            "type": "pubkey"
+          },
+          {
+            "name": "newAdmin",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pauseEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "isPaused",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "poolState",
       "serialization": "bytemuckunsafe",
       "repr": {
@@ -7468,6 +7686,46 @@ export type CoopMeme = {
           {
             "name": "status",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "roleGrantedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "roleType",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "roleRevokedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "roleType",
+            "type": "u8"
           }
         ]
       }

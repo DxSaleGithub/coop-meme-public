@@ -112,3 +112,55 @@ pub struct RevokeFreezeAuthority {
     pub token: Pubkey,
     pub old_authority: Pubkey,
 }
+
+#[event]
+pub struct ConfigUpdatedEvent {
+    pub admin: Pubkey,
+}
+
+#[event]
+pub struct OwnershipTransferredEvent {
+    pub old_admin: Pubkey,
+    pub new_admin: Pubkey,
+}
+
+#[event]
+pub struct PauseEvent {
+    pub admin: Pubkey,
+    pub is_paused: bool,
+}
+
+#[event]
+pub struct EmergencyEvent {
+    pub admin: Pubkey,
+    pub in_emergency: bool,
+}
+
+#[event]
+pub struct EmergencyWithdrawSolEvent {
+    pub admin: Pubkey,
+    pub team_wallet: Pubkey,
+    pub amount: u64,
+}
+
+#[event]
+pub struct EmergencyWithdrawTokenEvent {
+    pub admin: Pubkey,
+    pub coop_token: Pubkey,
+    pub team_wallet: Pubkey,
+    pub amount: u64,
+}
+
+#[event]
+pub struct RoleGrantedEvent {
+    pub admin: Pubkey,
+    pub user: Pubkey,
+    pub role_type: u8,
+}
+
+#[event]
+pub struct RoleRevokedEvent {
+    pub admin: Pubkey,
+    pub user: Pubkey,
+    pub role_type: u8,
+}

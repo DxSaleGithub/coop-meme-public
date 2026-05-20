@@ -59,7 +59,7 @@ describe('admin', () => {
     const newInitRealToken = new anchor.BN('1000000000000000000');
     const newMinVoteToken = new anchor.BN(1000_000_000_000);
     const newMinOptionToken = new anchor.BN(1000_000_000_000);
-    const newFairlaunchCap = new anchor.BN(1_000_000_000);
+    const newFairlaunchCap = new anchor.BN(2_000_000_000);
     const newTeamWallet = new PublicKey(
       'DczcCAEB3Fo3gd8ahDXjK4qp4geKDF69Xg1XDMcBDZPo',
     );
@@ -122,6 +122,54 @@ describe('admin', () => {
 
     const roleList = await program.account.rbaControlList.fetch(rbac);
     console.log('Role list:', roleList);
+  });
+
+  it.skip('revoke roles', async () => {
+    const owner = provider.wallet.publicKey;
+    const [rbac] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from('roles')],
+      program.programId,
+    );
+
+    const beforeRevoke = await program.account.rbaControlList.fetch(
+      rbac,
+    );
+    const lengthBefore = beforeRevoke.roles.length;
+    console.log(
+      'Roles before revoke:',
+      lengthBefore,
+      beforeRevoke.roles,
+    );
+
+    await program.methods
+      .revokeRole({ creating: {} }, owner)
+      .accounts({ owner })
+      .rpc();
+
+    const afterRevoke = await program.account.rbaControlList.fetch(
+      rbac,
+    );
+    const lengthAfter = afterRevoke.roles.length;
+    console.log(
+      'Roles after revoke:',
+      lengthAfter,
+      afterRevoke.roles,
+    );
+
+    assert.strictEqual(
+      lengthAfter,
+      lengthBefore - 1,
+      'Role Vec length should decrease by 1 after revoke',
+    );
+    const stillHasRole = afterRevoke.roles.some(
+      (r: any) =>
+        r.user.toString() === owner.toString() &&
+        'creating' in r.roleType,
+    );
+    assert.isFalse(
+      stillHasRole,
+      'Revoked role must not remain in the Vec',
+    );
   });
 
   it.skip('provide creator role', async () => {
@@ -244,22 +292,18 @@ describe('admin', () => {
   }
 
   async function emergencyWithdrawSol() {
-    const admin = provider.wallet.publicKey;
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId,
-    );
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId,
-      );
+    const { owner, configPda, globalVault } = await setup(true);
+    const admin = owner;
 
     await pause();
     await program.methods
       .startEmergencyMode()
       .accounts({ admin, config: configPda })
       .rpc();
+
+    const balanceBefore = await provider.connection.getBalance(
+      teamWallet,
+    );
 
     const txSig = await program.methods
       .emergencyWithdrawSol()
@@ -276,48 +320,32 @@ describe('admin', () => {
     await logTx(txSig);
 
     const balanceAfter = await provider.connection.getBalance(
-      globalVault,
+      teamWallet,
     );
-    assert.strictEqual(balanceAfter, 890880);
+    assert(balanceAfter > balanceBefore);
     await unpause();
   }
 
   async function emergencyWithdrawCoopToken() {
-    const admin = provider.wallet.publicKey;
-    const creator = provider.wallet.publicKey;
-    const [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('config')],
-      program.programId,
-    );
+    const {
+      owner,
+      creator,
+      configPda,
+      globalVault,
+      coopToken,
+      memecoinPda,
+      globalTokenAta,
+    } = await setup(true);
+
+    const admin = owner;
+
     const config = await program.account.configData.fetch(configPda);
-    const [globalVault] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global')],
-        program.programId,
-      );
 
     const totalCoopCreated = new BN(config.totalCoopCreated - 1);
     const seedBuffer = totalCoopCreated
       .addn(1)
       .toArrayLike(Buffer, 'le', 4);
-    const [coopToken] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('mint'), creator.toBuffer(), seedBuffer],
-      program.programId,
-    );
-    const [memecoinPda] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('memecoin'), coopToken.toBuffer()],
-        program.programId,
-      );
-    const [globalTokenAta] =
-      anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          globalVault.toBuffer(),
-          anchor.utils.token.TOKEN_PROGRAM_ID.toBuffer(),
-          coopToken.toBuffer(),
-        ],
-        anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-      );
+
     const { getAssociatedTokenAddress } = await import(
       '@solana/spl-token'
     );

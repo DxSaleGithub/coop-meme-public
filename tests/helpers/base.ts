@@ -52,7 +52,7 @@ const RAYDIUM_MAINNET = {
 const _raydium = _isDevnet ? RAYDIUM_DEVNET : RAYDIUM_MAINNET;
 
 export const teamWallet = _isDevnet
-  ? new PublicKey('4v1BCT6qefpmKNfgKD1hAZSgnZTFwPadYedGDAWTkN53')
+  ? new PublicKey('DczcCAEB3Fo3gd8ahDXjK4qp4geKDF69Xg1XDMcBDZPo')
   : new PublicKey('DczcCAEB3Fo3gd8ahDXjK4qp4geKDF69Xg1XDMcBDZPo');
 export const cpSwapProgram = _raydium.cpSwapProgram;
 export const ammConfig = _raydium.ammConfig;
@@ -95,10 +95,17 @@ export async function setup(create: boolean) {
   let localOwner = new PublicKey(
     '7VM5bv4p6H8bCktwVm5CSvFezaDTKeWji6ojTnGEprnL',
   );
+  let devnetOwner = new PublicKey(
+    '5QryMjDwDSXdE7hKVmViX9ARCuy2h1n5tKUyNPHVLSWG',
+  );
   let mainnetOwner = new PublicKey(
     '4v1BCT6qefpmKNfgKD1hAZSgnZTFwPadYedGDAWTkN53',
   );
-  const owner = _isDevnet || _isLocalnet ? localOwner : mainnetOwner;
+  const owner = _isLocalnet
+    ? localOwner
+    : _isDevnet
+    ? devnetOwner
+    : mainnetOwner;
   const creator = provider.wallet.publicKey;
   const trader = provider.wallet.publicKey;
   const trader2 = trader2Keypair.publicKey;

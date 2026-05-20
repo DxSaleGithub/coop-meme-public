@@ -2,7 +2,11 @@ use crate::state::MemeCoinData;
 use crate::utils::{
     sol_transfer_with_signer, token_transfer_with_signer, unfreeze_user_token_account,
 };
-use crate::{error::*, state::ConfigData};
+use crate::{
+    error::*,
+    events::{EmergencyEvent, EmergencyWithdrawSolEvent, EmergencyWithdrawTokenEvent},
+    state::ConfigData,
+};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::{self, AssociatedToken};
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
@@ -30,6 +34,10 @@ impl<'info> Emergency<'info> {
 
         if let Some(emergency_status) = in_emergency {
             self.config.in_emergency = emergency_status;
+            emit!(EmergencyEvent {
+                admin: self.admin.key(),
+                in_emergency: emergency_status,
+            });
         }
 
         Ok(())
@@ -95,11 +103,16 @@ impl<'info> EmergencyWithdrawSOL<'info> {
         if withdraw_amount > 0 {
             sol_transfer_with_signer(
                 self.global_vault.to_account_info(),
-                self.admin.to_account_info(),
+                self.team_wallet.to_account_info(),
                 &self.system_program,
                 &[seeds],
                 withdraw_amount,
             )?;
+            emit!(EmergencyWithdrawSolEvent {
+                admin: self.admin.key(),
+                team_wallet: self.team_wallet.key(),
+                amount: withdraw_amount,
+            });
         }
 
         Ok(())
@@ -145,7 +158,7 @@ pub struct EmergencyWithdrawCoopToken<'info> {
     ]]
     pub team_wallet: AccountInfo<'info>,
     #[account(
-      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes()],
+      seeds = [b"mint", creator.key().as_ref(), &memecoin.token_id.to_le_bytes(), &memecoin.token_nonce.to_le_bytes()],
       bump = memecoin.token_bump
     )]
     pub mint: Box<Account<'info, Mint>>,
@@ -197,15 +210,22 @@ impl<'info> EmergencyWithdrawCoopToken<'info> {
             &[self.config.global_vault_bump], // your bump, wrapped as byte slice
         ];
 
-        if self.global_token_ata.amount > 0 {
+        let token_amount = self.global_token_ata.amount;
+        if token_amount > 0 {
             token_transfer_with_signer(
                 self.global_token_ata.to_account_info(),
                 self.global_vault.to_account_info(),
                 self.admin_token_ata.to_account_info(),
                 &self.token_program,
                 &[seeds],
-                self.global_token_ata.amount as u64,
+                token_amount,
             )?;
+            emit!(EmergencyWithdrawTokenEvent {
+                admin: self.admin.key(),
+                coop_token: self.mint.key(),
+                team_wallet: self.team_wallet.key(),
+                amount: token_amount,
+            });
         }
 
         Ok(())
